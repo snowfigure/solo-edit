@@ -42,7 +42,7 @@
         <div id="allPanel">
             <div id="top">
                 <a href="${servePath}" target="_blank" class="hover">
-                    Solo
+                    ${blogTitle}
                 </a>
                 <span class="icon-unordered-list top__menu none"
                       onclick="admin.toggleMenu()"></span>

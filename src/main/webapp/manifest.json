@@ -1,12 +1,12 @@
 {
-  "name": "Solo - 博客",
-  "short_name": "Solo",
-  "start_url": ".",
+  "name": "冯读庆的个人主页",
+  "short_name": "snowfigur",
+  "start_url": "https://791211.com",
   "display": "standalone",
   "background_color": "#f1f2f7",
   "orientation": "portrait",
   "theme_color": "#1fb5ad",
-  "description": "一个用 Java 实现的博客系统，为你或你的团队创建个博客吧！",
+  "description": "冯读庆的个人主页. 天高地阔，欲往观之",
   "icons": [
     {
       "src": "images/logo/logo@48.png",

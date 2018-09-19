@@ -40,6 +40,10 @@ public final class Images {
      */
     private static final Logger LOGGER = Logger.getLogger(Images.class);
 
+    public static String IMG_PREFIX_URL = "https://img.791211.com/bind/";
+    public static String IMG_DEFAULT_TIME = "20171104";
+    public static String IMG_QINIU_PARA = "?imageView2/1/w/960/h/520/interlace/1/q/100";
+
     /**
      * Gets an image URL randomly. Sees https://github.com/b3log/bing for more details.
      *
@@ -47,16 +51,17 @@ public final class Images {
      */
     public static final String randImage() {
         try {
-            final long min = DateUtils.parseDate("20171104", new String[]{"yyyyMMdd"}).getTime();
+            final long min = DateUtils.parseDate(IMG_DEFAULT_TIME, new String[]{"yyyyMMdd"}).getTime();
             final long max = System.currentTimeMillis();
             final long delta = max - min;
             final long time = ThreadLocalRandom.current().nextLong(0, delta) + min;
 
-            return "https://img.hacpai.com/bing/" + DateFormatUtils.format(time, "yyyyMMdd") + ".jpg";
+            //https://img.hacpai.com/bing/
+            return IMG_PREFIX_URL + DateFormatUtils.format(time, "yyyyMMdd") + ".jpg";
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Generates random image URL failed", e);
 
-            return "https://img.hacpai.com/bing/20171104.jpg";
+            return IMG_PREFIX_URL + IMG_DEFAULT_TIME + ".jpg";
         }
     }
 

@@ -98,10 +98,10 @@ public class ArticleConsole {
      * {
      *     "sc": true,
      *     "data": [
-     *         "https://img.hacpai.com/bing/20171226.jpg?imageView2/1/w/960/h/520/interlace/1/q/100",
-     *         "https://img.hacpai.com/bing/20171105.jpg?imageView2/1/w/960/h/520/interlace/1/q/100",
-     *         "https://img.hacpai.com/bing/20180105.jpg?imageView2/1/w/960/h/520/interlace/1/q/100",
-     *         "https://img.hacpai.com/bing/20171114.jpg?imageView2/1/w/960/h/520/interlace/1/q/100"
+     *         "https://img.xxxx.com/bing/20171226.jpg?imageView2/1/w/960/h/520/interlace/1/q/100",
+     *         "https://img.xxxx.com/bing/20171105.jpg?imageView2/1/w/960/h/520/interlace/1/q/100",
+     *         "https://img.xxxx.com/bing/20180105.jpg?imageView2/1/w/960/h/520/interlace/1/q/100",
+     *         "https://img.xxxx.com/bing/20171114.jpg?imageView2/1/w/960/h/520/interlace/1/q/100"
      *     ]
      * }
      * </pre>
@@ -133,7 +133,7 @@ public class ArticleConsole {
 
         final int n = Integer.valueOf(strN);
         final List<String> urls = Images.randomImages(n);
-        result.put("data", urls.stream().map(url -> url += "?imageView2/1/w/960/h/520/interlace/1/q/100").collect(Collectors.toList()));
+        result.put("data", urls.stream().map(url -> url +=  Images.IMG_QINIU_PARA).collect(Collectors.toList()));
     }
 
     /**
