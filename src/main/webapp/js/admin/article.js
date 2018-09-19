@@ -164,6 +164,7 @@ admin.article = {
             if ($('#articleThumbnail').prop('checked')) {
                 var bgImage = $('.thumbnail__img').css('background-image');
                 articleContent = '![](' + bgImage.substring(5, bgImage.length - 2) + ')\n\n' + articleContent;
+                articleAbstract = '![](' + bgImage.substring(5, bgImage.length - 2) + ')\n\n' + articleAbstract;
             }
 
             var requestJSONObject = {
@@ -242,6 +243,7 @@ admin.article = {
             if ($('#articleThumbnail').prop('checked')) {
                 var bgImage = $('.thumbnail__img').css('background-image');
                 articleContent = '![](' + bgImage.substring(5, bgImage.length - 2) + ') \n\n' + articleContent;
+                articleAbstract = '![](' + bgImage.substring(5, bgImage.length - 2) + ') \n\n' + articleAbstract;
             }
             var requestJSONObject = {
                 "article": {
