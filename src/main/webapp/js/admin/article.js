@@ -176,7 +176,7 @@ admin.article = {
                     "articlePermalink": $("#permalink").val(),
                     "articleIsPublished": articleIsPublished,
                     "articleSignId": signId,
-                    "postToCommunity": $("#postToCommunity").prop("checked"),
+                    "postToCommunity": false, //$("#postToCommunity").prop("checked"),
                     "articleCommentable": $("#articleCommentable").prop("checked"),
                     "articleViewPwd": $("#viewPwd").val()
                 }
@@ -257,7 +257,7 @@ admin.article = {
                     "articleSignId": signId,
                     "articleCommentable": $("#articleCommentable").prop("checked"),
                     "articleViewPwd": $("#viewPwd").val(),
-                    "postToCommunity": $("#postToCommunity").prop("checked"),
+                    "postToCommunity": false, //$("#postToCommunity").prop("checked"),
                     "articleEditorType": admin.article.currentEditorType
                 }
             };
@@ -343,7 +343,7 @@ admin.article = {
                 $("#saveArticle").show();
             }
             if (this.status.articleHadBeenPublished) {
-                $("#postToCommunityPanel").hide();
+                //$("#postToCommunityPanel").hide();
             } else {
                 // 1.0.0 开始默认会发布到社区
                 // $("#postToCommunityPanel").show();
@@ -356,7 +356,7 @@ admin.article = {
             // $("#postToCommunityPanel").show();
         }
 
-        $("#postToCommunity").attr("checked", "checked");
+        $("#postToCommunity").attr("checked", "unchecked");
     },
     /**
      * @description 清除发布文章页面的输入框的内容
@@ -379,8 +379,8 @@ admin.article = {
         $("#tagCheckboxPanel").hide().find("span").removeClass("selected");
 
         $("#permalink").val("");
-        $("#articleCammentable").prop("checked", true);
-        $("#postToCommunity").prop("checked", true);
+        $("#articleCammentable").prop("checked", false);
+        $("#postToCommunity").prop("checked", false);
         $(".signs button").each(function (i) {
             if (i === 0) {
                 this.className = "selected";
