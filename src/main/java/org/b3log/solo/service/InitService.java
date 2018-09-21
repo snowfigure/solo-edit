@@ -19,6 +19,7 @@ package org.b3log.solo.service;
 
 import jodd.http.HttpRequest;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.b3log.latke.Keys;
@@ -187,6 +188,7 @@ public class InitService {
      *                          "userName": "",
      *                          "userEmail": "",
      *                          "userPassword": "", // Unhashed
+     *                          "userAvatar": "" // optional
      *                          }
      * @throws ServiceException service exception
      */
@@ -314,10 +316,8 @@ public class InitService {
         comment.put(Comment.COMMENT_ON_ID, articleId);
         comment.put(Comment.COMMENT_ON_TYPE, Article.ARTICLE);
         final String commentId = Ids.genTimeMillisId();
-
         comment.put(Keys.OBJECT_ID, commentId);
-        final String commentSharpURL = Comments.getCommentSharpURLForArticle(article, commentId);
-
+        final String commentSharpURL = Comment.getCommentSharpURLForArticle(article, commentId);
         comment.put(Comment.COMMENT_SHARP_URL, commentSharpURL);
 
         commentRepository.add(comment);
@@ -461,7 +461,8 @@ public class InitService {
      *                          {
      *                          "userName": "",
      *                          "userEmail": "",
-     *                          "userPassowrd": "" // Unhashed
+     *                          "userPassowrd": "", // Unhashed
+     *                          "userAvatar": "" // optional
      *                          }
      * @throws Exception exception
      */
@@ -476,7 +477,11 @@ public class InitService {
         admin.put(User.USER_PASSWORD, DigestUtils.md5Hex(requestJSONObject.getString(User.USER_PASSWORD)));
         admin.put(UserExt.USER_ARTICLE_COUNT, 0);
         admin.put(UserExt.USER_PUBLISHED_ARTICLE_COUNT, 0);
-        admin.put(UserExt.USER_AVATAR, Thumbnails.getGravatarURL(requestJSONObject.getString(User.USER_EMAIL), "128"));
+        String avatar = requestJSONObject.optString(UserExt.USER_AVATAR);
+        if (StringUtils.isBlank(avatar)) {
+            avatar = Thumbnails.getGravatarURL(requestJSONObject.getString(User.USER_EMAIL), "128");
+        }
+        admin.put(UserExt.USER_AVATAR, avatar);
 
         userRepository.add(admin);
 

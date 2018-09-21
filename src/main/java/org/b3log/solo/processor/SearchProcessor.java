@@ -55,7 +55,7 @@ import java.util.Map;
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="http://vanessa.b3log.org">Liyuan Li</a>
- * @version 1.1.0.0, May 29, 2018
+ * @version 1.1.0.1, Sep 20, 2018
  * @since 2.4.0
  */
 @RequestProcessor
@@ -155,18 +155,8 @@ public class SearchProcessor {
         try {
             final JSONObject preference = preferenceQueryService.getPreference();
 
-            filler.fillBlogHeader(request, context.getResponse(), dataModel, preference);
-            filler.fillBlogFooter(request, dataModel, preference);
-            filler.fillSide(request, dataModel, preference);
-
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-            if (hasMultipleUsers) {
-                filler.setArticlesExProperties(request, articles, preference);
-            } else if (!articles.isEmpty()) {
-                final JSONObject author = articleQueryService.getAuthor(articles.get(0));
-
-                filler.setArticlesExProperties(request, articles, author, preference);
-            }
+            filler.fillCommon(request, context.getResponse(), dataModel, preference);
+            filler.setArticlesExProperties(request, articles, preference);
 
             dataModel.put(Article.ARTICLES, articles);
             final JSONObject pagination = result.optJSONObject(Pagination.PAGINATION);

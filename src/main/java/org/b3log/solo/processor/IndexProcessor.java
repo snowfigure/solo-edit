@@ -31,6 +31,7 @@ import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.URIPatternMode;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
+import org.b3log.latke.servlet.renderer.DoNothingRenderer;
 import org.b3log.latke.servlet.renderer.freemarker.AbstractFreeMarkerRenderer;
 import org.b3log.latke.util.Locales;
 import org.b3log.latke.util.Requests;
@@ -97,26 +98,16 @@ public class IndexProcessor {
     private StatisticMgmtService statisticMgmtService;
 
     /**
-     * Gets the request page number from the specified request URI.
-     *
-     * @param requestURI the specified request URI
-     * @return page number, returns {@code -1} if the specified request URI can not convert to an number
-     */
-    private static int getCurrentPageNum(final String requestURI) {
-        final String pageNumString = StringUtils.substringAfterLast(requestURI, "/");
-
-        return Requests.getCurrentPageNum(pageNumString);
-    }
-
-    /**
      * Shows index with the specified context.
      *
      * @param context  the specified context
      * @param request  the specified HTTP servlet request
      * @param response the specified HTTP servlet response
+     * @throws Exception exception
      */
     @RequestProcessing(value = {"/\\d*", ""}, uriPatternsMode = URIPatternMode.REGEX, method = HTTPRequestMethod.GET)
-    public void showIndex(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response) {
+    public void showIndex(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
+            throws Exception {
         final AbstractFreeMarkerRenderer renderer = new SkinRenderer(request);
         context.setRenderer(renderer);
         renderer.setTemplateName("index.ftl");
@@ -152,10 +143,7 @@ public class IndexProcessor {
             Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
 
             filler.fillIndexArticles(request, dataModel, currentPageNum, preference);
-
-            filler.fillSide(request, dataModel, preference);
-            filler.fillBlogHeader(request, response, dataModel, preference);
-            filler.fillBlogFooter(request, dataModel, preference);
+            filler.fillCommon(request, response, dataModel, preference);
 
             dataModel.put(Pagination.PAGINATION_CURRENT_PAGE_NUM, currentPageNum);
             final int previousPageNum = currentPageNum > 1 ? currentPageNum - 1 : 0;
@@ -179,11 +167,7 @@ public class IndexProcessor {
         } catch (final ServiceException e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
 
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
@@ -193,34 +177,28 @@ public class IndexProcessor {
      * @param context  the specified context
      * @param request  the specified HTTP servlet request
      * @param response the specified HTTP servlet response
+     * @throws Exception exception
      */
     @RequestProcessing(value = "/kill-browser", method = HTTPRequestMethod.GET)
-    public void showKillBrowser(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response) {
+    public void showKillBrowser(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
+            throws Exception {
         final AbstractFreeMarkerRenderer renderer = new KillBrowserRenderer();
-
         context.setRenderer(renderer);
 
         final Map<String, Object> dataModel = renderer.getDataModel();
 
         try {
             final Map<String, String> langs = langPropsService.getAll(Locales.getLocale(request));
-
             dataModel.putAll(langs);
             final JSONObject preference = preferenceQueryService.getPreference();
-
-            filler.fillBlogHeader(request, response, dataModel, preference);
-            filler.fillBlogFooter(request, dataModel, preference);
+            filler.fillCommon(request, response, dataModel, preference);
             Keys.fillServer(dataModel);
             Keys.fillRuntime(dataModel);
             filler.fillMinified(dataModel);
         } catch (final ServiceException e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
 
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
@@ -230,35 +208,51 @@ public class IndexProcessor {
      * @param context  the specified context
      * @param request  the specified HTTP servlet request
      * @param response the specified HTTP servlet response
+     * @throws Exception exception
      */
     @RequestProcessing(value = "/register", method = HTTPRequestMethod.GET)
-    public void register(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response) {
+    public void register(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
+            throws Exception {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
-
         context.setRenderer(renderer);
-
         renderer.setTemplateName("register.ftl");
 
         final Map<String, Object> dataModel = renderer.getDataModel();
-
         try {
             final Map<String, String> langs = langPropsService.getAll(Locales.getLocale(request));
-
             dataModel.putAll(langs);
-
             final JSONObject preference = preferenceQueryService.getPreference();
-
-            filler.fillBlogFooter(request, dataModel, preference);
+            filler.fillCommon(request, response, dataModel, preference);
             filler.fillMinified(dataModel);
         } catch (final ServiceException e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
 
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    /**
+     * Online visitor count refresher.
+     *
+     * @param context the specified context
+     */
+    @RequestProcessing(value = "/console/stat/onlineVisitorRefresh", method = HTTPRequestMethod.GET)
+    public void onlineVisitorCountRefresher(final HTTPRequestContext context) {
+        context.setRenderer(new DoNothingRenderer());
+
+        StatisticMgmtService.removeExpiredOnlineVisitor();
+    }
+
+    /**
+     * Gets the request page number from the specified request URI.
+     *
+     * @param requestURI the specified request URI
+     * @return page number, returns {@code -1} if the specified request URI can not convert to an number
+     */
+    private static int getCurrentPageNum(final String requestURI) {
+        final String pageNumString = StringUtils.substringAfterLast(requestURI, "/");
+
+        return Requests.getCurrentPageNum(pageNumString);
     }
 
     /**
@@ -284,16 +278,11 @@ public class IndexProcessor {
 
             try {
                 final Template template = ConsoleRenderer.TEMPLATE_CFG.getTemplate("kill-browser.ftl");
-
                 final PrintWriter writer = response.getWriter();
-
                 final StringWriter stringWriter = new StringWriter();
-
                 template.setOutputEncoding("UTF-8");
                 template.process(getDataModel(), stringWriter);
-
                 final String pageContent = stringWriter.toString();
-
                 writer.write(pageContent);
                 writer.flush();
                 writer.close();
@@ -301,18 +290,18 @@ public class IndexProcessor {
                 try {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 } catch (final IOException ex) {
-                    LOGGER.log(Level.ERROR, "Can not sned error 500!", ex);
+                    LOGGER.log(Level.ERROR, "Can not send error 500!", ex);
                 }
             }
         }
 
         @Override
-        protected void afterRender(final HTTPRequestContext context) throws Exception {
+        protected void afterRender(final HTTPRequestContext context) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
-        protected void beforeRender(final HTTPRequestContext context) throws Exception {
+        protected void beforeRender(final HTTPRequestContext context) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

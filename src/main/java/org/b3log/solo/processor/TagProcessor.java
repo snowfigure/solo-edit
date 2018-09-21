@@ -25,7 +25,6 @@ import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Pagination;
 import org.b3log.latke.service.LangPropsService;
-import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
@@ -41,16 +40,12 @@ import org.b3log.solo.processor.renderer.SkinRenderer;
 import org.b3log.solo.processor.util.Filler;
 import org.b3log.solo.service.*;
 import org.b3log.solo.util.Skins;
-import org.b3log.solo.util.comparator.Comparators;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +53,7 @@ import java.util.Map;
  * Tag processor.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.1.5, Jun 22, 2018
+ * @version 1.1.1.6, Sep 20, 2018
  * @since 0.3.1
  */
 @RequestProcessor
@@ -115,32 +110,28 @@ public class TagProcessor {
      * Shows articles related with a tag with the specified context.
      *
      * @param context the specified context
-     * @throws IOException io exception
+     * @throws Exception exception
      */
     @RequestProcessing(value = "/tags/**", method = HTTPRequestMethod.GET)
-    public void showTagArticles(final HTTPRequestContext context) throws IOException {
+    public void showTagArticles(final HTTPRequestContext context) throws Exception {
         final AbstractFreeMarkerRenderer renderer = new SkinRenderer(context.getRequest());
-
         context.setRenderer(renderer);
-
         renderer.setTemplateName("tag-articles.ftl");
         final Map<String, Object> dataModel = renderer.getDataModel();
-
         final HttpServletRequest request = context.getRequest();
         final HttpServletResponse response = context.getResponse();
 
         try {
             String requestURI = request.getRequestURI();
-
             if (!requestURI.endsWith("/")) {
                 requestURI += "/";
             }
 
             String tagTitle = getTagTitle(requestURI);
             final int currentPageNum = getCurrentPageNum(requestURI, tagTitle);
-
             if (-1 == currentPageNum) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
                 return;
             }
 
@@ -148,9 +139,9 @@ public class TagProcessor {
 
             tagTitle = URLDecoder.decode(tagTitle, "UTF-8");
             final JSONObject result = tagQueryService.getTagByTitle(tagTitle);
-
             if (null == result) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
                 return;
             }
 
@@ -158,71 +149,35 @@ public class TagProcessor {
             final String tagId = tag.getString(Keys.OBJECT_ID);
 
             final JSONObject preference = preferenceQueryService.getPreference();
-
             Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
 
             final int pageSize = preference.getInt(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT);
             final int windowSize = preference.getInt(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);
-
             final List<JSONObject> articles = articleQueryService.getArticlesByTag(tagId, currentPageNum, pageSize);
-
             if (articles.isEmpty()) {
-                try {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                } catch (final IOException ex) {
-                    LOGGER.error(ex.getMessage());
-                }
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+                return;
             }
 
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-
-            if (hasMultipleUsers) {
-                filler.setArticlesExProperties(request, articles, preference);
-            } else {
-                // All articles composed by the same author
-                final JSONObject author = articleQueryService.getAuthor(articles.get(0));
-
-                filler.setArticlesExProperties(request, articles, author, preference);
-            }
+            filler.setArticlesExProperties(request, articles, preference);
 
             final int tagArticleCount = tag.getInt(Tag.TAG_PUBLISHED_REFERENCE_COUNT);
             final int pageCount = (int) Math.ceil((double) tagArticleCount / (double) pageSize);
-
             LOGGER.log(Level.TRACE, "Paginate tag-articles[currentPageNum={0}, pageSize={1}, pageCount={2}, windowSize={3}]",
                     currentPageNum, pageSize, pageCount, windowSize);
             final List<Integer> pageNums = Paginator.paginate(currentPageNum, pageSize, pageCount, windowSize);
-
             LOGGER.log(Level.TRACE, "tag-articles[pageNums={0}]", pageNums);
-
-            Collections.sort(articles, Comparators.ARTICLE_CREATE_DATE_COMPARATOR);
-
             fillPagination(dataModel, pageCount, currentPageNum, articles, pageNums);
             dataModel.put(Common.PATH, "/tags/" + URLEncoder.encode(tagTitle, "UTF-8"));
             dataModel.put(Keys.OBJECT_ID, tagId);
             dataModel.put(Tag.TAG, tag);
-
-            filler.fillSide(request, dataModel, preference);
-            filler.fillBlogHeader(request, response, dataModel, preference);
-            filler.fillBlogFooter(request, dataModel, preference);
-
+            filler.fillCommon(request, response, dataModel, preference);
             statisticMgmtService.incBlogViewCount(request, response);
-        } catch (final ServiceException e) {
+        } catch (final Exception e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
 
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
-        } catch (final JSONException e) {
-            LOGGER.log(Level.ERROR, e.getMessage(), e);
-
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 

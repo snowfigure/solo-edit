@@ -41,7 +41,6 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -52,7 +51,7 @@ import java.util.Map;
  * </p>
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.7, Sep 7, 2018
+ * @version 1.0.0.8, Sep 20, 2018
  * @since 0.4.5
  */
 @RequestProcessor
@@ -93,11 +92,11 @@ public class UserTemplateProcessor {
      * @param context  the specified context
      * @param request  the specified HTTP servlet request
      * @param response the specified HTTP servlet response
-     * @throws IOException io exception
+     * @throws Exception exception
      */
     @RequestProcessing(value = "/*.html", method = HTTPRequestMethod.GET)
     public void showPage(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
-            throws IOException {
+            throws Exception {
         final String requestURI = request.getRequestURI();
         String templateName = StringUtils.substringAfterLast(requestURI, "/");
 
@@ -105,44 +104,29 @@ public class UserTemplateProcessor {
         LOGGER.log(Level.DEBUG, "Shows page[requestURI={0}, templateName={1}]", requestURI, templateName);
 
         final AbstractFreeMarkerRenderer renderer = new SkinRenderer(request);
-
         context.setRenderer(renderer);
         renderer.setTemplateName(templateName);
 
         final Map<String, Object> dataModel = renderer.getDataModel();
-
         final Template template = Templates.getTemplate((String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), templateName);
-
         if (null == template) {
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
 
-                return;
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
+            return;
         }
 
         try {
             final Map<String, String> langs = langPropsService.getAll(Locales.getLocale(request));
-
             dataModel.putAll(langs);
             final JSONObject preference = preferenceQueryService.getPreference();
-
-            filler.fillBlogHeader(request, response, dataModel, preference);
+            filler.fillCommon(request, response, dataModel, preference);
             filler.fillUserTemplate(request, template, dataModel, preference);
-            filler.fillBlogFooter(request, dataModel, preference);
             Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-
             statisticMgmtService.incBlogViewCount(request, response);
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
 
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } catch (final IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 }

@@ -34,7 +34,6 @@ import org.b3log.latke.util.Sessions;
 import org.b3log.latke.util.URLs;
 import org.b3log.solo.repository.UserRepository;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +44,7 @@ import java.util.List;
  * User query service.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.4, Aug 2, 2018
+ * @version 1.0.0.6, Sep 21, 2018
  * @since 0.4.0
  */
 @Service
@@ -67,30 +66,6 @@ public class UserQueryService {
      */
     @Inject
     private UserMgmtService userMgmtService;
-
-    /**
-     * Determines whether if exists multiple users in current Solo.
-     *
-     * @return {@code true} if exists, {@code false} otherwise
-     * @throws ServiceException service exception
-     */
-    public boolean hasMultipleUsers() throws ServiceException {
-        final Query query = new Query().setPageCount(1);
-
-        try {
-            final JSONArray users = userRepository.get(query).getJSONArray(Keys.RESULTS);
-
-            return 1 != users.length();
-        } catch (final RepositoryException e) {
-            LOGGER.log(Level.ERROR, "Determines multiple users failed", e);
-
-            throw new ServiceException(e);
-        } catch (final JSONException e) {
-            LOGGER.log(Level.ERROR, "Determines multiple users failed", e);
-
-            throw new ServiceException(e);
-        }
-    }
 
     /**
      * Checks whether the current request is made by a logged in user
@@ -165,17 +140,22 @@ public class UserQueryService {
     }
 
     /**
-     * Gets a user by the specified email.
+     * Gets a user by the specified email or username.
      *
-     * @param email the specified email
+     * @param emailOrUserName the specified email or username
      * @return user, returns {@code null} if not found
      * @throws ServiceException service exception
      */
-    public JSONObject getUserByEmail(final String email) throws ServiceException {
+    public JSONObject getUserByEmailOrUserName(final String emailOrUserName) throws ServiceException {
         try {
-            return userRepository.getByEmail(email);
+            JSONObject ret = userRepository.getByEmail(emailOrUserName);
+            if (null == ret) {
+                ret = userRepository.getByUserName(emailOrUserName);
+            }
+
+            return ret;
         } catch (final RepositoryException e) {
-            LOGGER.log(Level.ERROR, "Gets user by email[" + email + "] failed", e);
+            LOGGER.log(Level.ERROR, "Gets a user by email or username [" + emailOrUserName + "] failed", e);
             throw new ServiceException(e);
         }
     }
@@ -261,8 +241,7 @@ public class UserQueryService {
     public JSONObject getUser(final String userId) throws ServiceException {
         final JSONObject ret = new JSONObject();
 
-        JSONObject user = null;
-
+        JSONObject user;
         try {
             user = userRepository.get(userId);
         } catch (final RepositoryException e) {

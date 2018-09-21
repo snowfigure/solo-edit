@@ -49,7 +49,6 @@ import org.b3log.solo.util.Emotions;
 import org.b3log.solo.util.Markdowns;
 import org.b3log.solo.util.Solos;
 import org.b3log.solo.util.Thumbnails;
-import org.b3log.solo.util.comparator.Comparators;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -66,7 +65,7 @@ import static org.b3log.solo.model.Article.ARTICLE_CONTENT;
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="http://vanessa.b3log.org">Liyuan Li</a>
- * @version 1.6.16.7, Sep 16, 2018
+ * @version 1.6.16.8, Sep 20, 2018
  * @since 0.3.1
  */
 @Service
@@ -241,16 +240,7 @@ public class Filler {
             dataModel.put(Pagination.PAGINATION_PAGE_NUMS, pageNums);
 
             final List<JSONObject> articles = articleRepository.getList(query);
-
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-
-            if (hasMultipleUsers) {
-                setArticlesExProperties(request, articles, preference);
-            } else if (!articles.isEmpty()) {
-                final JSONObject author = articleQueryService.getAuthor(articles.get(0));
-
-                setArticlesExProperties(request, articles, author, preference);
-            }
+            setArticlesExProperties(request, articles, preference);
 
             if (!isArticles1) {
                 dataModel.put(Article.ARTICLES, articles);
@@ -305,7 +295,7 @@ public class Filler {
             final List<JSONObject> tags = tagQueryService.getTags();
 
             tagQueryService.removeForUnpublishedArticles(tags);
-            Collections.sort(tags, Comparators.TAG_REF_CNT_COMPARATOR);
+            Collections.sort(tags, Comparator.comparingInt(t -> -t.optInt(Tag.TAG_REFERENCE_COUNT)));
 
             dataModel.put(Tag.TAGS, tags);
         } catch (final JSONException e) {
@@ -571,6 +561,22 @@ public class Filler {
     }
 
     /**
+     * Fills common parts (header, side and footer).
+     *
+     * @param request    the specified HTTP servlet request
+     * @param response   the specified HTTP servlet response
+     * @param dataModel  the specified data model
+     * @param preference the specified preference
+     * @throws ServiceException service exception
+     */
+    public void fillCommon(final HttpServletRequest request, final HttpServletResponse response,
+                            final Map<String, Object> dataModel, final JSONObject preference) throws ServiceException {
+        fillSide(request, dataModel, preference);
+        fillBlogHeader(request, response, dataModel, preference);
+        fillBlogFooter(request, dataModel, preference);
+    }
+
+    /**
      * Fills footer.ftl.
      *
      * @param request    the specified HTTP servlet request
@@ -578,7 +584,7 @@ public class Filler {
      * @param preference the specified preference
      * @throws ServiceException service exception
      */
-    public void fillBlogFooter(final HttpServletRequest request, final Map<String, Object> dataModel, final JSONObject preference)
+    private void fillBlogFooter(final HttpServletRequest request, final Map<String, Object> dataModel, final JSONObject preference)
             throws ServiceException {
         Stopwatchs.start("Fill Footer");
         try {
@@ -650,8 +656,8 @@ public class Filler {
      * @param preference the specified preference
      * @throws ServiceException service exception
      */
-    public void fillBlogHeader(final HttpServletRequest request, final HttpServletResponse response,
-                               final Map<String, Object> dataModel, final JSONObject preference)
+    private void fillBlogHeader(final HttpServletRequest request, final HttpServletResponse response,
+                                final Map<String, Object> dataModel, final JSONObject preference)
             throws ServiceException {
         Stopwatchs.start("Fill Header");
         try {
@@ -748,7 +754,7 @@ public class Filler {
      * @param preference the specified preference
      * @throws ServiceException service exception
      */
-    public void fillSide(final HttpServletRequest request, final Map<String, Object> dataModel, final JSONObject preference)
+    private void fillSide(final HttpServletRequest request, final Map<String, Object> dataModel, final JSONObject preference)
             throws ServiceException {
         Stopwatchs.start("Fill Side");
         try {
@@ -896,66 +902,6 @@ public class Filler {
     }
 
     /**
-     * Sets some extra properties into the specified article with the specified author and preference, performs content and abstract editor processing.
-     * <p>
-     * Article ext properties:
-     * <pre>
-     * {
-     *     ....,
-     *     "authorName": "",
-     *     "authorId": "",
-     *     "authorThumbnailURL": "",
-     *     "hasUpdated": boolean
-     * }
-     * </pre> </p>
-     *
-     * @param request    the specified HTTP servlet request
-     * @param article    the specified article
-     * @param author     the specified author
-     * @param preference the specified preference
-     * @throws ServiceException service exception
-     * @see #setArticlesExProperties(HttpServletRequest, List, JSONObject, JSONObject)
-     */
-    private void setArticleExProperties(final HttpServletRequest request,
-                                        final JSONObject article, final JSONObject author, final JSONObject preference)
-            throws ServiceException {
-        try {
-            final String authorName = author.getString(User.USER_NAME);
-            article.put(Common.AUTHOR_NAME, authorName);
-            final String authorId = author.getString(Keys.OBJECT_ID);
-            article.put(Common.AUTHOR_ID, authorId);
-            article.put(Article.ARTICLE_T_CREATE_DATE, new Date(article.optLong(Article.ARTICLE_CREATED)));
-
-            final String userAvatar = author.optString(UserExt.USER_AVATAR);
-            if (StringUtils.isNotBlank(userAvatar)) {
-                article.put(Common.AUTHOR_THUMBNAIL_URL, userAvatar);
-            } else {
-                final String thumbnailURL = Thumbnails.getGravatarURL(author.optString(User.USER_EMAIL), "128");
-                article.put(Common.AUTHOR_THUMBNAIL_URL, thumbnailURL);
-            }
-
-            if (preference.getBoolean(Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT)) {
-                article.put(Common.HAS_UPDATED, articleQueryService.hasUpdated(article));
-            } else {
-                article.put(Common.HAS_UPDATED, false);
-            }
-
-            if (articleQueryService.needViewPwd(request, article)) {
-                final String content = langPropsService.get("articleContentPwd");
-
-                article.put(ARTICLE_CONTENT, content);
-            }
-
-            processArticleAbstract(preference, article);
-
-            articleQueryService.markdown(article);
-        } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Sets article extra properties failed", e);
-            throw new ServiceException(e);
-        }
-    }
-
-    /**
      * Sets some extra properties into the specified article with the specified preference, performs content and abstract editor processing.
      * <p>
      * Article ext properties:
@@ -1011,38 +957,6 @@ public class Filler {
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Sets article extra properties failed", e);
             throw new ServiceException(e);
-        }
-    }
-
-    /**
-     * Sets some extra properties into the specified article with the specified author and preference.
-     * <p>
-     * The batch version of method {@linkplain #setArticleExProperties(HttpServletRequest, JSONObject, JSONObject, JSONObject)}.
-     * </p>
-     * <p>
-     * Article ext properties:
-     * <pre>
-     * {
-     *     ....,
-     *     "authorName": "",
-     *     "authorId": "",
-     *     "hasUpdated": boolean
-     * }
-     * </pre>
-     * </p>
-     *
-     * @param request    the specified HTTP servlet request
-     * @param articles   the specified articles
-     * @param author     the specified author
-     * @param preference the specified preference
-     * @throws ServiceException service exception
-     * @see #setArticleExProperties(HttpServletRequest, JSONObject, JSONObject, JSONObject)
-     */
-    public void setArticlesExProperties(final HttpServletRequest request,
-                                        final List<JSONObject> articles, final JSONObject author, final JSONObject preference)
-            throws ServiceException {
-        for (final JSONObject article : articles) {
-            setArticleExProperties(request, article, author, preference);
         }
     }
 

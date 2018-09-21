@@ -25,6 +25,7 @@ import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.User;
 import org.b3log.latke.repository.*;
+import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
@@ -49,11 +50,11 @@ import org.b3log.solo.service.PreferenceQueryService;
 import org.b3log.solo.service.UserQueryService;
 import org.b3log.solo.util.Emotions;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,7 +65,7 @@ import java.util.List;
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="https://github.com/feroozkhanchintu">feroozkhanchintu</a>
  * @author <a href="https://github.com/nanolikeyou">nanolikeyou</a>
- * @version 1.1.1.1, Sep 16, 2018
+ * @version 1.1.1.2, Sep 20, 2018
  * @since 0.3.1
  */
 @RequestProcessor
@@ -115,22 +116,19 @@ public class FeedProcessor {
      * Blog articles Atom output.
      *
      * @param context the specified context
+     * @throws Exception exception
      */
     @RequestProcessing(value = {"/blog-articles-feed.do"}, method = {HTTPRequestMethod.GET, HTTPRequestMethod.HEAD})
-    public void blogArticlesAtom(final HTTPRequestContext context) {
+    public void blogArticlesAtom(final HTTPRequestContext context) throws Exception {
         final AtomRenderer renderer = new AtomRenderer();
-
         context.setRenderer(renderer);
 
         final Feed feed = new Feed();
-
         try {
             final JSONObject preference = preferenceQueryService.getPreference();
-
             final String blogTitle = preference.getString(Option.ID_C_BLOG_TITLE);
             final String blogSubtitle = preference.getString(Option.ID_C_BLOG_SUBTITLE);
             final int outputCnt = preference.getInt(Option.ID_C_FEED_OUTPUT_CNT);
-
             feed.setTitle(blogTitle);
             feed.setSubtitle(blogSubtitle);
             feed.setUpdated(new Date());
@@ -139,27 +137,16 @@ public class FeedProcessor {
             feed.setId(Latkes.getServePath() + "/");
 
             final List<Filter> filters = new ArrayList<>();
-
             filters.add(new PropertyFilter(Article.ARTICLE_IS_PUBLISHED, FilterOperator.EQUAL, true));
             filters.add(new PropertyFilter(Article.ARTICLE_VIEW_PWD, FilterOperator.EQUAL, ""));
             final Query query = new Query().setCurrentPageNum(1).setPageSize(outputCnt).
                     setFilter(new CompositeFilter(CompositeFilterOperator.AND, filters)).
                     addSort(Article.ARTICLE_UPDATED, SortDirection.DESCENDING).setPageCount(1);
-
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-            String authorName = "";
-
             final JSONObject articleResult = articleRepository.get(query);
             final JSONArray articles = articleResult.getJSONArray(Keys.RESULTS);
-
-            if (!hasMultipleUsers && 0 != articles.length()) {
-                authorName = articleQueryService.getAuthor(articles.getJSONObject(0)).getString(User.USER_NAME);
-            }
-
             final boolean isFullContent = "fullContent".equals(preference.getString(Option.ID_C_FEED_OUTPUT_MODE));
-
             for (int i = 0; i < articles.length(); i++) {
-                Entry entry = getEntry(hasMultipleUsers, authorName, articles, isFullContent, i);
+                final Entry entry = getEntry(articles, isFullContent, i);
                 feed.addEntry(entry);
             }
 
@@ -167,17 +154,12 @@ public class FeedProcessor {
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Get blog article feed error", e);
 
-            try {
-                context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
     }
 
-    private Entry getEntry(final boolean hasMultipleUsers, String authorName, final JSONArray articles,
-                           final boolean isFullContent, int i)
-            throws org.json.JSONException, org.b3log.latke.service.ServiceException {
+    private Entry getEntry(final JSONArray articles, final boolean isFullContent, int i)
+            throws JSONException, ServiceException {
         final JSONObject article = articles.getJSONObject(i);
         final Entry ret = new Entry();
         final String title = article.getString(Article.ARTICLE_TITLE);
@@ -190,9 +172,7 @@ public class FeedProcessor {
         final String link = Latkes.getServePath() + article.getString(Article.ARTICLE_PERMALINK);
         ret.setLink(link);
         ret.setId(link);
-        if (hasMultipleUsers) {
-            authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
-        }
+        final String authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
         ret.setAuthor(authorName);
         final String tagsString = article.getString(Article.ARTICLE_TAGS_REF);
         final String[] tagStrings = tagsString.split(",");
@@ -209,10 +189,10 @@ public class FeedProcessor {
      * Tag articles Atom output.
      *
      * @param context the specified context
-     * @throws IOException io exception
+     * @throws Exception exception
      */
     @RequestProcessing(value = {"/tag-articles-feed.do"}, method = {HTTPRequestMethod.GET, HTTPRequestMethod.HEAD})
-    public void tagArticlesAtom(final HTTPRequestContext context) throws IOException {
+    public void tagArticlesAtom(final HTTPRequestContext context) throws Exception {
         final AtomRenderer renderer = new AtomRenderer();
         context.setRenderer(renderer);
 
@@ -276,17 +256,10 @@ public class FeedProcessor {
                 }
             }
 
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-            String authorName = "";
-
-            if (!hasMultipleUsers && !articles.isEmpty()) {
-                authorName = articleQueryService.getAuthor(articles.get(0)).getString(User.USER_NAME);
-            }
-
             final boolean isFullContent = "fullContent".equals(preference.getString(Option.ID_C_FEED_OUTPUT_MODE));
 
             for (int i = 0; i < articles.size(); i++) {
-                Entry entry = getEntryForArticle(articles, hasMultipleUsers, authorName, isFullContent, i);
+                final Entry entry = getEntryForArticle(articles, isFullContent, i);
                 feed.addEntry(entry);
             }
 
@@ -294,17 +267,12 @@ public class FeedProcessor {
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Get tag article feed error", e);
 
-            try {
-                context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
     }
 
-    private Entry getEntryForArticle(final List<JSONObject> articles, final boolean hasMultipleUsers, String authorName,
-                                     final boolean isFullContent, int i)
-            throws org.json.JSONException, org.b3log.latke.service.ServiceException {
+    private Entry getEntryForArticle(final List<JSONObject> articles, final boolean isFullContent, int i)
+            throws JSONException, ServiceException {
         final JSONObject article = articles.get(i);
         final Entry ret = new Entry();
         final String title = article.getString(Article.ARTICLE_TITLE);
@@ -317,9 +285,7 @@ public class FeedProcessor {
         final String link = Latkes.getServePath() + article.getString(Article.ARTICLE_PERMALINK);
         ret.setLink(link);
         ret.setId(link);
-        if (hasMultipleUsers) {
-            authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
-        }
+        final String authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
         ret.setAuthor(authorName);
         final String tagsString = article.getString(Article.ARTICLE_TAGS_REF);
         final String[] tagStrings = tagsString.split(",");
@@ -336,9 +302,10 @@ public class FeedProcessor {
      * Blog articles RSS output.
      *
      * @param context the specified context
+     * @throws Exception exception
      */
     @RequestProcessing(value = {"/blog-articles-rss.do"}, method = {HTTPRequestMethod.GET, HTTPRequestMethod.HEAD})
-    public void blogArticlesRSS(final HTTPRequestContext context) {
+    public void blogArticlesRSS(final HTTPRequestContext context) throws Exception {
         final HttpServletResponse response = context.getResponse();
         final RssRenderer renderer = new RssRenderer();
         context.setRenderer(renderer);
@@ -379,17 +346,10 @@ public class FeedProcessor {
             final JSONObject articleResult = articleRepository.get(query);
             final JSONArray articles = articleResult.getJSONArray(Keys.RESULTS);
 
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-            String authorName = "";
-
-            if (!hasMultipleUsers && 0 != articles.length()) {
-                authorName = articleQueryService.getAuthor(articles.getJSONObject(0)).getString(User.USER_NAME);
-            }
-
             final boolean isFullContent = "fullContent".equals(preference.getString(Option.ID_C_FEED_OUTPUT_MODE));
 
             for (int i = 0; i < articles.length(); i++) {
-                Item item = getItem(articles, hasMultipleUsers, authorName, isFullContent, i);
+                final Item item = getItem(articles, isFullContent, i);
                 channel.addItem(item);
             }
 
@@ -397,17 +357,12 @@ public class FeedProcessor {
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Get blog article rss error", e);
 
-            try {
-                context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
     }
 
-    private Item getItem(final JSONArray articles, final boolean hasMultipleUsers, String authorName,
-                         final boolean isFullContent, int i)
-            throws org.json.JSONException, org.b3log.latke.service.ServiceException {
+    private Item getItem(final JSONArray articles, final boolean isFullContent, int i)
+            throws JSONException, ServiceException {
         final JSONObject article = articles.getJSONObject(i);
         final Item ret = new Item();
         String title = article.getString(Article.ARTICLE_TITLE);
@@ -423,9 +378,7 @@ public class FeedProcessor {
         final String link = Latkes.getServePath() + article.getString(Article.ARTICLE_PERMALINK);
         ret.setLink(link);
         ret.setGUID(link);
-        if (hasMultipleUsers) {
-            authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
-        }
+        final String authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
         ret.setAuthor(authorName);
         final String tagsString = article.getString(Article.ARTICLE_TAGS_REF);
         final String[] tagStrings = tagsString.split(",");
@@ -442,10 +395,10 @@ public class FeedProcessor {
      * Tag articles RSS output.
      *
      * @param context the specified context
-     * @throws IOException io exception
+     * @throws Exception exception
      */
     @RequestProcessing(value = {"/tag-articles-rss.do"}, method = {HTTPRequestMethod.GET, HTTPRequestMethod.HEAD})
-    public void tagArticlesRSS(final HTTPRequestContext context) throws IOException {
+    public void tagArticlesRSS(final HTTPRequestContext context) throws Exception {
         final HttpServletResponse response = context.getResponse();
         final HttpServletRequest request = context.getRequest();
 
@@ -514,17 +467,10 @@ public class FeedProcessor {
                 }
             }
 
-            final boolean hasMultipleUsers = userQueryService.hasMultipleUsers();
-            String authorName = "";
-
-            if (!hasMultipleUsers && !articles.isEmpty()) {
-                authorName = articleQueryService.getAuthor(articles.get(0)).getString(User.USER_NAME);
-            }
-
             final boolean isFullContent = "fullContent".equals(preference.getString(Option.ID_C_FEED_OUTPUT_MODE));
 
             for (int i = 0; i < articles.size(); i++) {
-                Item item = getItemForArticles(articles, hasMultipleUsers, authorName, isFullContent, i);
+                final Item item = getItemForArticles(articles, isFullContent, i);
                 channel.addItem(item);
             }
 
@@ -532,17 +478,12 @@ public class FeedProcessor {
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Get tag article rss error", e);
 
-            try {
-                context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-            } catch (final IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
     }
 
-    private Item getItemForArticles(final List<JSONObject> articles, final boolean hasMultipleUsers, String authorName,
-                                    final boolean isFullContent, int i)
-            throws org.json.JSONException, org.b3log.latke.service.ServiceException {
+    private Item getItemForArticles(final List<JSONObject> articles, final boolean isFullContent, int i)
+            throws JSONException, ServiceException {
         final JSONObject article = articles.get(i);
         final Item ret = new Item();
         final String title = article.getString(Article.ARTICLE_TITLE);
@@ -556,9 +497,7 @@ public class FeedProcessor {
         final String link = Latkes.getServePath() + article.getString(Article.ARTICLE_PERMALINK);
         ret.setLink(link);
         ret.setGUID(link);
-        if (hasMultipleUsers) {
-            authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
-        }
+        final String authorName = articleQueryService.getAuthor(article).getString(User.USER_NAME);
         ret.setAuthor(authorName);
         final String tagsString = article.getString(Article.ARTICLE_TAGS_REF);
         final String[] tagStrings = tagsString.split(",");

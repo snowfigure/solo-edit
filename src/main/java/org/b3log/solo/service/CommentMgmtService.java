@@ -49,7 +49,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 
@@ -166,13 +165,12 @@ public class CommentMgmtService {
      * @param comment         the specified comment
      * @param originalComment original comment, if not exists, set it as {@code null}
      * @param preference      the specified preference
-     * @throws IOException   io exception
-     * @throws JSONException json exception
+     * @throws Exception exception
      */
     public void sendNotificationMail(final JSONObject articleOrPage,
                                      final JSONObject comment,
                                      final JSONObject originalComment,
-                                     final JSONObject preference) throws IOException, JSONException {
+                                     final JSONObject preference) throws Exception {
         if (!Mails.isConfigured()) {
             return;
         }
@@ -457,8 +455,7 @@ public class CommentMgmtService {
 
             ret.put(Keys.OBJECT_ID, commentId);
             // Save comment sharp URL
-            final String commentSharpURL = Comments.getCommentSharpURLForPage(page, commentId);
-
+            final String commentSharpURL = Comment.getCommentSharpURLForPage(page, commentId);
             ret.put(Comment.COMMENT_NAME, commentName);
             ret.put(Comment.COMMENT_CONTENT, commentContent);
             ret.put(Comment.COMMENT_URL, commentURL);
@@ -600,8 +597,7 @@ public class CommentMgmtService {
 
             comment.put(Keys.OBJECT_ID, commentId);
             ret.put(Keys.OBJECT_ID, commentId);
-            final String commentSharpURL = Comments.getCommentSharpURLForArticle(article, commentId);
-
+            final String commentSharpURL = Comment.getCommentSharpURLForArticle(article, commentId);
             comment.put(Comment.COMMENT_SHARP_URL, commentSharpURL);
             ret.put(Comment.COMMENT_SHARP_URL, commentSharpURL);
 
