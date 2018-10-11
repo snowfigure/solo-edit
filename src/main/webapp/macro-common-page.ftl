@@ -35,8 +35,8 @@
 <div class="wrap">
     <div class="content">
         <div class="logo">
-            <a href="https://b3log.org" target="_blank">
-                <img width="128" border="0" alt="Solo" title="Solo" src="${staticServePath}/images/logo.png"/>
+            <a href="${servePath}" target="_blank">
+                <img width="128" border="0" alt="${blogTitle}" title="${blogTitle}" src="${staticServePath}/images/logo.png"/>
             </a>
         </div>
         <div class="main">
