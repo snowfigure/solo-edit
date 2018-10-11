@@ -108,8 +108,13 @@ public class TagProcessor {
     private StatisticMgmtService statisticMgmtService;
 
 
-
-
+    /**
+     * 获取指定tag的文章列表信息
+     * @param context
+     * @param tagTitleInfo
+     * @param currentPageNum
+     * @throws Exception
+     */
     private void showTagArticlesDetail(final HTTPRequestContext context, final String tagTitleInfo, final int currentPageNum) throws Exception{
         final AbstractFreeMarkerRenderer renderer = new SkinRenderer(context.getRequest());
         context.setRenderer(renderer);
