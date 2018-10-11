@@ -64,6 +64,7 @@ public class TagProcessor {
      */
     private static final Logger LOGGER = Logger.getLogger(TagProcessor.class);
 
+    private static String URI_TAG = "tags";
     /**
      * Filler.
      */
@@ -106,14 +107,10 @@ public class TagProcessor {
     @Inject
     private StatisticMgmtService statisticMgmtService;
 
-    /**
-     * Shows articles related with a tag with the specified context.
-     *
-     * @param context the specified context
-     * @throws Exception exception
-     */
-    @RequestProcessing(value = "/tags/**", method = HTTPRequestMethod.GET)
-    public void showTagArticles(final HTTPRequestContext context) throws Exception {
+
+
+
+    private void showTagArticlesDetail(final HTTPRequestContext context, final String tagTitleInfo, final int currentPageNum) throws Exception{
         final AbstractFreeMarkerRenderer renderer = new SkinRenderer(context.getRequest());
         context.setRenderer(renderer);
         renderer.setTemplateName("tag-articles.ftl");
@@ -121,23 +118,12 @@ public class TagProcessor {
         final HttpServletRequest request = context.getRequest();
         final HttpServletResponse response = context.getResponse();
 
-        try {
-            String requestURI = request.getRequestURI();
-            if (!requestURI.endsWith("/")) {
-                requestURI += "/";
-            }
 
-            String tagTitle = getTagTitle(requestURI);
-            final int currentPageNum = getCurrentPageNum(requestURI, tagTitle);
-            if (-1 == currentPageNum) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        LOGGER.log(Level.DEBUG, "Tag[title={0}, currentPageNum={1}]", tagTitleInfo, currentPageNum);
 
-                return;
-            }
-
-            LOGGER.log(Level.DEBUG, "Tag[title={0}, currentPageNum={1}]", tagTitle, currentPageNum);
-
-            tagTitle = URLDecoder.decode(tagTitle, "UTF-8");
+        try
+        {
+            String tagTitle = URLDecoder.decode(tagTitleInfo, "UTF-8");
             final JSONObject result = tagQueryService.getTagByTitle(tagTitle);
             if (null == result) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -174,6 +160,85 @@ public class TagProcessor {
             dataModel.put(Tag.TAG, tag);
             filler.fillCommon(request, response, dataModel, preference);
             statisticMgmtService.incBlogViewCount(request, response);
+        } catch (final Exception e) {
+            LOGGER.log(Level.ERROR, e.getMessage(), e);
+
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+
+
+    }
+
+    /**
+     * Shows articles related with a tag with the specified context.
+     * @param context
+     * @throws Exception
+     */
+    @RequestProcessing(value = "/tag/**", method = HTTPRequestMethod.GET)
+    public void showTagsArticles(final HTTPRequestContext context) throws Exception{
+        final HttpServletRequest request = context.getRequest();
+        final HttpServletResponse response = context.getResponse();
+
+        try {
+            String requestURI = request.getRequestURI();
+            if (!requestURI.endsWith("/")) {
+                requestURI += "/";
+            }
+
+            final String path = requestURI.substring((Latkes.getContextPath() + "/tag/").length());
+
+            String tagTitle;
+            if (path.contains("/")) {
+                tagTitle =  path.substring(0, path.indexOf("/"));
+            } else {
+                tagTitle  =  path.substring(0);
+            }
+
+            //String tagTitle = getTagTitle(requestURI);
+            final String pageNumString = requestURI.substring((Latkes.getContextPath() + "/tag/" + tagTitle + "/").length());
+
+            final int currentPageNum = Requests.getCurrentPageNum(pageNumString);
+            if (-1 == currentPageNum) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+                return;
+            }
+
+            showTagArticlesDetail(context, tagTitle, currentPageNum);
+        } catch (final Exception e) {
+            LOGGER.log(Level.ERROR, e.getMessage(), e);
+
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+
+    /**
+     * Shows articles related with a tag with the specified context.
+     *
+     * @param context the specified context
+     * @throws Exception exception
+     */
+    @RequestProcessing(value = "/tags/**", method = HTTPRequestMethod.GET)
+    public void showTagArticles(final HTTPRequestContext context) throws Exception {
+        final HttpServletRequest request = context.getRequest();
+        final HttpServletResponse response = context.getResponse();
+
+        try {
+            String requestURI = request.getRequestURI();
+            if (!requestURI.endsWith("/")) {
+                requestURI += "/";
+            }
+
+            String tagTitle = getTagTitle(requestURI);
+            final int currentPageNum = getCurrentPageNum(requestURI, tagTitle);
+            if (-1 == currentPageNum) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+                return;
+            }
+
+            showTagArticlesDetail(context, tagTitle, currentPageNum);
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
 
@@ -234,6 +299,7 @@ public class TagProcessor {
      * @return tag title
      */
     private static String getTagTitle(final String requestURI) {
+
         final String path = requestURI.substring((Latkes.getContextPath() + "/tags/").length());
 
         if (path.contains("/")) {
