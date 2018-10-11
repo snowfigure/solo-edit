@@ -22,8 +22,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
-import org.b3log.latke.logging.Logger;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.model.Pagination;
 import org.b3log.latke.model.User;
 import org.b3log.latke.servlet.HTTPRequestContext;
@@ -56,11 +55,6 @@ import java.util.Set;
  */
 @RequestProcessor
 public class BlogProcessor {
-
-    /**
-     * Logger.
-     */
-    private static final Logger LOGGER = Logger.getLogger(BlogProcessor.class);
 
     /**
      * Article query service.
@@ -203,14 +197,14 @@ public class BlogProcessor {
             throws Exception {
         final String pwd = request.getParameter("pwd");
         if (StringUtils.isBlank(pwd)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
         }
 
         final JSONObject admin = userQueryService.getAdmin();
         if (!DigestUtils.md5Hex(pwd).equals(admin.getString(User.USER_PASSWORD))) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
         }

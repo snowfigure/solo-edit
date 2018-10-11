@@ -27,7 +27,7 @@ import org.b3log.latke.Latkes;
 import org.b3log.latke.event.Event;
 import org.b3log.latke.event.EventException;
 import org.b3log.latke.event.EventManager;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Plugin;
@@ -38,9 +38,10 @@ import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
+import org.b3log.latke.servlet.annotation.Before;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
-import org.b3log.latke.servlet.renderer.freemarker.AbstractFreeMarkerRenderer;
+import org.b3log.latke.servlet.renderer.AbstractFreeMarkerRenderer;
 import org.b3log.latke.util.Execs;
 import org.b3log.latke.util.Strings;
 import org.b3log.solo.SoloServletListener;
@@ -48,13 +49,8 @@ import org.b3log.solo.model.Common;
 import org.b3log.solo.model.Option;
 import org.b3log.solo.model.Skin;
 import org.b3log.solo.model.UserExt;
-import org.b3log.solo.processor.renderer.ConsoleRenderer;
-import org.b3log.solo.processor.util.Filler;
-import org.b3log.solo.service.ExportService;
-import org.b3log.solo.service.OptionQueryService;
-import org.b3log.solo.service.PreferenceQueryService;
-import org.b3log.solo.service.UserQueryService;
-import org.b3log.solo.util.Thumbnails;
+import org.b3log.solo.service.*;
+import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
 
 import javax.servlet.ServletOutputStream;
@@ -73,10 +69,11 @@ import java.util.*;
  * Admin console render processing.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.7.0.4, Aug 8, 2018
+ * @version 1.7.0.6, Oct 5, 2018
  * @since 0.4.1
  */
 @RequestProcessor
+@Before(adviceClass = ConsoleAuthAdvice.class)
 public class AdminConsole {
 
     /**
@@ -115,10 +112,10 @@ public class AdminConsole {
     private ExportService exportService;
 
     /**
-     * Filler.
+     * DataModelService.
      */
     @Inject
-    private Filler filler;
+    private DataModelService dataModelService;
 
     /**
      * Event manager.
@@ -135,43 +132,35 @@ public class AdminConsole {
     /**
      * Shows administrator index with the specified context.
      *
-     * @param request the specified request
-     * @param context the specified context
+     * @param request  the specified request
+     * @param response the specified response
+     * @param context  the specified context
      */
     @RequestProcessing(value = "/admin-index.do", method = HTTPRequestMethod.GET)
-    public void showAdminIndex(final HttpServletRequest request, final HTTPRequestContext context) {
+    public void showAdminIndex(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context) {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
-
         context.setRenderer(renderer);
         final String templateName = "admin-index.ftl";
-
         renderer.setTemplateName(templateName);
-
         final Map<String, String> langs = langPropsService.getAll(Latkes.getLocale());
         final Map<String, Object> dataModel = renderer.getDataModel();
-
         dataModel.putAll(langs);
-
-        final JSONObject currentUser = userQueryService.getCurrentUser(request);
+        final JSONObject currentUser = Solos.getCurrentUser(request, response);
         final String userName = currentUser.optString(User.USER_NAME);
         dataModel.put(User.USER_NAME, userName);
-
         final String roleName = currentUser.optString(User.USER_ROLE);
         dataModel.put(User.USER_ROLE, roleName);
-
         final String email = currentUser.optString(User.USER_EMAIL);
-
         final String userAvatar = currentUser.optString(UserExt.USER_AVATAR);
         if (StringUtils.isNotBlank(userAvatar)) {
             dataModel.put(Common.GRAVATAR, userAvatar);
         } else {
-            final String gravatar = Thumbnails.getGravatarURL(email, "128");
+            final String gravatar = Solos.getGravatarURL(email, "128");
             dataModel.put(Common.GRAVATAR, gravatar);
         }
 
         try {
             final JSONObject preference = preferenceQueryService.getPreference();
-
             dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
             dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
             dataModel.put(Option.ID_C_BLOG_SUBTITLE, preference.getString(Option.ID_C_BLOG_SUBTITLE));
@@ -183,9 +172,8 @@ public class AdminConsole {
             dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
             dataModel.put(Option.ID_C_EDITOR_TYPE, preference.getString(Option.ID_C_EDITOR_TYPE));
             dataModel.put(Skin.SKIN_DIR_NAME, preference.getString(Skin.SKIN_DIR_NAME));
-
             Keys.fillRuntime(dataModel);
-            filler.fillMinified(dataModel);
+            dataModelService.fillMinified(dataModel);
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Admin index render failed", e);
         }
@@ -244,22 +232,17 @@ public class AdminConsole {
     @RequestProcessing(value = "/admin-preference.do", method = HTTPRequestMethod.GET)
     public void showAdminPreferenceFunction(final HttpServletRequest request, final HTTPRequestContext context) {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
-
         context.setRenderer(renderer);
-
         final String templateName = "admin-preference.ftl";
-
         renderer.setTemplateName(templateName);
 
         final Locale locale = Latkes.getLocale();
         final Map<String, String> langs = langPropsService.getAll(locale);
         final Map<String, Object> dataModel = renderer.getDataModel();
-
         dataModel.putAll(langs);
         dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
 
         JSONObject preference = null;
-
         try {
             preference = preferenceQueryService.getPreference();
         } catch (final ServiceException e) {
@@ -282,7 +265,6 @@ public class AdminConsole {
         }
 
         dataModel.put("timeZoneIdOptions", timeZoneIdOptions.toString());
-
         fireFreeMarkerActionEvent(templateName, dataModel);
     }
 
@@ -297,8 +279,8 @@ public class AdminConsole {
     @RequestProcessing(value = "/console/export/sql", method = HTTPRequestMethod.GET)
     public void exportSQL(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!userQueryService.isAdminLoggedIn(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        if (!Solos.isAdminLoggedIn(request)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
         }
@@ -416,8 +398,8 @@ public class AdminConsole {
     @RequestProcessing(value = "/console/export/json", method = HTTPRequestMethod.GET)
     public void exportJSON(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!userQueryService.isAdminLoggedIn(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        if (!Solos.isAdminLoggedIn(request)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
         }
@@ -466,8 +448,8 @@ public class AdminConsole {
     @RequestProcessing(value = "/console/export/hexo", method = HTTPRequestMethod.GET)
     public void exportHexo(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!userQueryService.isAdminLoggedIn(request)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+        if (!Solos.isAdminLoggedIn(request)) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
         }

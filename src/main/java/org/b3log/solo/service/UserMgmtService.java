@@ -21,9 +21,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.LatkeBeanManager;
-import org.b3log.latke.ioc.Lifecycle;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Role;
@@ -33,17 +31,16 @@ import org.b3log.latke.repository.Transaction;
 import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.service.annotation.Service;
-import org.b3log.latke.util.Crypts;
-import org.b3log.latke.util.Sessions;
+import org.b3log.latke.util.CollectionUtils;
 import org.b3log.latke.util.Strings;
+import org.b3log.solo.model.Option;
 import org.b3log.solo.model.UserExt;
 import org.b3log.solo.repository.UserRepository;
-import org.b3log.solo.util.Thumbnails;
+import org.b3log.solo.util.Solos;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 /**
  * User management service.
@@ -51,7 +48,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="mailto:385321165@qq.com">DASHU</a>
  * @author <a href="https://github.com/nanolikeyou">nanolikeyou</a>
- * @version 1.1.0.12, Aug 2, 2018
+ * @version 1.1.0.14, Oct 5, 2018
  * @since 0.4.0
  */
 @Service
@@ -80,65 +77,16 @@ public class UserMgmtService {
     private LangPropsService langPropsService;
 
     /**
-     * Tries to login with cookie.
-     *
-     * @param request  the specified request
-     * @param response the specified response
+     * Option query service.
      */
-    public void tryLogInWithCookie(final HttpServletRequest request, final HttpServletResponse response) {
-        final Cookie[] cookies = request.getCookies();
-        if (null == cookies || 0 == cookies.length) {
-            return;
-        }
+    @Inject
+    private OptionQueryService optionQueryService;
 
-        try {
-            for (int i = 0; i < cookies.length; i++) {
-                final Cookie cookie = cookies[i];
-                if (!Sessions.COOKIE_NAME.equals(cookie.getName())) {
-                    continue;
-                }
-
-                final String value = Crypts.decryptByAES(cookie.getValue(), Sessions.COOKIE_SECRET);
-                final JSONObject cookieJSONObject = new JSONObject(value);
-
-                final String userId = cookieJSONObject.optString(Keys.OBJECT_ID);
-                if (StringUtils.isBlank(userId)) {
-                    break;
-                }
-
-                final LatkeBeanManager beanManager = Lifecycle.getBeanManager();
-                final UserQueryService userQueryService = beanManager.getReference(UserQueryService.class);
-
-                final JSONObject userResult = userQueryService.getUser(userId);
-                if (null == userResult) {
-                    break;
-                }
-
-                final JSONObject user = userResult.getJSONObject(User.USER);
-                if (null == user) {
-                    break;
-                }
-
-                final String userPassword = user.optString(User.USER_PASSWORD);
-                final String token = cookieJSONObject.optString(Keys.TOKEN);
-                final String hashPassword = StringUtils.substringBeforeLast(token, ":");
-
-                if (userPassword.equals(hashPassword)) {
-                    Sessions.login(request, response, user);
-
-                    LOGGER.log(Level.DEBUG, "Logged in with cookie [email={0}]", user.optString(User.USER_EMAIL));
-                }
-            }
-        } catch (final Exception e) {
-            LOGGER.log(Level.TRACE, "Parses cookie failed, clears the cookie [name=" + Sessions.COOKIE_NAME + "]");
-
-            final Cookie cookie = new Cookie(Sessions.COOKIE_NAME, null);
-            cookie.setMaxAge(0);
-            cookie.setPath("/");
-
-            response.addCookie(cookie);
-        }
-    }
+    /**
+     * Option management service.
+     */
+    @Inject
+    private OptionMgmtService optionMgmtService;
 
     /**
      * Updates a user by the specified request json object.
@@ -328,7 +276,7 @@ public class UserMgmtService {
 
             String userAvatar = requestJSONObject.optString(UserExt.USER_AVATAR);
             if (StringUtils.isBlank(userAvatar)) {
-                userAvatar = Thumbnails.getGravatarURL(userEmail, "128");
+                userAvatar = Solos.getGravatarURL(userEmail, "128");
             }
             user.put(UserExt.USER_AVATAR, userAvatar);
 
@@ -364,8 +312,25 @@ public class UserMgmtService {
                 transaction.rollback();
             }
 
-            LOGGER.log(Level.ERROR, "Removes a user[id=" + userId + "] failed", e);
+            LOGGER.log(Level.ERROR, "Removes a user [id=" + userId + "] failed", e);
             throw new ServiceException(e);
+        }
+
+        final JSONObject oauthGitHubOpt = optionQueryService.getOptionById(Option.ID_C_OAUTH_GITHUB);
+        if (null != oauthGitHubOpt) {
+            String value = oauthGitHubOpt.optString(Option.OPTION_VALUE);
+            try {
+                final Set<String> githubs = CollectionUtils.jsonArrayToSet(new JSONArray(value));
+                final String oAuthPair = Option.getOAuthPair(githubs, userId);
+                if (StringUtils.isNotBlank(oAuthPair)) {
+                    githubs.remove(oAuthPair);
+                    value = new JSONArray(githubs).toString();
+                    oauthGitHubOpt.put(Option.OPTION_VALUE, value);
+                    optionMgmtService.addOrUpdateOption(oauthGitHubOpt);
+                }
+            } catch (final Exception e) {
+                LOGGER.log(Level.ERROR, "Remove oauth GitHub data for user [id=" + userId + "] failed", e);
+            }
         }
     }
 

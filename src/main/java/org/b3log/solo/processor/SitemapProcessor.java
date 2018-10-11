@@ -21,7 +21,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.repository.FilterOperator;
@@ -41,9 +41,9 @@ import org.b3log.solo.model.Tag;
 import org.b3log.solo.model.sitemap.Sitemap;
 import org.b3log.solo.model.sitemap.URL;
 import org.b3log.solo.repository.ArchiveDateRepository;
+import org.b3log.solo.repository.ArticleRepository;
 import org.b3log.solo.repository.PageRepository;
 import org.b3log.solo.repository.TagRepository;
-import org.b3log.solo.repository.impl.ArticleRepositoryImpl;
 import org.b3log.solo.service.PreferenceQueryService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,7 +55,7 @@ import java.net.URLEncoder;
  * Sitemap processor.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.2.3, Sep 20, 2018
+ * @version 1.0.2.4, Sep 26, 2018
  * @since 0.3.1
  */
 @RequestProcessor
@@ -76,7 +76,7 @@ public class SitemapProcessor {
      * Article repository.
      */
     @Inject
-    private ArticleRepositoryImpl articleRepository;
+    private ArticleRepository articleRepository;
 
     /**
      * Page repository.
@@ -122,7 +122,7 @@ public class SitemapProcessor {
             LOGGER.log(Level.INFO, "Generated sitemap");
             renderer.setContent(content);
         } catch (final Exception e) {
-            LOGGER.log(Level.ERROR, "Get blog article feed error", e);
+            LOGGER.log(Level.ERROR, "Generates sitemap failed", e);
 
             context.getResponse().sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }

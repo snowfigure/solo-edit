@@ -21,7 +21,17 @@
 
 <@commonPage "${registerSoloUserLabel}!">
 <h2>${registerSoloUserLabel}</h2>
-<div class="form">
+<div id="github">
+    <div class="github__icon" href="${servePath}/oauth/github/redirect"
+         onclick="window.location.href = '${servePath}/oauth/github/redirect';$('#github').addClass('github--loading')">
+        <img src="${staticServePath}/images/github-init.gif"/>
+    </div>
+    <button class="hover"
+            onclick="window.location.href = '${servePath}/oauth/github/redirect';$('#github').addClass('github--loading')">${useGitHubAccountLoginLabel}</button>
+    <br>
+    <span onclick="$('#github').hide();$('.form').show()">${useLocalAccountLabel}</span>
+</div>
+<div class="form none">
     <label for="userEmail">
     ${commentEmail1Label}
     </label>
@@ -42,7 +52,7 @@
     ${userPasswordConfirm1Label}
     </label>
     <input type="password" id="userPasswordConfirm" />
-    <button onclick='getUserInfo();'>${saveLabel}</button>
+    <button onclick='getUserInfo();'>${registerSoloUserLabel}</button>
     <span id="tip" ></span>
 </div>
 <script type="text/javascript" src="${staticServePath}/js/lib/jquery/jquery.min.js" charset="utf-8"></script>

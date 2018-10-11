@@ -19,12 +19,13 @@ package org.b3log.solo.processor.console;
 
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
+import org.b3log.latke.servlet.annotation.Before;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
@@ -32,7 +33,7 @@ import org.b3log.latke.util.Requests;
 import org.b3log.solo.model.Comment;
 import org.b3log.solo.service.CommentMgmtService;
 import org.b3log.solo.service.CommentQueryService;
-import org.b3log.solo.service.UserQueryService;
+import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,22 +44,17 @@ import java.util.List;
  * Comment console request processing.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.2, Sep 20, 2018
+ * @version 1.0.0.3, Sep 25, 2018
  * @since 0.4.0
  */
 @RequestProcessor
+@Before(adviceClass = ConsoleAuthAdvice.class)
 public class CommentConsole {
 
     /**
      * Logger.
      */
     private static final Logger LOGGER = Logger.getLogger(CommentConsole.class);
-
-    /**
-     * User query service.
-     */
-    @Inject
-    private UserQueryService userQueryService;
 
     /**
      * Comment query service.
@@ -93,16 +89,9 @@ public class CommentConsole {
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
      * @param context  the specified http request context
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/page/comment/*", method = HTTPRequestMethod.DELETE)
-    public void removePageComment(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void removePageComment(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
@@ -111,7 +100,8 @@ public class CommentConsole {
         try {
             final String commentId = request.getRequestURI().substring((Latkes.getContextPath() + "/console/page/comment/").length());
 
-            if (!commentQueryService.canAccessComment(commentId, request)) {
+            final JSONObject currentUser = Solos.getCurrentUser(request, response);
+            if (!commentQueryService.canAccessComment(commentId, currentUser)) {
                 ret.put(Keys.STATUS_CODE, false);
                 ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
 
@@ -150,11 +140,6 @@ public class CommentConsole {
     @RequestProcessing(value = "/console/article/comment/*", method = HTTPRequestMethod.DELETE)
     public void removeArticleComment(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
@@ -162,8 +147,8 @@ public class CommentConsole {
 
         try {
             final String commentId = request.getRequestURI().substring((Latkes.getContextPath() + "/console/article/comment/").length());
-
-            if (!commentQueryService.canAccessComment(commentId, request)) {
+            final JSONObject currentUser = Solos.getCurrentUser(request, response);
+            if (!commentQueryService.canAccessComment(commentId, currentUser)) {
                 ret.put(Keys.STATUS_CODE, false);
                 ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
 
@@ -222,11 +207,6 @@ public class CommentConsole {
             method = HTTPRequestMethod.GET)
     public void getComments(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
 
@@ -279,18 +259,12 @@ public class CommentConsole {
     @RequestProcessing(value = "/console/comments/article/*", method = HTTPRequestMethod.GET)
     public void getArticleComments(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
             throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
+        final JSONObject ret = new JSONObject();
+        renderer.setJSONObject(ret);
 
         try {
-            final JSONObject ret = new JSONObject();
-            renderer.setJSONObject(ret);
-
             final String requestURI = request.getRequestURI();
             final String articleId = requestURI.substring((Latkes.getContextPath() + "/console/comments/article/").length());
 
@@ -337,18 +311,12 @@ public class CommentConsole {
     @RequestProcessing(value = "/console/comments/page/*", method = HTTPRequestMethod.GET)
     public void getPageComments(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
             throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
+        final JSONObject ret = new JSONObject();
+        renderer.setJSONObject(ret);
 
         try {
-            final JSONObject ret = new JSONObject();
-            renderer.setJSONObject(ret);
-
             final String requestURI = request.getRequestURI();
             final String pageId = requestURI.substring((Latkes.getContextPath() + "/console/comments/page/").length());
 

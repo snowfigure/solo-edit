@@ -21,13 +21,14 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
+import org.b3log.latke.servlet.annotation.Before;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
@@ -41,6 +42,7 @@ import org.b3log.solo.service.UserQueryService;
 import org.b3log.solo.util.Emotions;
 import org.b3log.solo.util.Images;
 import org.b3log.solo.util.Markdowns;
+import org.b3log.solo.util.Solos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -53,10 +55,11 @@ import java.util.stream.Collectors;
  * Article console request processing.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.1.2, Sep 20, 2018
+ * @version 1.1.1.4, Oct 5, 2018
  * @since 0.4.0
  */
 @RequestProcessor
+@Before(adviceClass = ConsoleAuthAdvice.class)
 public class ArticleConsole {
 
     /**
@@ -108,16 +111,9 @@ public class ArticleConsole {
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
      * @param context  the specified http request context
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/thumbs", method = HTTPRequestMethod.GET)
-    public void getArticleThumbs(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void getArticleThumbs(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject result = new JSONObject();
@@ -151,13 +147,10 @@ public class ArticleConsole {
      *                 }
      * @param response the specified http servlet response
      * @param context  the specified http request context
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/markdown/2html", method = HTTPRequestMethod.POST)
-    public void markdown2HTML(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
-            throws Exception {
+    public void markdown2HTML(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context) {
         final JSONRenderer renderer = new JSONRenderer();
-
         context.setRenderer(renderer);
         final JSONObject result = new JSONObject();
         renderer.setJSONObject(result);
@@ -167,11 +160,6 @@ public class ArticleConsole {
         if (StringUtils.isBlank(markdownText)) {
             result.put("html", "");
 
-            return;
-        }
-
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
@@ -218,16 +206,9 @@ public class ArticleConsole {
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
      * @param context  the specified http request context
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/article/*", method = HTTPRequestMethod.GET)
-    public void getArticle(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void getArticle(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
 
@@ -279,17 +260,10 @@ public class ArticleConsole {
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
      * @param context  the specified http request context
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/articles/status/*/*/*/*"/* Requests.PAGINATION_PATH_PATTERN */,
             method = HTTPRequestMethod.GET)
-    public void getArticles(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void getArticles(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
 
@@ -353,23 +327,19 @@ public class ArticleConsole {
      * @param request   the specified http servlet request
      * @param response  the specified http servlet response
      * @param articleId the specified article id
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/article/{articleId}", method = HTTPRequestMethod.DELETE)
     public void removeArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response,
-                              final String articleId) throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+                              final String articleId) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
         renderer.setJSONObject(ret);
 
+        final JSONObject currentUser = Solos.getCurrentUser(request, response);
+
         try {
-            if (!articleQueryService.canAccessArticle(articleId, request)) {
+            if (!articleQueryService.canAccessArticle(articleId, currentUser)) {
                 ret.put(Keys.STATUS_CODE, false);
                 ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
 
@@ -405,16 +375,9 @@ public class ArticleConsole {
      * @param context  the specified http request context
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/article/unpublish/*", method = HTTPRequestMethod.PUT)
-    public void cancelPublishArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void cancelPublishArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
@@ -423,7 +386,8 @@ public class ArticleConsole {
         try {
             final String articleId = request.getRequestURI().substring((Latkes.getContextPath() + "/console/article/unpublish/").length());
 
-            if (!articleQueryService.canAccessArticle(articleId, request)) {
+            final JSONObject currentUser = Solos.getCurrentUser(request, response);
+            if (!articleQueryService.canAccessArticle(articleId, currentUser)) {
                 ret.put(Keys.STATUS_CODE, false);
                 ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
 
@@ -459,23 +423,16 @@ public class ArticleConsole {
      * @param context  the specified http request context
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/article/canceltop/*", method = HTTPRequestMethod.PUT)
-    public void cancelTopArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void cancelTopArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
 
         renderer.setJSONObject(ret);
 
-        if (!userQueryService.isAdminLoggedIn(request)) {
+        if (!Solos.isAdminLoggedIn(request)) {
             ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
             ret.put(Keys.STATUS_CODE, false);
 
@@ -514,23 +471,16 @@ public class ArticleConsole {
      * @param context  the specified http request context
      * @param request  the specified http servlet request
      * @param response the specified http servlet response
-     * @throws Exception exception
      */
     @RequestProcessing(value = "/console/article/puttop/*", method = HTTPRequestMethod.PUT)
-    public void putTopArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
-            throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
+    public void putTopArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
 
         renderer.setJSONObject(ret);
 
-        if (!userQueryService.isAdminLoggedIn(request)) {
+        if (!Solos.isAdminLoggedIn(request)) {
             ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
             ret.put(Keys.STATUS_CODE, false);
 
@@ -590,11 +540,6 @@ public class ArticleConsole {
     @RequestProcessing(value = "/console/article/", method = HTTPRequestMethod.PUT)
     public void updateArticle(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response,
                               final JSONObject requestJSONObject) throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
@@ -604,7 +549,8 @@ public class ArticleConsole {
             final String articleId = article.getString(Keys.OBJECT_ID);
             renderer.setJSONObject(ret);
 
-            if (!articleQueryService.canAccessArticle(articleId, request)) {
+            final JSONObject currentUser = Solos.getCurrentUser(request, response);
+            if (!articleQueryService.canAccessArticle(articleId, currentUser)) {
                 ret.put(Keys.MSG, langPropsService.get("forbiddenLabel"));
                 ret.put(Keys.STATUS_CODE, false);
 
@@ -660,17 +606,12 @@ public class ArticleConsole {
     @RequestProcessing(value = "/console/article/", method = HTTPRequestMethod.POST)
     public void addArticle(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context,
                            final JSONObject requestJSONObject) throws Exception {
-        if (!userQueryService.isLoggedIn(request, response)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
         final JSONObject ret = new JSONObject();
 
         try {
-            final JSONObject currentUser = userQueryService.getCurrentUser(request);
+            final JSONObject currentUser = Solos.getCurrentUser(request, response);
             requestJSONObject.getJSONObject(Article.ARTICLE).put(Article.ARTICLE_AUTHOR_ID, currentUser.getString(Keys.OBJECT_ID));
 
             final String articleId = articleMgmtService.addArticle(requestJSONObject);

@@ -13,6 +13,69 @@ var soloKanbanniang = {
       $('.solo-kanbanniang__tip').fadeTo(200, 0);
     }, timeout);
   },
+  _initMove: function () {
+    if (sessionStorage.soloKanbanniangX) {
+      $('.solo-kanbanniang').css('left', sessionStorage.soloKanbanniangX + 'px')
+    }
+    if (sessionStorage.soloKanbanniangY) {
+      $('.solo-kanbanniang').css('top', sessionStorage.soloKanbanniangY + 'px')
+    }
+    $('.solo-kanbanniang').mousedown(function(event) {
+      var _document = document;
+      if (!event) {
+        event = window.event;
+      }
+      var dialog = this;
+      var x = event.clientX - parseInt(dialog.style.left || 0),
+        y = event.clientY - parseInt(dialog.style.top ||  $(window).height() - $(dialog).height());
+      _document.ondragstart = "return false;";
+      _document.onselectstart = "return false;";
+      _document.onselect = "document.selection.empty();";
+
+      if (this.setCapture) {
+        this.setCapture();
+      } else if (window.captureEvents) {
+        window.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);
+      }
+
+      _document.onmousemove = function(event) {
+        if (!event) {
+          event = window.event;
+        }
+        var positionX = event.clientX - x,
+          positionY = event.clientY - y;
+        if (positionX < 0) {
+          positionX = 0;
+        }
+        if (positionX > $(window).width() - $(dialog).width()) {
+          positionX = $(window).width() - $(dialog).width();
+        }
+        if (positionY < 0) {
+          positionY = 0;
+        }
+        if (positionY > $(window).height() - $(dialog).height()) {
+          positionY = $(window).height() - $(dialog).height();
+        }
+        dialog.style.left = positionX + "px";
+        dialog.style.top = positionY + "px";
+        sessionStorage.setItem('soloKanbanniangX', positionX);
+        sessionStorage.setItem('soloKanbanniangY', positionY);
+      };
+
+      _document.onmouseup = function() {
+        if (this.releaseCapture) {
+          this.releaseCapture();
+        } else if(window.captureEvents) {
+          window.captureEvents(Event.MOUSEMOVE|Event.MOUSEUP);
+        }
+        _document.onmousemove = null;
+        _document.onmouseup = null;
+        _document.ondragstart = null;
+        _document.onselectstart = null;
+        _document.onselect = null;
+      }
+    });
+  },
   _initTips: function() {
     $.ajax({
       cache: true,
@@ -45,7 +108,7 @@ var soloKanbanniang = {
                 tips.text.replace('{year}', now.getFullYear()), 6000, true);
           }
         });
-      },
+      }
     });
   },
   _initMenu: function() {
@@ -54,7 +117,7 @@ var soloKanbanniang = {
     });
 
     $('#soloKanbanniangRSS').click(function() {
-      window.location = latkeConfig.servePath + '/blog-articles-rss.do';
+      window.location = latkeConfig.servePath + '/rss.xml';
     });
 
     $('#soloKanbanniangGithub').click(function() {
@@ -137,6 +200,7 @@ var soloKanbanniang = {
     this._initTips();
     this._initMenu();
     this._initFirstMsg();
+    this._initMove();
     window.setInterval(soloKanbanniang.showChat, 30000);
 
     var re = /solo/;
@@ -150,23 +214,36 @@ var soloKanbanniang = {
       soloKanbanniang.showMessage('你都复制了些什么呀，转载要记得加上出处哦', 5000, true);
     });
   },
-  showChat() {
+  showChat: function () {
     $.getJSON(
         'https://api.imjad.cn/hitokoto/?cat=&charset=utf-8&length=55&encode=json',
         function(result) {
           soloKanbanniang.showMessage(result.hitokoto, 5000);
         });
-  },
+  }
 };
 
-$(document).ready(function() {
-  if (sessionStorage.getItem('soloKanbanniang') === 'close') {
-    $('.solo-kanbanniang').remove();
-    return;
-  }
+if (navigator.userAgent.indexOf('MSIE') === -1) {
+    $(document).ready(function () {
+        if (sessionStorage.getItem('soloKanbanniang') === 'close') {
+            $('.solo-kanbanniang').remove();
+            return;
+        }
 
-  soloKanbanniang.init();
+        $.ajax({
+            url: 'https://static-solo.b3log.org/plugins/kanbanniang/assert/live2d.js',
+            dataType: "script",
+            cache: true,
+            success: function () {
+                soloKanbanniang.init();
 
-  loadlive2d('soloKanbanniang',  latkeConfig.servePath +
-      '/plugins/kanbanniang/assert/model?t=' + (new Date()).getTime());
-});
+                loadlive2d('soloKanbanniang', latkeConfig.servePath +
+                    '/plugins/kanbanniang/assert/model?t=' + (new Date()).getTime());
+            }
+        });
+    });
+} else {
+    $(document).ready(function () {
+        $('.solo-kanbanniang').remove()
+    })
+}

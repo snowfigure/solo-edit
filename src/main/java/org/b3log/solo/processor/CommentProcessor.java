@@ -19,7 +19,7 @@ package org.b3log.solo.processor;
 
 import freemarker.template.Template;
 import org.b3log.latke.Keys;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.User;
@@ -29,7 +29,6 @@ import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
-import org.b3log.latke.util.freemarker.Templates;
 import org.b3log.solo.model.*;
 import org.b3log.solo.service.CommentMgmtService;
 import org.b3log.solo.service.PreferenceQueryService;
@@ -37,6 +36,7 @@ import org.b3log.solo.service.UserMgmtService;
 import org.b3log.solo.service.UserQueryService;
 import org.b3log.solo.util.Emotions;
 import org.b3log.solo.util.Skins;
+import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -50,7 +50,7 @@ import java.util.Map;
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author ArmstrongCN
- * @version 1.3.3.1, Mar 3, 2018
+ * @version 1.3.3.3, Oct 7, 2018
  * @since 0.3.1
  */
 @RequestProcessor
@@ -114,7 +114,7 @@ public class CommentProcessor {
      *                          "commentName": "",
      *                          "commentEmail": "",
      *                          "commentURL": "",
-     *                          "commentContent": "", // HTML
+     *                          "commentContent": "",
      *                          "commentOriginalCommentId": "" // optional, if exists this key, the comment is an reply
      */
     @RequestProcessing(value = "/add-page-comment.do", method = HTTPRequestMethod.POST)
@@ -136,7 +136,7 @@ public class CommentProcessor {
             return;
         }
 
-        if (!userQueryService.isLoggedIn(httpServletRequest, httpServletResponse)) {
+        if (!Solos.isLoggedIn(httpServletRequest, httpServletResponse)) {
             final String captcha = requestJSONObject.optString(CaptchaProcessor.CAPTCHA);
             if (CaptchaProcessor.invalidCaptcha(captcha)) {
                 jsonObject.put(Keys.STATUS_CODE, false);
@@ -160,7 +160,7 @@ public class CommentProcessor {
             // https://github.com/b3log/solo/issues/12246
             try {
                 final String skinDirName = (String) httpServletRequest.getAttribute(Keys.TEMAPLTE_DIR_NAME);
-                final Template template = Templates.MAIN_CFG.getTemplate("common-comment.ftl");
+                final Template template = Skins.getSkinTemplate(httpServletRequest, "common-comment.ftl");
                 final JSONObject preference = preferenceQueryService.getPreference();
                 Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), skinDirName, dataModel);
                 Keys.fillServer(dataModel);
@@ -198,7 +198,7 @@ public class CommentProcessor {
      *     "commentSharpURL": "",
      *     "commentThumbnailURL": "",
      *     "commentOriginalCommentName": "", // if exists this key, the comment is an reply
-     *     "commentContent": "" // HTML
+     *     "commentContent": ""
      * }
      * </pre>
      * </p>
@@ -232,7 +232,7 @@ public class CommentProcessor {
             return;
         }
 
-        if (!userQueryService.isLoggedIn(httpServletRequest, httpServletResponse)) {
+        if (!Solos.isLoggedIn(httpServletRequest, httpServletResponse)) {
             final String captcha = requestJSONObject.optString(CaptchaProcessor.CAPTCHA);
             if (CaptchaProcessor.invalidCaptcha(captcha)) {
                 jsonObject.put(Keys.STATUS_CODE, false);
@@ -255,7 +255,7 @@ public class CommentProcessor {
             // https://github.com/b3log/solo/issues/12246
             try {
                 final String skinDirName = (String) httpServletRequest.getAttribute(Keys.TEMAPLTE_DIR_NAME);
-                final Template template = Templates.MAIN_CFG.getTemplate("common-comment.ftl");
+                final Template template = Skins.getSkinTemplate(httpServletRequest, "common-comment.ftl");
                 final JSONObject preference = preferenceQueryService.getPreference();
                 Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), skinDirName, dataModel);
                 Keys.fillServer(dataModel);
@@ -283,15 +283,12 @@ public class CommentProcessor {
     /**
      * Fills commenter info if logged in.
      *
-     * @param requestJSONObject   the specified request json object
-     * @param httpServletRequest  the specified HTTP servlet request
-     * @param httpServletResponse the specified HTTP servlet response
+     * @param requestJSONObject the specified request json object
+     * @param request           the specified HTTP servlet request
+     * @param request           the specified HTTP servlet response
      */
-    private void fillCommenter(final JSONObject requestJSONObject,
-                               final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) {
-        userMgmtService.tryLogInWithCookie(httpServletRequest, httpServletResponse);
-
-        final JSONObject currentUser = userQueryService.getCurrentUser(httpServletRequest);
+    private void fillCommenter(final JSONObject requestJSONObject, final HttpServletRequest request, final HttpServletResponse response) {
+        final JSONObject currentUser = Solos.getCurrentUser(request, response);
         if (null == currentUser) {
             return;
         }

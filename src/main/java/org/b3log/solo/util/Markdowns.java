@@ -25,13 +25,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.cache.Cache;
-import org.b3log.latke.cache.CacheFactory;
-import org.b3log.latke.ioc.LatkeBeanManagerImpl;
+import org.b3log.latke.ioc.BeanManager;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.service.LangPropsService;
-import org.b3log.latke.service.LangPropsServiceImpl;
 import org.b3log.latke.util.Callstacks;
 import org.b3log.latke.util.Stopwatchs;
 import org.json.JSONObject;
@@ -42,6 +39,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
@@ -53,7 +51,7 @@ import java.util.concurrent.*;
  * </p>
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 2.3.1.0, Apr 20, 2018
+ * @version 2.3.1.1, Sep 25, 2018
  * @since 0.4.5
  */
 public final class Markdowns {
@@ -64,14 +62,9 @@ public final class Markdowns {
     private static final Logger LOGGER = Logger.getLogger(Markdowns.class);
 
     /**
-     * Language service.
-     */
-    private static final LangPropsService LANG_PROPS_SERVICE = LatkeBeanManagerImpl.getInstance().getReference(LangPropsServiceImpl.class);
-
-    /**
      * Markdown cache.
      */
-    private static final Cache MD_CACHE = CacheFactory.getCache("markdown");
+    private static final Map<String, JSONObject> MD_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Markdown to HTML timeout.
@@ -108,8 +101,6 @@ public final class Markdowns {
     public static boolean MARKED_AVAILABLE;
 
     static {
-        MD_CACHE.setMaxCount(1024 * 10 * 4);
-
         try {
             final URL url = new URL(MARKED_ENGINE_URL);
             final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -162,13 +153,15 @@ public final class Markdowns {
             return cachedHTML;
         }
 
+        final LangPropsService langPropsService = BeanManager.getInstance().getReference(LangPropsService.class);
+
         final ExecutorService pool = Executors.newSingleThreadExecutor();
         final long[] threadId = new long[1];
 
         final Callable<String> call = () -> {
             threadId[0] = Thread.currentThread().getId();
 
-            String html = LANG_PROPS_SERVICE.get("contentRenderFailedLabel");
+            String html = langPropsService.get("contentRenderFailedLabel");
 
             if (MARKED_AVAILABLE) {
                 html = toHtmlByMarked(markdownText);
@@ -226,7 +219,7 @@ public final class Markdowns {
             Stopwatchs.end();
         }
 
-        return LANG_PROPS_SERVICE.get("contentRenderFailedLabel");
+        return langPropsService.get("contentRenderFailedLabel");
     }
 
     private static String toHtmlByMarked(final String markdownText) throws Exception {

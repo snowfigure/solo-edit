@@ -23,7 +23,17 @@
 <h2>
 ${loginLabel}
 </h2>
-<div class="form">
+<div id="github">
+    <div class="github__icon"
+        onclick="window.location.href = '${servePath}/oauth/github/redirect';$('#github').addClass('github--loading')">
+        <img src="${staticServePath}/images/github-init.gif"/>
+    </div>
+    <button class="hover" onclick="window.location.href = '${servePath}/oauth/github/redirect';$('#github').addClass('github--loading')">${useGitHubAccountLoginLabel}</button>
+    <br>
+    <span onclick="$('#github').hide();$('.form').show()">${useLocalAccountLabel}</span>
+</div>
+
+<div class="form none">
     <label for="userEmail">
     ${userLabel}
     </label>

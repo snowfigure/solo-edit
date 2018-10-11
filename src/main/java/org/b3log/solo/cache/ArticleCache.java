@@ -18,34 +18,33 @@
 package org.b3log.solo.cache;
 
 import org.b3log.latke.Keys;
-import org.b3log.latke.cache.Cache;
-import org.b3log.latke.cache.CacheFactory;
-import org.b3log.latke.ioc.inject.Named;
-import org.b3log.latke.ioc.inject.Singleton;
+import org.b3log.latke.ioc.Singleton;
 import org.b3log.solo.model.Article;
-import org.b3log.solo.util.JSONs;
+import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Article cache.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.2.0.0, Sep 16, 2018
+ * @version 1.2.0.1, Sep 25, 2018
  * @since 2.3.0
  */
-@Named
 @Singleton
 public class ArticleCache {
 
     /**
      * Article id cache.
      */
-    private Cache idCache = CacheFactory.getCache(Article.ARTICLES);
+    private final Map<String, JSONObject> idCache = new ConcurrentHashMap<>();
 
     /**
      * Article permalink cache.
      */
-    private Cache permalinkCache = CacheFactory.getCache(Article.ARTICLE_PERMALINK);
+    private final Map<String, JSONObject> permalinkCache = new ConcurrentHashMap<>();
 
     /**
      * Gets an article by the specified article id.
@@ -59,7 +58,7 @@ public class ArticleCache {
             return null;
         }
 
-        return JSONs.clone(article);
+        return Solos.clone(article);
     }
 
     /**
@@ -74,7 +73,7 @@ public class ArticleCache {
             return null;
         }
 
-        return JSONs.clone(article);
+        return Solos.clone(article);
     }
 
     /**
@@ -83,8 +82,8 @@ public class ArticleCache {
      * @param article the specified article
      */
     public void putArticle(final JSONObject article) {
-        idCache.put(article.optString(Keys.OBJECT_ID), JSONs.clone(article));
-        permalinkCache.put(article.optString(Article.ARTICLE_PERMALINK), JSONs.clone(article));
+        idCache.put(article.optString(Keys.OBJECT_ID), Solos.clone(article));
+        permalinkCache.put(article.optString(Article.ARTICLE_PERMALINK), Solos.clone(article));
     }
 
     /**
@@ -97,10 +96,10 @@ public class ArticleCache {
     }
 
     /**
-     * Clears all cached articles.
+     * Clears all cached data.
      */
     public void clear() {
-        idCache.removeAll();
-        permalinkCache.removeAll();
+        idCache.clear();
+        permalinkCache.clear();
     }
 }

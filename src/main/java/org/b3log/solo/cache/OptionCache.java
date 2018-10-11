@@ -18,12 +18,9 @@
 package org.b3log.solo.cache;
 
 import org.b3log.latke.Keys;
-import org.b3log.latke.cache.Cache;
-import org.b3log.latke.cache.CacheFactory;
-import org.b3log.latke.ioc.inject.Named;
-import org.b3log.latke.ioc.inject.Singleton;
+import org.b3log.latke.ioc.Singleton;
 import org.b3log.solo.model.Option;
-import org.b3log.solo.util.JSONs;
+import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -33,22 +30,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * Option cache.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.0.0, Sep 19, 2018
+ * @version 1.1.0.1, Sep 25, 2018
  * @since 2.3.0
  */
-@Named
 @Singleton
 public class OptionCache {
 
     /**
      * Option cache.
      */
-    private static final Cache CACHE = CacheFactory.getCache(Option.OPTIONS);
+    private final Map<String, JSONObject> cache = new ConcurrentHashMap<>();
 
     /**
      * Category option caches.
      */
-    private static final Map<String, JSONObject> CATEGORY_CACHES = new ConcurrentHashMap<>();
+    private final Map<String, JSONObject> categoryCache = new ConcurrentHashMap<>();
 
     /**
      * Removes a category cache specified by the given category.
@@ -56,7 +52,7 @@ public class OptionCache {
      * @param category the given category
      */
     public void removeCategory(final String category) {
-        CATEGORY_CACHES.remove(category);
+        categoryCache.remove(category);
     }
 
     /**
@@ -66,12 +62,12 @@ public class OptionCache {
      * @return merged options
      */
     public JSONObject getCategory(final String category) {
-        JSONObject ret = CATEGORY_CACHES.get(category);
+        JSONObject ret = categoryCache.get(category);
         if (null == ret) {
             return null;
         }
 
-        return JSONs.clone(ret);
+        return Solos.clone(ret);
     }
 
     /**
@@ -81,7 +77,7 @@ public class OptionCache {
      * @param mergedOptions the specified merged options
      */
     public void putCategory(final String category, final JSONObject mergedOptions) {
-        CATEGORY_CACHES.put(category, mergedOptions);
+        categoryCache.put(category, mergedOptions);
     }
 
     /**
@@ -91,12 +87,12 @@ public class OptionCache {
      * @return option, returns {@code null} if not found
      */
     public JSONObject getOption(final String id) {
-        final JSONObject option = CACHE.get(id);
+        final JSONObject option = cache.get(id);
         if (null == option) {
             return null;
         }
 
-        return JSONs.clone(option);
+        return Solos.clone(option);
     }
 
     /**
@@ -105,7 +101,7 @@ public class OptionCache {
      * @param option the specified option
      */
     public void putOption(final JSONObject option) {
-        CACHE.put(option.optString(Keys.OBJECT_ID), JSONs.clone(option));
+        cache.put(option.optString(Keys.OBJECT_ID), Solos.clone(option));
 
         final String category = option.optString(Option.OPTION_CATEGORY);
         removeCategory(category);
@@ -125,6 +121,14 @@ public class OptionCache {
         final String category = option.optString(Option.OPTION_CATEGORY);
         removeCategory(category);
 
-        CACHE.remove(id);
+        cache.remove(id);
+    }
+
+    /**
+     * Clears all cached data.
+     */
+    public void clear() {
+        cache.clear();
+        categoryCache.clear();
     }
 }

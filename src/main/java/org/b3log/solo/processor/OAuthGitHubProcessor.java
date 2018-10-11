@@ -23,11 +23,12 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Role;
 import org.b3log.latke.model.User;
+import org.b3log.latke.repository.jdbc.JdbcRepository;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
@@ -44,7 +45,6 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -139,7 +139,7 @@ public class OAuthGitHubProcessor {
      * @throws Exception exception
      */
     @RequestProcessing(value = "/oauth/github", method = HTTPRequestMethod.GET)
-    public void showGitHubCallback(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
+    public synchronized void showGitHubCallback(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
         final String state = request.getParameter("state");
         String referer = STATES.get(state);
         if (StringUtils.isBlank(referer)) {
@@ -176,7 +176,7 @@ public class OAuthGitHubProcessor {
         final JSONArray github = new JSONArray(value);
         final Set<String> githubAuths = CollectionUtils.jsonArrayToSet(github);
         final String splitChar = ":@:";
-        final String oAuthPair = getOAuthPair(githubAuths, openId); // openId:@:userId
+        final String oAuthPair = Option.getOAuthPair(githubAuths, openId); // openId:@:userId
         if (StringUtils.isBlank(oAuthPair)) {
             if (!initService.isInited()) {
                 final JSONObject initReq = new JSONObject();
@@ -193,16 +193,26 @@ public class OAuthGitHubProcessor {
                     return;
                 }
 
-                final JSONObject addUserReq = new JSONObject();
-                addUserReq.put(User.USER_NAME, userName);
-                addUserReq.put(User.USER_EMAIL, userEmail);
-                addUserReq.put(User.USER_PASSWORD, RandomStringUtils.randomAlphanumeric(8));
-                addUserReq.put(UserExt.USER_AVATAR, userAvatar);
-                addUserReq.put(User.USER_ROLE, Role.VISITOR_ROLE);
-                userMgmtService.addUser(addUserReq);
+                JSONObject user = userQueryService.getUserByEmailOrUserName(userName);
+                if (null == user) {
+                    user = userQueryService.getUserByEmailOrUserName(userEmail);
+                }
+                if (null == user) {
+                    final JSONObject addUserReq = new JSONObject();
+                    addUserReq.put(User.USER_NAME, userName);
+                    addUserReq.put(User.USER_EMAIL, userEmail);
+                    addUserReq.put(User.USER_PASSWORD, RandomStringUtils.randomAlphanumeric(8));
+                    addUserReq.put(UserExt.USER_AVATAR, userAvatar);
+                    addUserReq.put(User.USER_ROLE, Role.VISITOR_ROLE);
+                    userMgmtService.addUser(addUserReq);
+                    JdbcRepository.dispose();
+                }
             }
 
-            final JSONObject user = userQueryService.getUserByEmailOrUserName(userName);
+            JSONObject user = userQueryService.getUserByEmailOrUserName(userName);
+            if (null == user) {
+                user = userQueryService.getUserByEmailOrUserName(userEmail);
+            }
             final String userId = user.optString(Keys.OBJECT_ID);
             githubAuths.add(openId + splitChar + userId);
             value = new JSONArray(githubAuths).toString();
@@ -254,8 +264,12 @@ public class OAuthGitHubProcessor {
 
             res.charset("UTF-8");
             final JSONObject userInfo = new JSONObject(res.bodyText());
-            final String userName = StringUtils.trim(userInfo.optString("login"));
-            final String email = userInfo.optString("email");
+            String userName = StringUtils.trim(userInfo.optString("login"));
+            userName = StringUtils.replace(userName, "-", "");
+            String email = userInfo.optString("email");
+            if (StringUtils.isBlank(email)) {
+                email = userName + "@solo.b3log.org";
+            }
             final String openId = userInfo.optString("id");
 
             final JSONObject ret = new JSONObject();
@@ -270,15 +284,5 @@ public class OAuthGitHubProcessor {
 
             return null;
         }
-    }
-
-    private static String getOAuthPair(final Set<String> oauthPairs, final String openId) {
-        for (final String pair : oauthPairs) {
-            if (StringUtils.containsIgnoreCase(pair, openId)) {
-                return pair;
-            }
-        }
-
-        return null;
     }
 }

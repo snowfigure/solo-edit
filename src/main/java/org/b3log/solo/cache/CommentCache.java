@@ -18,29 +18,27 @@
 package org.b3log.solo.cache;
 
 import org.b3log.latke.Keys;
-import org.b3log.latke.cache.Cache;
-import org.b3log.latke.cache.CacheFactory;
-import org.b3log.latke.ioc.inject.Named;
-import org.b3log.latke.ioc.inject.Singleton;
-import org.b3log.solo.model.Comment;
-import org.b3log.solo.util.JSONs;
+import org.b3log.latke.ioc.Singleton;
+import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Comment cache.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.1.0.0, Sep 16, 2018
+ * @version 1.1.0.1, Sep 25, 2018
  * @since 2.3.0
  */
-@Named
 @Singleton
 public class CommentCache {
 
     /**
      * Comment cache.
      */
-    private Cache cache = CacheFactory.getCache(Comment.COMMENTS);
+    private final Map<String, JSONObject> cache = new ConcurrentHashMap<>();
 
     /**
      * Gets a comment by the specified comment id.
@@ -54,7 +52,7 @@ public class CommentCache {
             return null;
         }
 
-        return JSONs.clone(comment);
+        return Solos.clone(comment);
     }
 
     /**
@@ -63,7 +61,7 @@ public class CommentCache {
      * @param comment the specified comment
      */
     public void putComment(final JSONObject comment) {
-        cache.put(comment.optString(Keys.OBJECT_ID), JSONs.clone(comment));
+        cache.put(comment.optString(Keys.OBJECT_ID), Solos.clone(comment));
     }
 
     /**
@@ -76,9 +74,9 @@ public class CommentCache {
     }
 
     /**
-     * Clears all cached comments.
+     * Clears all cached data.
      */
     public void clear() {
-        cache.removeAll();
+        cache.clear();
     }
 }

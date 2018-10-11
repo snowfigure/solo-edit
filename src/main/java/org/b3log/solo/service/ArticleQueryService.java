@@ -19,7 +19,7 @@ package org.b3log.solo.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Pagination;
@@ -36,12 +36,12 @@ import org.b3log.solo.model.*;
 import org.b3log.solo.repository.*;
 import org.b3log.solo.util.Emotions;
 import org.b3log.solo.util.Markdowns;
+import org.b3log.solo.util.Solos;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.*;
 
 import static org.b3log.solo.model.Article.*;
@@ -53,7 +53,7 @@ import static org.b3log.solo.model.Article.*;
  * @author <a href="http://blog.sweelia.com">ArmstrongCN</a>
  * @author <a href="http://zephyr.b3log.org">Zephyr</a>
  * @author <a href="http://vanessa.b3log.org">Liyuan Li</a>
- * @version 1.3.2.4, Sep 16, 2018
+ * @version 1.3.2.6, Oct 7, 2018
  * @since 0.3.5
  */
 @Service
@@ -237,6 +237,7 @@ public class ArticleQueryService {
 
                 article.put(ARTICLE_CREATE_TIME, article.optLong(ARTICLE_CREATED));
                 article.put(ARTICLE_T_CREATE_DATE, new Date(article.optLong(ARTICLE_CREATED)));
+                article.put(Article.ARTICLE_T_UPDATE_DATE, new Date(article.optLong(ARTICLE_UPDATED)));
 
                 articles.add(article);
             }
@@ -251,70 +252,30 @@ public class ArticleQueryService {
     }
 
     /**
-     * Can the current user access an article specified by the given article id?
+     * Can the specified user access an article specified by the given article id?
      *
      * @param articleId the given article id
-     * @param request   the specified request
+     * @param user      the specified user
      * @return {@code true} if the current user can access the article, {@code false} otherwise
      * @throws Exception exception
      */
-    public boolean canAccessArticle(final String articleId, final HttpServletRequest request) throws Exception {
+    public boolean canAccessArticle(final String articleId, final JSONObject user) throws Exception {
         if (StringUtils.isBlank(articleId)) {
             return false;
         }
 
-        if (userQueryService.isAdminLoggedIn(request)) {
+        if (null == user) {
+            return false;
+        }
+
+        if (Role.ADMIN_ROLE.equals(user.optString(User.USER_ROLE))) {
             return true;
         }
 
         final JSONObject article = articleRepository.get(articleId);
-        final String currentUserId = userQueryService.getCurrentUser(request).getString(Keys.OBJECT_ID);
+        final String currentUserId = user.getString(Keys.OBJECT_ID);
 
         return article.getString(Article.ARTICLE_AUTHOR_ID).equals(currentUserId);
-    }
-
-    /**
-     * Checks whether need password to view the specified article with the specified request.
-     * <p>
-     * Checks session, if not represents, checks article property {@link Article#ARTICLE_VIEW_PWD view password}.
-     * </p>
-     * <p>
-     * The blogger itself dose not need view password never.
-     * </p>
-     *
-     * @param request the specified request
-     * @param article the specified article
-     * @return {@code true} if need, returns {@code false} otherwise
-     */
-    public boolean needViewPwd(final HttpServletRequest request, final JSONObject article) {
-        final String articleViewPwd = article.optString(Article.ARTICLE_VIEW_PWD);
-
-        if (StringUtils.isBlank(articleViewPwd)) {
-            return false;
-        }
-
-        if (null == request) {
-            return true;
-        }
-
-        final HttpSession session = request.getSession(false);
-
-        if (null != session) {
-            @SuppressWarnings("unchecked")
-            Map<String, String> viewPwds = (Map<String, String>) session.getAttribute(Common.ARTICLES_VIEW_PWD);
-
-            if (null == viewPwds) {
-                viewPwds = new HashMap<String, String>();
-            }
-
-            if (articleViewPwd.equals(viewPwds.get(article.optString(Keys.OBJECT_ID)))) {
-                return false;
-            }
-        }
-
-        final JSONObject currentUser = userQueryService.getCurrentUser(request);
-
-        return !(null != currentUser && !Role.VISITOR_ROLE.equals(currentUser.optString(User.USER_ROLE)));
     }
 
     /**
@@ -398,10 +359,7 @@ public class ArticleQueryService {
             }
         }
 
-        LOGGER.log(Level.WARN, "Can not find the sign[id={0}], returns a default sign[id=1]", signId);
-        if (null == defaultSign) {
-            throw new IllegalStateException("Can not find the default sign which id equals to 1");
-        }
+        LOGGER.log(Level.WARN, "Can not find the sign [id={0}], returns a default sign [id=1]", signId);
 
         return defaultSign;
     }
@@ -698,6 +656,7 @@ public class ArticleQueryService {
 
                 article.put(ARTICLE_CREATE_TIME, article.getLong(ARTICLE_CREATED));
                 article.put(ARTICLE_T_CREATE_DATE, new Date(article.getLong(ARTICLE_CREATED)));
+                article.put(Article.ARTICLE_T_UPDATE_DATE, new Date(article.optLong(ARTICLE_UPDATED)));
 
                 ret.add(article);
             }
@@ -750,6 +709,7 @@ public class ArticleQueryService {
 
                 article.put(ARTICLE_CREATE_TIME, article.getLong(ARTICLE_CREATED));
                 article.put(ARTICLE_T_CREATE_DATE, new Date(article.getLong(ARTICLE_CREATED)));
+                article.put(Article.ARTICLE_T_UPDATE_DATE, new Date(article.optLong(ARTICLE_UPDATED)));
 
                 ret.add(article);
             }
@@ -987,6 +947,7 @@ public class ArticleQueryService {
                 final JSONObject article = articles.getJSONObject(i);
                 article.put(ARTICLE_CREATE_TIME, article.getLong(ARTICLE_CREATED));
                 article.put(ARTICLE_T_CREATE_DATE, new Date(article.optLong(ARTICLE_CREATED)));
+                article.put(Article.ARTICLE_T_UPDATE_DATE, new Date(article.optLong(ARTICLE_UPDATED)));
 
                 ret.add(article);
             }
@@ -1023,7 +984,7 @@ public class ArticleQueryService {
                 return null;
             }
 
-            if (needViewPwd(request, article)) {
+            if (Solos.needViewPwd(request, article)) {
                 final String content = langPropsService.get("articleContentPwd");
 
                 article.put(ARTICLE_CONTENT, content);

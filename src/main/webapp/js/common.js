@@ -33,7 +33,7 @@ var Util = {
     div.innerHTML = decodeURIComponent(code)
     return div.innerText
   },
-  _isArticlePage: function (href) {
+  isArticlePage: function (href) {
     var isArticle = true;
     if (href.indexOf(latkeConfig.servePath + '/tags/') > -1) {
       isArticle = false;
@@ -64,9 +64,8 @@ var Util = {
   /**
    * 初始化 Pjax
    * @param cb 除文章和自定义页面外的其他页面加载回调
-   * @param articelCB 文章页面加载后的回调
    */
-  initPjax: function (cb, articelCB) {
+  initPjax: function (cb) {
     if ($('#pjax').length === 1) {
       $.pjax({
         selector: 'a',
@@ -76,14 +75,17 @@ var Util = {
         storage: true,
         titleSuffix: '',
         filter: function(href){
-          if (href.indexOf('data:image') > -1) {
+          if (href === latkeConfig.servePath + '/rss.xml') {
             return true
           }
-          return Util._isArticlePage(href);
+          if (href.indexOf(latkeConfig.servePath) > -1) {
+            return false
+          }
+          return true
         },
         callback: function () {
-          cb()
-        },
+          cb && cb()
+        }
       });
       NProgress.configure({ showSpinner: false });
       $('#pjax').bind('pjax.start', function(){
@@ -92,34 +94,6 @@ var Util = {
       $('#pjax').bind('pjax.end', function(){
         NProgress.done();
       });
-      return;
-    }
-    if ($('#pjaxArticle').length === 1) {
-      $.pjax({
-        selector: 'a',
-        container: '#pjaxArticle',
-        show: '',
-        cache: false,
-        storage: true,
-        titleSuffix: '',
-        filter: function(href){
-          if (href.indexOf('data:image') > -1) {
-            return true
-          }
-          return !Util._isArticlePage(href);
-        },
-        callback: function () {
-          articelCB();
-        },
-      });
-      NProgress.configure({ showSpinner: false });
-      $('#pjaxArticle').bind('pjax.start', function(){
-        NProgress.start();
-      });
-      $('#pjaxArticle').bind('pjax.end', function(){
-        NProgress.done();
-      });
-      return;
     }
   },
   /**
@@ -235,31 +209,32 @@ var Util = {
   /**
    * @description IE6/7，跳转到 kill-browser 页面
    */
-  killIE: function () {
+  killIE: function (ieVersion) {
     var addKillPanel = function () {
       if (Cookie.readCookie("showKill") === "") {
-        var left = ($(window).width() - 701) / 2,
-          top1 = ($(window).height() - 420) / 2;
-        $("body").append("<div style='display: block; height: 100%; width: 100%; position: fixed; background-color: rgb(0, 0, 0); opacity: 0.6; top: 0px;z-index:11'></div>"
-          + "<iframe style='left:" + left + "px;z-index:20;top: " + top1 + "px; position: fixed; border: 0px none; width: 701px; height: 420px;' src='" + latkeConfig.servePath + "/kill-browser'></iframe>");
+        try {
+          var left = ($(window).width() - 781) / 2,
+              top1 = ($(window).height() - 680) / 2;
+          var killIEHTML = "<div style='display: block; height: 100%; width: 100%; position: fixed; background-color: rgb(0, 0, 0); opacity: 0.6;filter: alpha(opacity=60); top: 0px;z-index:110'></div>"
+              + "<iframe style='left:" + left + "px;z-index:120;top: " + top1 + "px; position: fixed; border: 0px none; width: 781px; height: 680px;' src='" + latkeConfig.servePath + "/kill-browser'></iframe>";
+          $("body").append(killIEHTML)
+        } catch (e) {
+          var left = 10,
+              top1 = 0;
+          var killIEHTML = "<div style='display: block; height: 100%; width: 100%; position: fixed; background-color: rgb(0, 0, 0); opacity: 0.6;filter: alpha(opacity=60); top: 0px;z-index:110'></div>"
+              + "<iframe style='left:" + left + "px;z-index:120;top: " + top1 + "px; position: fixed; border: 0px none; width: 781px; height: 680px;' src='" + latkeConfig.servePath + "/kill-browser'></iframe>";
+          document.body.innerHTML = document.body.innerHTML + killIEHTML
+        }
       }
     };
 
-    if ($.browser.msie) {
-      // kill IE6 and IE7
-      if ($.browser.version === "6.0" || $.browser.version === "7.0") {
-        addKillPanel();
-        return;
+    var ua = navigator.userAgent.split('MSIE')[1]
+    if (ua) {
+      if (!ieVersion) {
+        ieVersion = 7
       }
-
-      // 后台页面 kill 360
-      if (window.external && window.external.twGetRunPath) {
-        var path = external.twGetRunPath();
-        if (path && path.toLowerCase().indexOf("360se") > -1 &&
-          window.location.href.indexOf("admin-index") > -1) {
-          addKillPanel();
-          return;
-        }
+      if (parseFloat(ua.split(';')) <= ieVersion){
+        addKillPanel();
       }
     }
   },

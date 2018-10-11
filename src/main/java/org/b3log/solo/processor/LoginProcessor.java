@@ -22,7 +22,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.mail.MailService;
@@ -37,18 +37,17 @@ import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
+import org.b3log.latke.servlet.renderer.AbstractFreeMarkerRenderer;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
-import org.b3log.latke.servlet.renderer.freemarker.AbstractFreeMarkerRenderer;
 import org.b3log.latke.util.Requests;
 import org.b3log.latke.util.Sessions;
 import org.b3log.solo.SoloServletListener;
 import org.b3log.solo.model.Common;
 import org.b3log.solo.model.Option;
-import org.b3log.solo.processor.renderer.ConsoleRenderer;
-import org.b3log.solo.processor.util.Filler;
+import org.b3log.solo.processor.console.ConsoleRenderer;
 import org.b3log.solo.repository.OptionRepository;
 import org.b3log.solo.service.*;
-import org.b3log.solo.util.Mails;
+import org.b3log.solo.util.Solos;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -65,7 +64,7 @@ import java.util.Map;
  * @author <a href="http://vanessa.b3log.org">Liyuan Li</a>
  * @author <a href="mailto:dongxu.wang@acm.org">Dongxu Wang</a>
  * @author <a href="https://github.com/nanolikeyou">nanolikeyou</a>
- * @version 1.1.1.13, Sep 16, 2018
+ * @version 1.1.1.14, Oct 5, 2018
  * @since 0.3.1
  */
 @RequestProcessor
@@ -100,10 +99,10 @@ public class LoginProcessor {
     private LangPropsService langPropsService;
 
     /**
-     * Filler.
+     * DataModelService.
      */
     @Inject
-    private Filler filler;
+    private DataModelService dataModelService;
 
     /**
      * Preference query service.
@@ -147,10 +146,7 @@ public class LoginProcessor {
         }
 
         final HttpServletResponse response = context.getResponse();
-
-        userMgmtService.tryLogInWithCookie(request, response);
-
-        if (null != userQueryService.getCurrentUser(request)) { // User has already logged in
+        if (null != Solos.getCurrentUser(request, response)) { // User has already logged in
             response.sendRedirect(destinationURL);
 
             return;
@@ -402,7 +398,7 @@ public class LoginProcessor {
         message.setSubject(mailSubject);
         message.setHtmlBody(mailBody);
 
-        if (Mails.isConfigured()) {
+        if (Solos.isConfigured()) {
             mailService.send(message);
         } else {
             LOGGER.log(Level.INFO, "Do not send mail caused by not configure mail.properties");
@@ -428,7 +424,6 @@ public class LoginProcessor {
     private void renderPage(final HTTPRequestContext context, final String pageTemplate, final String destinationURL,
                             final HttpServletRequest request) throws JSONException, ServiceException {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
-
         renderer.setTemplateName(pageTemplate);
         context.setRenderer(renderer);
 
@@ -443,7 +438,10 @@ public class LoginProcessor {
         dataModel.put(Common.STATIC_RESOURCE_VERSION, Latkes.getStaticResourceVersion());
         dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
 
-        final String token = request.getParameter("token");
+        String token = request.getParameter("token");
+        if (StringUtils.isBlank(token)) {
+            token = "";
+        }
         final JSONObject tokenObj = optionQueryService.getOptionById(token);
 
         if (tokenObj == null) {
@@ -465,7 +463,7 @@ public class LoginProcessor {
         }
 
         Keys.fillRuntime(dataModel);
-        filler.fillMinified(dataModel);
+        dataModelService.fillMinified(dataModel);
     }
 
     /**

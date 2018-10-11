@@ -19,32 +19,28 @@ package org.b3log.solo.service;
 
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Pagination;
-import org.b3log.latke.model.Role;
 import org.b3log.latke.model.User;
 import org.b3log.latke.repository.Query;
 import org.b3log.latke.repository.RepositoryException;
 import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.service.annotation.Service;
 import org.b3log.latke.util.Paginator;
-import org.b3log.latke.util.Sessions;
 import org.b3log.latke.util.URLs;
 import org.b3log.solo.repository.UserRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
  * User query service.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.0.0.6, Sep 21, 2018
+ * @version 1.0.0.7, Oct 5, 2018
  * @since 0.4.0
  */
 @Service
@@ -66,63 +62,6 @@ public class UserQueryService {
      */
     @Inject
     private UserMgmtService userMgmtService;
-
-    /**
-     * Checks whether the current request is made by a logged in user
-     * (including default user and administrator lists in <i>users</i>).
-     *
-     * <p>
-     * Invokes this method will try to login with cookie first.
-     * </p>
-     *
-     * @param request  the specified request
-     * @param response the specified response
-     * @return {@code true} if the current request is made by logged in user,
-     * returns {@code false} otherwise
-     */
-    public boolean isLoggedIn(final HttpServletRequest request, final HttpServletResponse response) {
-        userMgmtService.tryLogInWithCookie(request, response);
-
-        return null != Sessions.currentUser(request);
-    }
-
-    /**
-     * Checks whether the current request is made by logged in administrator.
-     *
-     * @param request the specified request
-     * @return {@code true} if the current request is made by logged in
-     * administrator, returns {@code false} otherwise
-     */
-    public boolean isAdminLoggedIn(final HttpServletRequest request) {
-        final JSONObject user = Sessions.currentUser(request);
-        if (null == user) {
-            return false;
-        }
-
-        return Role.ADMIN_ROLE.equals(user.optString(User.USER_ROLE));
-    }
-
-    /**
-     * Gets the current user.
-     *
-     * @param request the specified request
-     * @return the current user, {@code null} if not found
-     */
-    public JSONObject getCurrentUser(final HttpServletRequest request) {
-        JSONObject currentUser = Sessions.currentUser(request);
-        if (null == currentUser) {
-            return null;
-        }
-
-        final String email = currentUser.optString(User.USER_EMAIL);
-        try {
-            return userRepository.getByEmail(email);
-        } catch (final RepositoryException e) {
-            LOGGER.log(Level.ERROR, "Gets current user by request failed, returns null", e);
-
-            return null;
-        }
-    }
 
     /**
      * Gets the administrator.
@@ -194,8 +133,7 @@ public class UserQueryService {
         final int windowSize = requestJSONObject.optInt(Pagination.PAGINATION_WINDOW_SIZE);
         final Query query = new Query().setCurrentPageNum(currentPageNum).setPageSize(pageSize);
 
-        JSONObject result = null;
-
+        JSONObject result;
         try {
             result = userRepository.get(query);
         } catch (final RepositoryException e) {
@@ -205,17 +143,12 @@ public class UserQueryService {
         }
 
         final int pageCount = result.optJSONObject(Pagination.PAGINATION).optInt(Pagination.PAGINATION_PAGE_COUNT);
-
         final JSONObject pagination = new JSONObject();
-
         ret.put(Pagination.PAGINATION, pagination);
         final List<Integer> pageNums = Paginator.paginate(currentPageNum, pageSize, pageCount, windowSize);
-
         pagination.put(Pagination.PAGINATION_PAGE_COUNT, pageCount);
         pagination.put(Pagination.PAGINATION_PAGE_NUMS, pageNums);
-
         final JSONArray users = result.optJSONArray(Keys.RESULTS);
-
         ret.put(User.USERS, users);
 
         return ret;

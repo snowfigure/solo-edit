@@ -20,7 +20,7 @@ package org.b3log.solo.service;
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.mail.MailService;
@@ -28,7 +28,6 @@ import org.b3log.latke.mail.MailServiceFactory;
 import org.b3log.latke.model.User;
 import org.b3log.latke.repository.Query;
 import org.b3log.latke.repository.Transaction;
-import org.b3log.latke.repository.jdbc.JdbcRepository;
 import org.b3log.latke.repository.jdbc.util.Connections;
 import org.b3log.latke.service.LangPropsService;
 import org.b3log.latke.service.annotation.Service;
@@ -43,8 +42,7 @@ import org.b3log.solo.repository.ArticleRepository;
 import org.b3log.solo.repository.CommentRepository;
 import org.b3log.solo.repository.OptionRepository;
 import org.b3log.solo.repository.UserRepository;
-import org.b3log.solo.util.Mails;
-import org.b3log.solo.util.Thumbnails;
+import org.b3log.solo.util.Solos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -58,7 +56,7 @@ import java.util.List;
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="mailto:dongxu.wang@acm.org">Dongxu Wang</a>
- * @version 1.2.0.29, Sep 16, 2018
+ * @version 1.2.0.30, Oct 10, 2018
  * @since 1.2.0
  */
 @Service
@@ -82,7 +80,7 @@ public class UpgradeService {
     /**
      * Old version.
      */
-    private static final String FROM_VER = "2.9.3";
+    private static final String FROM_VER = "2.9.4";
 
     /**
      * New version.
@@ -188,17 +186,6 @@ public class UpgradeService {
         LOGGER.log(Level.INFO, "Upgrading from version [{0}] to version [{1}]....", FROM_VER, TO_VER);
 
         try {
-            alterTables();
-            JdbcRepository.dispose(); // avoid to metadata lock
-            upgradeArticles();
-            upgradeComments();
-            JdbcRepository.dispose(); // avoid to metadata lock
-            dropColumns();
-            JdbcRepository.dispose(); // avoid to metadata lock
-
-            articleCache.clear();
-            commentCache.clear();
-
             final Transaction transaction = optionRepository.beginTransaction();
             final JSONObject versionOpt = optionRepository.get(Option.ID_C_VERSION);
             versionOpt.put(Option.OPTION_VALUE, TO_VER);
@@ -263,7 +250,7 @@ public class UpgradeService {
         for (int i = 0; i < users.length(); i++) {
             final JSONObject user = users.getJSONObject(i);
             final String email = user.optString(User.USER_EMAIL);
-            user.put(UserExt.USER_AVATAR, Thumbnails.getGravatarURL(email, "128"));
+            user.put(UserExt.USER_AVATAR, Solos.getGravatarURL(email, "128"));
 
             userRepository.update(user.optString(Keys.OBJECT_ID), user);
             LOGGER.log(Level.INFO, "Updated user[email={0}]", email);
@@ -387,7 +374,7 @@ public class UpgradeService {
      * @throws Exception exception
      */
     private void notifyUserByEmail() throws Exception {
-        if (!Mails.isConfigured()) {
+        if (!Solos.isConfigured()) {
             return;
         }
 

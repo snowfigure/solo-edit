@@ -19,7 +19,7 @@ package org.b3log.solo.processor.console;
 
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
-import org.b3log.latke.ioc.inject.Inject;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.model.Plugin;
@@ -31,8 +31,6 @@ import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
 import org.b3log.latke.servlet.renderer.JSONRenderer;
 import org.b3log.latke.util.Requests;
-import org.b3log.solo.processor.console.common.ProcessAuthAdvice;
-import org.b3log.solo.processor.renderer.ConsoleRenderer;
 import org.b3log.solo.service.PluginMgmtService;
 import org.b3log.solo.service.PluginQueryService;
 import org.json.JSONObject;
@@ -45,12 +43,12 @@ import java.util.Map;
  * Plugin console request processing.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @author <a href="mailto:wmainlove@gmail.com">Love Yao</a>
- * @version 1.1.0.2, Sep 20, 2018
+ * @author <a href="https://hacpai.com/member/mainlove">Love Yao</a>
+ * @version 1.1.0.3, Sep 25, 2018
  * @since 0.4.0
  */
 @RequestProcessor
-@Before(adviceClass = ProcessAuthAdvice.class)
+@Before(adviceClass = ConsoleAdminAuthAdvice.class)
 public class PluginConsole {
 
     /**
