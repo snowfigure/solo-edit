@@ -21,8 +21,8 @@
 
 <@commonPage "404 Not Found!">
 <h2>404 Not Found!</h2>
-<img class="img-error" src="${staticServePath}/images/404.gif" title="404" alt="404 Not Found!"/>
+<img class="img-error" src="${staticServePath}/images/404.jpg" title="404" alt="404 Not Found!"/>
 <div class="a-error">
-    Please <a href="${loginURL}">Login</a> or return to <a href="${servePath}">Index</a>.
+    Please <a href="${loginURL}">Login </a> or return to <a href="${servePath}">${blogTitle}</a>.
 </div>
 </@commonPage>

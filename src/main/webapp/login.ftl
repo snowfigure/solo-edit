@@ -19,7 +19,7 @@
 -->
 <#include "macro-common-page.ftl">
 
-<@commonPage "${welcomeToSoloLabel}!">
+<@commonPage "welcome to ${blogTitle}!">
 <h2>
 ${loginLabel}
 </h2>

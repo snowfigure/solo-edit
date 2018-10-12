@@ -159,8 +159,19 @@ public class AdminConsole {
             dataModel.put(Common.GRAVATAR, gravatar);
         }
 
+
+
         try {
+            String footerContent = "";
+            final JSONObject opt = optionQueryService.getOptionById(Option.ID_C_FOOTER_CONTENT);
+            if (null != opt) {
+                footerContent = opt.optString(Option.OPTION_VALUE);
+            }
+
             final JSONObject preference = preferenceQueryService.getPreference();
+
+            dataModelService.fillCommon(request, response, dataModel, preference);
+
             dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
             dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
             dataModel.put(Option.ID_C_BLOG_SUBTITLE, preference.getString(Option.ID_C_BLOG_SUBTITLE));
@@ -172,6 +183,10 @@ public class AdminConsole {
             dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
             dataModel.put(Option.ID_C_EDITOR_TYPE, preference.getString(Option.ID_C_EDITOR_TYPE));
             dataModel.put(Skin.SKIN_DIR_NAME, preference.getString(Skin.SKIN_DIR_NAME));
+            dataModel.put(Option.ID_C_FOOTER_CONTENT, footerContent);
+            dataModel.put(Keys.Server.STATIC_SERVER, Latkes.getStaticServer());
+            dataModel.put(Keys.Server.SERVER, Latkes.getServer());
+
             Keys.fillRuntime(dataModel);
             dataModelService.fillMinified(dataModel);
         } catch (final Exception e) {

@@ -129,6 +129,11 @@ public class LoginProcessor {
     private OptionRepository optionRepository;
 
     /**
+     * Statistic management service.
+     */
+    @Inject
+    private StatisticMgmtService statisticMgmtService;
+    /**
      * Shows login page.
      *
      * @param context the specified context
@@ -152,7 +157,9 @@ public class LoginProcessor {
             return;
         }
 
-        renderPage(context, "login.ftl", destinationURL, request);
+
+
+        renderPage(context, "login.ftl", destinationURL, request, response);
     }
 
     /**
@@ -245,6 +252,7 @@ public class LoginProcessor {
     @RequestProcessing(value = "/forgot", method = HTTPRequestMethod.GET)
     public void showForgot(final HTTPRequestContext context) throws Exception {
         final HttpServletRequest request = context.getRequest();
+        final HttpServletResponse response = context.getResponse();
 
         String destinationURL = request.getParameter(Common.GOTO);
         if (StringUtils.isBlank(destinationURL)) {
@@ -253,7 +261,7 @@ public class LoginProcessor {
             destinationURL = "/";
         }
 
-        renderPage(context, "reset-pwd.ftl", destinationURL, request);
+        renderPage(context, "reset-pwd.ftl", destinationURL, request, response);
     }
 
     /**
@@ -422,7 +430,7 @@ public class LoginProcessor {
      * @throws ServiceException the ServiceException
      */
     private void renderPage(final HTTPRequestContext context, final String pageTemplate, final String destinationURL,
-                            final HttpServletRequest request) throws JSONException, ServiceException {
+                            final HttpServletRequest request, final HttpServletResponse response) throws JSONException, ServiceException {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
         renderer.setTemplateName(pageTemplate);
         context.setRenderer(renderer);
@@ -431,11 +439,15 @@ public class LoginProcessor {
         final Map<String, String> langs = langPropsService.getAll(Latkes.getLocale());
         final JSONObject preference = preferenceQueryService.getPreference();
 
+        dataModelService.fillCommon(request, response, dataModel, preference);
+
+
         dataModel.putAll(langs);
         dataModel.put(Common.GOTO, destinationURL);
         dataModel.put(Common.YEAR, String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
         dataModel.put(Common.VERSION, SoloServletListener.VERSION);
         dataModel.put(Common.STATIC_RESOURCE_VERSION, Latkes.getStaticResourceVersion());
+        dataModel.put(Common.LOGIN_URL, userQueryService.getLoginURL(Common.ADMIN_INDEX_URI));
         dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
 
         String token = request.getParameter("token");
@@ -464,6 +476,7 @@ public class LoginProcessor {
 
         Keys.fillRuntime(dataModel);
         dataModelService.fillMinified(dataModel);
+
     }
 
     /**
