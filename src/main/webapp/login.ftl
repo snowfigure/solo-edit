@@ -23,7 +23,7 @@
 <h2>
 ${loginLabel}
 </h2>
-<div id="github">
+<div id="github" class="none"">
     <div class="github__icon"
         onclick="window.location.href = '${servePath}/oauth/github/redirect';$('#github').addClass('github--loading')">
         <img src="${staticServePath}/images/github-init.gif"/>
@@ -33,16 +33,21 @@ ${loginLabel}
     <span onclick="$('#github').hide();$('.form').show()">${useLocalAccountLabel}</span>
 </div>
 
-<div class="form none">
+<div class="form">
     <label for="userEmail">
     ${userLabel}
     </label>
     <input id="userEmail" tabindex="1" />
     <label for="userPassword">
-    ${userPasswordLabel} <a href="${servePath}/forgot">(${forgotLabel})</a>
+        ${userPasswordLabel} <!--a href="${servePath}/forgot">(${forgotLabel})</a-->
     </label>
     <input type="password" id="userPassword" tabindex="2" />
-    <button onclick='login();'>${loginLabel}</button>
+    <div style="text-align: center">
+        <button class="hover" onclick='login();'>  ${loginLabel}  </button>
+
+        <button onclick="$('#github').show();$('.form').hide()">${useGitHubAccountLoginLabel} </button>
+    </div>
+
     <span id="tip">${resetMsg}</span>
 </div>
 <script type="text/javascript" src="${staticServePath}/js/lib/jquery/jquery.min.js" charset="utf-8"></script>

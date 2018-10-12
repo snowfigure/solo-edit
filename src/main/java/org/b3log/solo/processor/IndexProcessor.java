@@ -196,7 +196,7 @@ public class IndexProcessor {
      * @param response the specified HTTP servlet response
      * @throws Exception exception
      */
-    @RequestProcessing(value = "/register", method = HTTPRequestMethod.GET)
+    @RequestProcessing(value = "/register-not-support", method = HTTPRequestMethod.GET)
     public void register(final HTTPRequestContext context, final HttpServletRequest request, final HttpServletResponse response)
             throws Exception {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();

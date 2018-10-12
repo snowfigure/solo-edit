@@ -249,7 +249,7 @@ public class LoginProcessor {
      * @param context the specified context
      * @throws Exception exception
      */
-    @RequestProcessing(value = "/forgot", method = HTTPRequestMethod.GET)
+    @RequestProcessing(value = "/forgot-not-support", method = HTTPRequestMethod.GET)
     public void showForgot(final HTTPRequestContext context) throws Exception {
         final HttpServletRequest request = context.getRequest();
         final HttpServletResponse response = context.getResponse();
@@ -279,7 +279,7 @@ public class LoginProcessor {
      * @param context           the specified context
      * @param requestJSONObject the specified request json object
      */
-    @RequestProcessing(value = "/forgot", method = HTTPRequestMethod.POST)
+    @RequestProcessing(value = "/forgot-not-support", method = HTTPRequestMethod.POST)
     public void forgot(final HTTPRequestContext context, final JSONObject requestJSONObject) {
         final JSONRenderer renderer = new JSONRenderer();
         context.setRenderer(renderer);
@@ -328,7 +328,7 @@ public class LoginProcessor {
      * @param context           the specified context
      * @param requestJSONObject the specified request json object
      */
-    @RequestProcessing(value = "/reset", method = HTTPRequestMethod.POST)
+    @RequestProcessing(value = "/reset-not-support", method = HTTPRequestMethod.POST)
     public void reset(final HTTPRequestContext context, final JSONObject requestJSONObject) {
         final JSONRenderer renderer = new JSONRenderer();
 

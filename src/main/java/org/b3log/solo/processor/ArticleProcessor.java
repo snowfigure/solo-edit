@@ -167,6 +167,8 @@ public class ArticleProcessor {
         renderer.setTemplateName("article-pwd.ftl");
 
         final Map<String, Object> dataModel = renderer.getDataModel();
+
+
         dataModel.put("articleId", articleId);
         dataModel.put("articlePermalink", article.optString(Article.ARTICLE_PERMALINK));
         dataModel.put("articleTitle", article.optString(Article.ARTICLE_TITLE));
@@ -185,6 +187,7 @@ public class ArticleProcessor {
         dataModel.put(Common.VERSION, SoloServletListener.VERSION);
         dataModel.put(Common.STATIC_RESOURCE_VERSION, Latkes.getStaticResourceVersion());
         dataModel.put(Common.YEAR, String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
+        dataModelService.fillCommon(request, response, dataModel, preference);
 
         Keys.fillRuntime(dataModel);
         dataModelService.fillMinified(dataModel);
