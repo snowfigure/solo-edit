@@ -294,7 +294,7 @@ public class AdminConsole {
     @RequestProcessing(value = "/console/export/sql", method = HTTPRequestMethod.GET)
     public void exportSQL(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!Solos.isAdminLoggedIn(request)) {
+        if (!Solos.isAdminLoggedIn(request, response)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
@@ -413,7 +413,7 @@ public class AdminConsole {
     @RequestProcessing(value = "/console/export/json", method = HTTPRequestMethod.GET)
     public void exportJSON(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!Solos.isAdminLoggedIn(request)) {
+        if (!Solos.isAdminLoggedIn(request, response)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
@@ -463,7 +463,7 @@ public class AdminConsole {
     @RequestProcessing(value = "/console/export/hexo", method = HTTPRequestMethod.GET)
     public void exportHexo(final HttpServletRequest request, final HttpServletResponse response, final HTTPRequestContext context)
             throws Exception {
-        if (!Solos.isAdminLoggedIn(request)) {
+        if (!Solos.isAdminLoggedIn(request, response)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 
             return;
