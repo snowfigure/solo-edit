@@ -189,6 +189,8 @@ public class ArticleProcessor {
         dataModel.put(Common.YEAR, String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
         dataModelService.fillCommon(request, response, dataModel, preference);
 
+        Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
+
         Keys.fillRuntime(dataModel);
         dataModelService.fillMinified(dataModel);
     }

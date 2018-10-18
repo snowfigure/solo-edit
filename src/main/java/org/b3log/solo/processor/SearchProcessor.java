@@ -19,6 +19,7 @@ package org.b3log.solo.processor;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
@@ -36,10 +37,8 @@ import org.b3log.solo.model.Article;
 import org.b3log.solo.model.Common;
 import org.b3log.solo.model.Option;
 import org.b3log.solo.processor.console.ConsoleRenderer;
-import org.b3log.solo.service.ArticleQueryService;
-import org.b3log.solo.service.DataModelService;
-import org.b3log.solo.service.PreferenceQueryService;
-import org.b3log.solo.service.UserQueryService;
+import org.b3log.solo.service.*;
+import org.b3log.solo.util.Skins;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
@@ -98,6 +97,11 @@ public class SearchProcessor {
     private DataModelService dataModelService;
 
     /**
+     * Statistic management service.
+     */
+    @Inject
+    private StatisticMgmtService statisticMgmtService;
+    /**
      * Shows opensearch.xml.
      *
      * @param context the specified context
@@ -128,7 +132,7 @@ public class SearchProcessor {
      */
     @RequestProcessing(value = "/search", method = HTTPRequestMethod.GET)
     public void search(final HTTPRequestContext context) {
-        final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
+        final AbstractFreeMarkerRenderer renderer = new SkinRenderer(context.getRequest()); //new ConsoleRenderer();
         context.setRenderer(renderer);
         renderer.setTemplateName("search.ftl");
 
@@ -142,7 +146,7 @@ public class SearchProcessor {
         if (!Strings.isNumeric(page)) {
             page = "1";
         }
-        final int pageNum = Integer.valueOf(page);
+        final int currentPageNum = Integer.valueOf(page);
         String keyword = request.getParameter(Common.KEYWORD);
         if (StringUtils.isBlank(keyword)) {
             keyword = "";
@@ -150,19 +154,41 @@ public class SearchProcessor {
         keyword = Encode.forHtml(keyword);
 
         dataModel.put(Common.KEYWORD, keyword);
-        final JSONObject result = articleQueryService.searchKeyword(keyword, pageNum, 15);
+        final JSONObject result = articleQueryService.searchKeyword(keyword, currentPageNum, 15);
         final List<JSONObject> articles = (List<JSONObject>) result.opt(Article.ARTICLES);
 
         try {
             final JSONObject preference = preferenceQueryService.getPreference();
 
+            dataModelService.fillIndexArticles(request, dataModel, currentPageNum, preference);
             dataModelService.fillCommon(request, context.getResponse(), dataModel, preference);
+            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
+
             dataModelService.setArticlesExProperties(request, articles, preference);
 
             dataModel.put(Article.ARTICLES, articles);
+
+
             final JSONObject pagination = result.optJSONObject(Pagination.PAGINATION);
-            pagination.put(Pagination.PAGINATION_CURRENT_PAGE_NUM, pageNum);
+            pagination.put(Pagination.PAGINATION_CURRENT_PAGE_NUM, currentPageNum);
             dataModel.put(Pagination.PAGINATION, pagination);
+
+            /*分页信息*/
+            dataModel.put(Pagination.PAGINATION_PAGE_COUNT, pagination.get(Pagination.PAGINATION_PAGE_COUNT));
+
+            final int previousPageNum = currentPageNum > 1 ? currentPageNum - 1 : 0;
+
+            final Integer pageCount = (Integer) pagination.get(Pagination.PAGINATION_PAGE_COUNT);
+            final int nextPageNum = currentPageNum + 1 > pageCount ? pageCount : currentPageNum + 1;
+
+            /*分页信息*/
+            dataModel.put(Pagination.PAGINATION_CURRENT_PAGE_NUM, currentPageNum);
+            dataModel.put(Pagination.PAGINATION_PREVIOUS_PAGE_NUM, previousPageNum);
+            dataModel.put(Pagination.PAGINATION_NEXT_PAGE_NUM, nextPageNum);
+            dataModel.put(Common.PATH, "");
+
+            statisticMgmtService.incBlogViewCount(request, context.getResponse());
+
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Search articles failed");
 
