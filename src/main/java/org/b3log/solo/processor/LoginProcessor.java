@@ -46,6 +46,7 @@ import org.b3log.solo.model.Option;
 import org.b3log.solo.processor.console.ConsoleRenderer;
 import org.b3log.solo.repository.OptionRepository;
 import org.b3log.solo.service.*;
+import org.b3log.solo.util.Skins;
 import org.b3log.solo.util.Solos;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,6 +143,11 @@ public class LoginProcessor {
     public void showLogin(final HTTPRequestContext context) throws Exception {
         final HttpServletRequest request = context.getRequest();
 
+        final AbstractFreeMarkerRenderer renderer = new SkinRenderer(request);
+        context.setRenderer(renderer);
+        renderer.setTemplateName("login.ftl");
+
+
         String destinationURL = request.getParameter(Common.GOTO);
         if (StringUtils.isBlank(destinationURL)) {
             destinationURL = Latkes.getServePath() + Common.ADMIN_INDEX_URI;
@@ -156,9 +162,28 @@ public class LoginProcessor {
             return;
         }
 
+        final Map<String, Object> dataModel = renderer.getDataModel();
+
+        try {
+
+            final JSONObject preference = preferenceQueryService.getPreference();
+
+            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
+
+            dataModel.put("resetMsg", "");
+            statisticMgmtService.incBlogViewCount(request, response);
+            dataModelService.fillCommon(request, response, dataModel, preference);
+
+        }
+        catch (final ServiceException e) {
+            LOGGER.log(Level.ERROR, e.getMessage(), e);
+
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
 
 
-        renderPage(context, "login.ftl", destinationURL, request, response);
+
+        //renderPage(context, "login.ftl", destinationURL, request, response);
     }
 
     /**
