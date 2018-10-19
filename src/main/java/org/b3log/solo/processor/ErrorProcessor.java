@@ -18,6 +18,7 @@
 package org.b3log.solo.processor;
 
 import org.apache.commons.lang.StringUtils;
+import org.b3log.latke.Keys;
 import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
@@ -26,12 +27,16 @@ import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.RequestProcessing;
 import org.b3log.latke.servlet.annotation.RequestProcessor;
+import org.b3log.latke.servlet.renderer.AbstractFreeMarkerRenderer;
 import org.b3log.latke.util.Locales;
 import org.b3log.solo.model.Common;
+import org.b3log.solo.model.Option;
 import org.b3log.solo.processor.console.ConsoleRenderer;
 import org.b3log.solo.service.DataModelService;
 import org.b3log.solo.service.PreferenceQueryService;
+import org.b3log.solo.service.StatisticMgmtService;
 import org.b3log.solo.service.UserQueryService;
+import org.b3log.solo.util.Skins;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,6 +83,11 @@ public class ErrorProcessor {
     private LangPropsService langPropsService;
 
     /**
+     * Statistic management service.
+     */
+    @Inject
+    private StatisticMgmtService statisticMgmtService;
+    /**
      * Handles the error.
      *
      * @param context  the specified context
@@ -94,7 +104,7 @@ public class ErrorProcessor {
             String templateName = StringUtils.substringAfterLast(requestURI, "/");
             templateName = StringUtils.substringBefore(templateName, ".") + ".ftl";
 
-            final ConsoleRenderer renderer = new ConsoleRenderer();
+            final AbstractFreeMarkerRenderer renderer = new SkinRenderer(request);
             context.setRenderer(renderer);
             renderer.setTemplateName("error/" + templateName);
 
@@ -103,7 +113,11 @@ public class ErrorProcessor {
                 final Map<String, String> langs = langPropsService.getAll(Locales.getLocale(request));
                 dataModel.putAll(langs);
                 final JSONObject preference = preferenceQueryService.getPreference();
+
+                Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
+
                 dataModelService.fillCommon(request, response, dataModel, preference);
+                statisticMgmtService.incBlogViewCount(request, response);
                 dataModel.put(Common.LOGIN_URL, userQueryService.getLoginURL(Common.ADMIN_INDEX_URI));
             } catch (final Exception e) {
                 LOGGER.log(Level.ERROR, e.getMessage(), e);
