@@ -243,7 +243,11 @@ public final class Solos {
             cookie.setPath("/");
             cookie.setMaxAge(COOKIE_EXPIRY);
             cookie.setHttpOnly(COOKIE_HTTP_ONLY);
-            response.addCookie(cookie);
+            if(response != null)
+            {
+                response.addCookie(cookie);
+            }
+
         } catch (final Exception e) {
             LOGGER.log(Level.WARN, "Can not write cookie", e);
         }

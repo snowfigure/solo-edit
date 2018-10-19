@@ -79,7 +79,7 @@ var soloKanbanniang = {
   _initTips: function() {
     $.ajax({
       cache: true,
-      url: 'https://static-solo.b3log.org/plugins/kanbanniang/assert/tips.json',
+      url: 'https://www.791211.com/plugins/kanbanniang/assert/tips.json',
       dataType: 'json',
       success: function(result) {
         $.each(result.mouseover, function(index, tips) {
@@ -231,7 +231,7 @@ if (navigator.userAgent.indexOf('MSIE') === -1) {
         }
 
         $.ajax({
-            url: 'https://static-solo.b3log.org/plugins/kanbanniang/assert/live2d.js',
+            url: 'https://www.791211.com/plugins/kanbanniang/assert/live2d.js',
             dataType: "script",
             cache: true,
             success: function () {
