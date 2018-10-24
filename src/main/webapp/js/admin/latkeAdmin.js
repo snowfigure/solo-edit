@@ -1208,7 +1208,7 @@ admin.article = {
                     "articlePermalink": $("#permalink").val(),
                     "articleIsPublished": articleIsPublished,
                     "articleSignId": signId,
-                    "postToCommunity": false, //$("#postToCommunity").prop("checked"),
+                    "postToCommunity": $("#postToCommunity").prop("checked"), //false, //
                     "articleCommentable": $("#articleCommentable").prop("checked"),
                     "articleViewPwd": $("#viewPwd").val()
                 }
@@ -1288,7 +1288,7 @@ admin.article = {
                     "articleSignId": signId,
                     "articleCommentable": $("#articleCommentable").prop("checked"),
                     "articleViewPwd": $("#viewPwd").val(),
-                    "postToCommunity": false, //$("#postToCommunity").prop("checked"),
+                    "postToCommunity": $("#postToCommunity").prop("checked"), //false, //
                     "articleEditorType": admin.article.currentEditorType
                 }
             };

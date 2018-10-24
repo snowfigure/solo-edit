@@ -44,6 +44,8 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.URIParameter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,7 +72,12 @@ public class OAuthGitHubProcessor {
     /**
      * Client id.
      */
-    private static final String CLIENT_ID = "22a4ba08d3cc4b1ff189";
+    private static final String CLIENT_ID = "cee5d2882b06f871a957";
+
+    /**
+     * Client id.
+     */
+    private static final String CLIENT_SECRET = "f4b61c16b2f16a5a0d448d7f63a8d44c5e1f5cfc";
 
     /**
      * OAuth parameters - state.
@@ -124,6 +131,7 @@ public class OAuthGitHubProcessor {
         final String state = Latkes.getServePath() + ":::" + RandomStringUtils.randomAlphanumeric(16);
         STATES.put(state, URLs.encode(state));
 
+        //final String path = String.format("https://github.com/login/oauth/authorize?client_id=%s&state=%s&scope=public_repo,user",CLIENT_ID, state );
         final String path = "https://github.com/login/oauth/authorize" + "?client_id=" + CLIENT_ID + "&state=" + state
                 + "&scope=public_repo,user";
 
@@ -132,7 +140,7 @@ public class OAuthGitHubProcessor {
 
     /**
      * Shows GitHub callback page.
-     *
+     * Github 回调认证接口
      * @param request  the specified request
      * @param response the specified response
      * @throws Exception exception
@@ -148,7 +156,10 @@ public class OAuthGitHubProcessor {
         }
         STATES.remove(state);
 
-        final String accessToken = request.getParameter("ak");
+        /*使用code机制进行获取access token关键字*/
+        final String code = request.getParameter("code");
+
+        final String accessToken = getGitHubUserAccessToken(code); //request.getParameter("ak");
         final JSONObject userInfo = getGitHubUserInfo(accessToken);
         if (null == userInfo) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -185,6 +196,8 @@ public class OAuthGitHubProcessor {
                 initReq.put(UserExt.USER_AVATAR, userAvatar);
                 initService.init(initReq);
             } else {
+
+                /*判断是否允许注册新用户*/
                 final JSONObject preference = preferenceQueryService.getPreference();
                 if (!preference.optBoolean(Option.ID_C_ALLOW_REGISTER)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -196,6 +209,7 @@ public class OAuthGitHubProcessor {
                 if (null == user) {
                     user = userQueryService.getUserByEmailOrUserName(userEmail);
                 }
+                /*用户不存在，创建用户*/
                 if (null == user) {
                     final JSONObject addUserReq = new JSONObject();
                     addUserReq.put(User.USER_NAME, userName);
@@ -241,14 +255,63 @@ public class OAuthGitHubProcessor {
     }
 
     /**
+     * 把url的参数字符串转换成Map结构
+     * @param urlparam
+     * @return
+     */
+    private Map<String,String> UriSplit(String urlparam){
+        Map<String,String> map = new HashMap<String, String>();
+        String[] param =  urlparam.split("&");
+        for(String keyvalue:param){
+            String[] pair = keyvalue.split("=");
+            if(pair.length==2){
+                map.put(pair[0], pair[1]);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 根据github返回的用户code，使用app的 client_id，client_secret 参数，获取用户的access token
+     * @param code
+     * @return
+     */
+    private String getGitHubUserAccessToken(final String code){
+        try{
+            final String req_url = String.format("https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=%s", CLIENT_ID,CLIENT_SECRET,code);
+            final HttpResponse res = HttpRequest.get(req_url).
+                    connectionTimeout(7000).
+                    timeout(7000).header("User-Agent", Solos.USER_AGENT).
+                    send();
+
+
+            if (HttpServletResponse.SC_OK != res.statusCode()) {
+                return null;
+            }
+
+            res.charset("UTF-8");
+            final String body_text = res.bodyText();
+
+
+            String get_access_token = UriSplit(body_text).get("access_token");
+            String access_token = get_access_token;
+            return access_token;
+        }
+        catch (final Exception e) {
+            LOGGER.log(Level.ERROR, "Gets GitHub user AccessToken failed", e);
+
+            return null;
+        }
+    }
+    /**
      * Gets GitHub user info.
-     *
+     * 根据用户的access token，获取用户登录名、用户邮箱
      * @param accessToken the specified access token
      * @return GitHub user info, for example, <pre>
      * {
      *   "openId": "",
      *   "userName": "D",
-     *   "userEmail": "d@b3log.org", // may be empty
+     *   "userEmail": "xx@791211.com", // may be empty
      *   "userAvatar": "https://avatars3.githubusercontent.com/u/873584?v=4"
      * }
      * </pre>, returns {@code null} if not found QQ user info
@@ -267,7 +330,7 @@ public class OAuthGitHubProcessor {
             userName = StringUtils.replace(userName, "-", "");
             String email = userInfo.optString("email");
             if (StringUtils.isBlank(email)) {
-                email = userName + "@solo.b3log.org";
+                email = userName + "@791211.com";
             }
             final String openId = userInfo.optString("id");
 
