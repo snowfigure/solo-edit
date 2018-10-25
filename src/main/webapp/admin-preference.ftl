@@ -57,20 +57,38 @@
         <div class="clear"></div>
         <label for="blogTitle">${blogTitle1Label}</label>
         <input id="blogTitle" type="text"/>
+
         <label for="blogSubtitle">${blogSubtitle1Label}</label>
         <input id="blogSubtitle" type="text"/>
+
         <label for="blogHost">${blogHost1Label}</label>
         <input id="blogHost" type="text" value="${servePath}" readonly="true"/>
+
         <label for="metaKeywords">${metaKeywords1Label}</label>
         <input id="metaKeywords" type="text"/>
+
         <label for="metaDescription">${metaDescription1Label}</label>
         <input id="metaDescription" type="text"/>
+
         <label for="htmlHead">${htmlhead1Label}</label>
         <textarea rows="6" id="htmlHead"></textarea>
+
+        <label for="cdnjQueryJS">${cdnjQueryJSLabel}</label>
+        <textarea rows="2" id="cdnjQueryJS"></textarea>
+
+        <label for="cdnIconfont">${cdnIconfontLabel}</label>
+        <textarea rows="2" id="cdnIconfont"></textarea>
+
+        <label for="bannerImageUrl">${bannerImageUrlLabel}</label>
+        <textarea rows="2" id="bannerImageUrl"></textarea>
+
         <label for="noticeBoard">${noticeBoard1Label}</label>
         <textarea rows="6" id="noticeBoard"></textarea>
+
         <label for="footerContent">${footerContent1Label}</label>
-        <textarea rows="2" id="footerContent"></textarea><br><br>
+        <textarea rows="2" id="footerContent"></textarea>
+
+        <br><br>
         <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>

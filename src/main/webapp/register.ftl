@@ -55,7 +55,7 @@
     <button onclick='getUserInfo();'>${registerSoloUserLabel}</button>
     <span id="tip" ></span>
 </div>
-<script type="text/javascript" src="${staticServePath}/js/lib/jquery/jquery.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="${cdnjQueryJS}" charset="utf-8"></script>
 <script type="text/javascript">
     var validate = function() {
         var userName = $("#userName").val().replace(/(^\s*)|(\s*$)/g, "");

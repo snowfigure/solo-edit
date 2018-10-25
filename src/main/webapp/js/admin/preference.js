@@ -61,6 +61,9 @@ admin.preference = {
                 $("#noticeBoard").val(preference.noticeBoard);
                 $("#footerContent").val(preference.footerContent);
                 $("#htmlHead").val(preference.htmlHead);
+                $("#cdnjQueryJS").val(preference.cdnjQueryJS);
+                $("#cdnIconfont").val(preference.cdnIconfont);
+                $("#bannerImageUrl").val(preference.bannerImageUrl);
                 $("#externalRelevantArticlesDisplayCount").val(preference.externalRelevantArticlesDisplayCount);
                 $("#relevantArticlesDisplayCount").val(preference.relevantArticlesDisplayCount);
                 $("#randomArticlesDisplayCount").val(preference.randomArticlesDisplayCount);
@@ -215,6 +218,9 @@ admin.preference = {
                 "noticeBoard": $("#noticeBoard").val(),
                 "footerContent": $("#footerContent").val(),
                 "htmlHead": $("#htmlHead").val(),
+                "cdnjQueryJS": $("#cdnjQueryJS").val(),
+                "cdnIconfont": $("#cdnIconfont").val(),
+                "bannerImageUrl": $("#bannerImageUrl").val(),
                 "externalRelevantArticlesDisplayCount": $("#externalRelevantArticlesDisplayCount").val(),
                 "relevantArticlesDisplayCount": $("#relevantArticlesDisplayCount").val(),
                 "randomArticlesDisplayCount": $("#randomArticlesDisplayCount").val(),

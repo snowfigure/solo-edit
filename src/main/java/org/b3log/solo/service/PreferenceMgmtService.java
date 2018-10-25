@@ -285,6 +285,22 @@ public class PreferenceMgmtService {
             htmlHeadOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_HTML_HEAD));
             optionRepository.update(Option.ID_C_HTML_HEAD, htmlHeadOpt);
 
+
+            final JSONObject cdnjQueryJsOpt = optionRepository.get(Option.ID_C_CDN_JQUERY_JS);
+            cdnjQueryJsOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_CDN_JQUERY_JS));
+            optionRepository.update(Option.ID_C_CDN_JQUERY_JS, cdnjQueryJsOpt);
+
+
+            final JSONObject cdnIconfontOpt = optionRepository.get(Option.ID_C_CDN_ICONFONT);
+            cdnIconfontOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_CDN_ICONFONT));
+            optionRepository.update(Option.ID_C_CDN_ICONFONT, cdnIconfontOpt);
+
+
+            final JSONObject bannerImageUrlOpt = optionRepository.get(Option.ID_C_BANNER_IMAGE_URL);
+            bannerImageUrlOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_BANNER_IMAGE_URL));
+            optionRepository.update(Option.ID_C_BANNER_IMAGE_URL, bannerImageUrlOpt);
+
+
             final JSONObject keyOfSoloOpt = optionRepository.get(Option.ID_C_KEY_OF_SOLO);
             keyOfSoloOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_KEY_OF_SOLO));
             optionRepository.update(Option.ID_C_KEY_OF_SOLO, keyOfSoloOpt);

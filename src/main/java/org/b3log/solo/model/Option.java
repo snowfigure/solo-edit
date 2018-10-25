@@ -165,6 +165,12 @@ public final class Option {
      */
     public static final String ID_C_HTML_HEAD = "htmlHead";
 
+
+    public static final String ID_C_CDN_JQUERY_JS = "cdnjQueryJS";
+
+    public static final String ID_C_CDN_ICONFONT = "cdnIconfont";
+
+    public static final String ID_C_BANNER_IMAGE_URL = "bannerImageUrl";
     /**
      * Key of meta keywords.
      */

@@ -50,7 +50,7 @@ ${loginLabel}
 
     <span id="tip">${resetMsg}</span>
 </div>
-<script type="text/javascript" src="${staticServePath}/js/lib/jquery/jquery.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="${cdnjQueryJS}" charset="utf-8"></script>
 <script type="text/javascript">
     (function() {
         $("#userEmail").focus();
