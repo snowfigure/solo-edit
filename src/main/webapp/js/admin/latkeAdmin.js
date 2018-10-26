@@ -273,7 +273,8 @@ $.extend(Admin.prototype, {
     }
 });
 
-var admin = new Admin();/*
+var admin = new Admin();
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -374,6 +375,7 @@ $.extend(SoloEditor.prototype, {
 admin.editors.articleEditor = {};
 admin.editors.abstractEditor = {};
 admin.editors.pageEditor = {};
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -501,6 +503,7 @@ admin.editors.tinyMCE = {
         tinyMCE.get(id).remove();
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -608,6 +611,7 @@ admin.editors.KindEditor = {
         this[id].remove();
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -915,7 +919,8 @@ admin.editors.CodeMirror = {
     this[id].toTextArea();
     $('.editor-toolbar').remove();
   }
-};/*
+};
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -1031,6 +1036,7 @@ $.extend(TablePaginate.prototype, {
         this.currentPage = currentPage;
     }
 });
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -1197,6 +1203,7 @@ admin.article = {
             if ($('#articleThumbnail').prop('checked')) {
                 var bgImage = $('.thumbnail__img').css('background-image');
                 articleContent = '![](' + bgImage.substring(5, bgImage.length - 2) + ')\n\n' + articleContent;
+                articleAbstract = '![](' + bgImage.substring(5, bgImage.length - 2) + ')\n\n' + articleAbstract;
             }
 
             var requestJSONObject = {
@@ -1208,7 +1215,7 @@ admin.article = {
                     "articlePermalink": $("#permalink").val(),
                     "articleIsPublished": articleIsPublished,
                     "articleSignId": signId,
-                    "postToCommunity": $("#postToCommunity").prop("checked"), //false, //
+                    "postToCommunity": $("#postToCommunity").prop("checked"),//false, //
                     "articleCommentable": $("#articleCommentable").prop("checked"),
                     "articleViewPwd": $("#viewPwd").val()
                 }
@@ -1275,6 +1282,7 @@ admin.article = {
             if ($('#articleThumbnail').prop('checked')) {
                 var bgImage = $('.thumbnail__img').css('background-image');
                 articleContent = '![](' + bgImage.substring(5, bgImage.length - 2) + ') \n\n' + articleContent;
+                articleAbstract = '![](' + bgImage.substring(5, bgImage.length - 2) + ') \n\n' + articleAbstract;
             }
             var requestJSONObject = {
                 "article": {
@@ -1374,7 +1382,7 @@ admin.article = {
                 $("#saveArticle").show();
             }
             if (this.status.articleHadBeenPublished) {
-                $("#postToCommunityPanel").hide();
+                //$("#postToCommunityPanel").hide();
             } else {
                 // 1.0.0 开始默认会发布到社区
                 // $("#postToCommunityPanel").show();
@@ -1387,7 +1395,7 @@ admin.article = {
             // $("#postToCommunityPanel").show();
         }
 
-        $("#postToCommunity").attr("checked", "checked");
+        $("#postToCommunity").attr("checked", "unchecked");
     },
     /**
      * @description 清除发布文章页面的输入框的内容
@@ -1410,8 +1418,8 @@ admin.article = {
         $("#tagCheckboxPanel").hide().find("span").removeClass("selected");
 
         $("#permalink").val("");
-        $("#articleCammentable").prop("checked", true);
-        $("#postToCommunity").prop("checked", true);
+        $("#articleCammentable").prop("checked", false);
+        $("#postToCommunity").prop("checked", false);
         $(".signs button").each(function (i) {
             if (i === 0) {
                 this.className = "selected";
@@ -1701,6 +1709,7 @@ function getUUID() {
     return ret;
 }
 ;
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -1833,6 +1842,7 @@ admin.comment = {
         }
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -1896,7 +1906,7 @@ admin.articleList = {
         this.tablePagination.initCommentsDialog();
         this.getList(page);
 
-        const that = this
+        that = this
         $('#articleListBtn').click(function () {
           that.getList(page);
         });
@@ -1989,7 +1999,8 @@ admin.register["article-list"] =  {
     "obj": admin.articleList,
     "init": admin.articleList.init,
     "refresh": admin.articleList.getList
-}/*
+}
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -2104,7 +2115,8 @@ admin.register["draft-list"] =  {
     "obj": admin.draftList,
     "init": admin.draftList.init,
     "refresh": admin.draftList.getList
-};/*
+};
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -2562,6 +2574,7 @@ admin.register["page-list"] = {
     "init": admin.pageList.init,
     "refresh": admin.pageList.getList
 }
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -2751,6 +2764,7 @@ admin.register.others = {
     admin.clearTip();
   }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -3103,7 +3117,8 @@ admin.register["link-list"] =  {
     "obj": admin.linkList,
     "init": admin.linkList.init,
     "refresh": admin.linkList.getList
-}/*
+}
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -3166,6 +3181,9 @@ admin.preference = {
                 $("#noticeBoard").val(preference.noticeBoard);
                 $("#footerContent").val(preference.footerContent);
                 $("#htmlHead").val(preference.htmlHead);
+                $("#cdnjQueryJS").val(preference.cdnjQueryJS);
+                $("#cdnIconfont").val(preference.cdnIconfont);
+                $("#bannerImageUrl").val(preference.bannerImageUrl);
                 $("#externalRelevantArticlesDisplayCount").val(preference.externalRelevantArticlesDisplayCount);
                 $("#relevantArticlesDisplayCount").val(preference.relevantArticlesDisplayCount);
                 $("#randomArticlesDisplayCount").val(preference.randomArticlesDisplayCount);
@@ -3320,6 +3338,9 @@ admin.preference = {
                 "noticeBoard": $("#noticeBoard").val(),
                 "footerContent": $("#footerContent").val(),
                 "htmlHead": $("#htmlHead").val(),
+                "cdnjQueryJS": $("#cdnjQueryJS").val(),
+                "cdnIconfont": $("#cdnIconfont").val(),
+                "bannerImageUrl": $("#bannerImageUrl").val(),
                 "externalRelevantArticlesDisplayCount": $("#externalRelevantArticlesDisplayCount").val(),
                 "relevantArticlesDisplayCount": $("#relevantArticlesDisplayCount").val(),
                 "randomArticlesDisplayCount": $("#randomArticlesDisplayCount").val(),
@@ -3402,6 +3423,7 @@ admin.register["preference"] = {
         admin.clearTip();
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -3580,6 +3602,7 @@ admin.register["plugin-list"] = {
         $("#loadMsg").text("");
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -3937,7 +3960,8 @@ admin.register["user-list"] = {
     "obj": admin.userList,
     "init": admin.userList.init,
     "refresh": admin.userList.getList
-}/*
+}
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -4307,7 +4331,8 @@ admin.register["category-list"] = {
     "obj": admin.categoryList,
     "init": admin.categoryList.init,
     "refresh": admin.categoryList.getList
-}/*
+}
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -4458,7 +4483,8 @@ admin.register["comment-list"] =  {
     "obj": admin.commentList,
     "init": admin.commentList.init,
     "refresh": admin.commentList.getList
-}/*
+}
+/*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
@@ -4594,6 +4620,7 @@ admin.plugin = {
         }
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com
@@ -4634,6 +4661,7 @@ admin.register.main =  {
         admin.clearTip();
     }
 };
+
 /*
  * Solo - A small and beautiful blogging system written in Java.
  * Copyright (c) 2010-2018, b3log.org & hacpai.com

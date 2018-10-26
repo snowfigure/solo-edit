@@ -69,6 +69,44 @@ function miniAdmin () {
 
 }
 
+function mergeLatkeAdmin() {
+    const jsJqueryAdmin = [
+        './src/main/webapp/js/admin/admin.js',
+        './src/main/webapp/js/admin/editor.js',
+        './src/main/webapp/js/admin/editorTinyMCE.js',
+        './src/main/webapp/js/admin/editorKindEditor.js',
+        './src/main/webapp/js/admin/editorCodeMirror.js',
+        './src/main/webapp/js/admin/tablePaginate.js',
+        './src/main/webapp/js/admin/article.js',
+        './src/main/webapp/js/admin/comment.js',
+        './src/main/webapp/js/admin/articleList.js',
+        './src/main/webapp/js/admin/draftList.js',
+        './src/main/webapp/js/admin/pageList.js',
+        './src/main/webapp/js/admin/others.js',
+        './src/main/webapp/js/admin/linkList.js',
+        './src/main/webapp/js/admin/preference.js',
+        './src/main/webapp/js/admin/pluginList.js',
+        './src/main/webapp/js/admin/userList.js',
+        './src/main/webapp/js/admin/categoryList.js',
+        './src/main/webapp/js/admin/commentList.js',
+        './src/main/webapp/js/admin/plugin.js',
+        './src/main/webapp/js/admin/main.js',
+        './src/main/webapp/js/admin/about.js'
+    ]
+
+    return gulp.src(jsJqueryAdmin).
+    pipe(concat('latkeAdmin.js')).
+    pipe(gulp.dest('./src/main/webapp/js/admin/'))
+}
+
+function miniLatkeAdmin() {
+
+    return gulp.src('./src/main/webapp/js/admin/latkeAdmin.js').
+      pipe(uglify({output: {ascii_only: true}})).
+      pipe(concat('latkeAdmin.min.js')).
+      pipe(gulp.dest('./src/main/webapp/js/admin/'))
+}
+
 function miniPjax (){
   // concat js
   const jsPjax = [
@@ -104,5 +142,9 @@ function cleanProcess () {
 }
 
 gulp.task('default',
-  gulp.series(cleanProcess, sassProcess, gulp.parallel(scripts, styles),
-    gulp.parallel(miniPjax, miniAdmin)))
+  gulp.series(cleanProcess, sassProcess,
+      gulp.parallel(scripts, styles),
+      gulp.parallel(miniPjax, miniAdmin, mergeLatkeAdmin),
+      gulp.parallel(miniLatkeAdmin)
+  )
+)
