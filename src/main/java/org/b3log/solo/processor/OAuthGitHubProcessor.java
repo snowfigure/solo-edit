@@ -72,12 +72,12 @@ public class OAuthGitHubProcessor {
     /**
      * Client id.
      */
-    private static final String CLIENT_ID = "cee5d2882b06f871a957";
+    private static final String CLIENT_ID = "22a4ba08d3cc4b1ff189";
 
     /**
      * Client id.
      */
-    private static final String CLIENT_SECRET = "f4b61c16b2f16a5a0d448d7f63a8d44c5e1f5cfc";
+    private static final String CLIENT_SECRET = "db4a1308ff6b026e4f854f01172450ac339ef0fd";
 
     /**
      * OAuth parameters - state.
