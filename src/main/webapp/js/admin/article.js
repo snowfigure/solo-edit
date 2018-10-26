@@ -95,7 +95,7 @@ admin.article = {
                 $("#viewPwd").val(result.article.articleViewPwd);
 
                 $("#articleCommentable").prop("checked", result.article.articleCommentable);
-
+                //$("#postToCommunity").prop("checked", result.article.articleHadBeenPublished);
                 // signs
                 var signs = result.article.signs;
                 $(".signs button").each(function (i) {
@@ -344,9 +344,11 @@ admin.article = {
             }
             if (this.status.articleHadBeenPublished) {
                 //$("#postToCommunityPanel").hide();
+                //$("#postToCommunity").attr("checked", "checked");
             } else {
                 // 1.0.0 开始默认会发布到社区
                 // $("#postToCommunityPanel").show();
+                // $("#postToCommunity").attr("checked", "unchecked");
             }
         } else {
             $("#submitArticle").show();
@@ -356,7 +358,7 @@ admin.article = {
             // $("#postToCommunityPanel").show();
         }
 
-        $("#postToCommunity").attr("checked", "unchecked");
+
     },
     /**
      * @description 清除发布文章页面的输入框的内容
