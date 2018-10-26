@@ -60,7 +60,8 @@ function miniAdmin () {
     './src/main/webapp/js/overwrite/codemirror/addon/hint/show-hint.js',
     './src/main/webapp/js/lib/CodeMirrorEditor/editor.js',
     './src/main/webapp/js/lib/to-markdown.js',
-    './src/main/webapp/js/lib/highlight.js-9.6.0/highlight.pack.js']
+    './src/main/webapp/js/lib/highlight.js-9.6.0/highlight.pack.js'
+  ]
   return gulp.src(jsJqueryUpload).
     pipe(uglify({output: {ascii_only: true}})).
     // https://github.com/b3log/solo/issues/12522

@@ -34,9 +34,7 @@ import org.b3log.solo.util.Skins;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 import static org.b3log.solo.model.Skin.*;
 import static org.b3log.solo.util.Skins.getSkinDirNames;
@@ -219,41 +217,11 @@ public class PreferenceMgmtService {
             LOGGER.log(Level.DEBUG, "Current locale[string={0}]", localeString);
             Latkes.setLocale(new Locale(Locales.getLanguage(localeString), Locales.getCountry(localeString)));
 
+
+
             final JSONObject adminEmailOpt = optionRepository.get(Option.ID_C_ADMIN_EMAIL);
             adminEmailOpt.put(Option.OPTION_VALUE, adminEmail);
             optionRepository.update(Option.ID_C_ADMIN_EMAIL, adminEmailOpt);
-
-            final JSONObject allowVisitDraftViaPermalinkOpt = optionRepository.get(Option.ID_C_ALLOW_VISIT_DRAFT_VIA_PERMALINK);
-            allowVisitDraftViaPermalinkOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_ALLOW_VISIT_DRAFT_VIA_PERMALINK));
-            optionRepository.update(Option.ID_C_ALLOW_VISIT_DRAFT_VIA_PERMALINK, allowVisitDraftViaPermalinkOpt);
-
-            final JSONObject allowRegisterOpt = optionRepository.get(Option.ID_C_ALLOW_REGISTER);
-            allowRegisterOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_ALLOW_REGISTER));
-            optionRepository.update(Option.ID_C_ALLOW_REGISTER, allowRegisterOpt);
-
-            final JSONObject articleListDisplayCountOpt = optionRepository.get(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT);
-            articleListDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT));
-            optionRepository.update(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT, articleListDisplayCountOpt);
-
-            final JSONObject articleListPaginationWindowSizeOpt = optionRepository.get(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);
-            articleListPaginationWindowSizeOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE));
-            optionRepository.update(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE, articleListPaginationWindowSizeOpt);
-
-            final JSONObject articleListStyleOpt = optionRepository.get(Option.ID_C_ARTICLE_LIST_STYLE);
-            articleListStyleOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_ARTICLE_LIST_STYLE));
-            optionRepository.update(Option.ID_C_ARTICLE_LIST_STYLE, articleListStyleOpt);
-
-            final JSONObject blogSubtitleOpt = optionRepository.get(Option.ID_C_BLOG_SUBTITLE);
-            blogSubtitleOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_BLOG_SUBTITLE));
-            optionRepository.update(Option.ID_C_BLOG_SUBTITLE, blogSubtitleOpt);
-
-            final JSONObject blogTitleOpt = optionRepository.get(Option.ID_C_BLOG_TITLE);
-            blogTitleOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_BLOG_TITLE));
-            optionRepository.update(Option.ID_C_BLOG_TITLE, blogTitleOpt);
-
-            final JSONObject commentableOpt = optionRepository.get(Option.ID_C_COMMENTABLE);
-            commentableOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_COMMENTABLE));
-            optionRepository.update(Option.ID_C_COMMENTABLE, commentableOpt);
 
             final JSONObject editorTypeOpt = optionRepository.get(Option.ID_C_EDITOR_TYPE);
             // https://github.com/b3log/solo/issues/12285
@@ -261,117 +229,65 @@ public class PreferenceMgmtService {
             editorTypeOpt.put(Option.OPTION_VALUE, Option.DefaultPreference.DEFAULT_EDITOR_TYPE);
             optionRepository.update(Option.ID_C_EDITOR_TYPE, editorTypeOpt);
 
-            final JSONObject enableArticleUpdateHintOpt = optionRepository.get(Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT);
-            enableArticleUpdateHintOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT));
-            optionRepository.update(Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT, enableArticleUpdateHintOpt);
 
-            final JSONObject externalRelevantArticlesDisplayCountOpt = optionRepository.get(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT);
-            externalRelevantArticlesDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT, externalRelevantArticlesDisplayCountOpt);
+            final List<String> option_list = new ArrayList<>();
+            option_list.add(Option.ID_C_ALLOW_VISIT_DRAFT_VIA_PERMALINK);
+            option_list.add(Option.ID_C_ALLOW_REGISTER);
 
-            final JSONObject feedOutputCntOpt = optionRepository.get(Option.ID_C_FEED_OUTPUT_CNT);
-            feedOutputCntOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_FEED_OUTPUT_CNT));
-            optionRepository.update(Option.ID_C_FEED_OUTPUT_CNT, feedOutputCntOpt);
+            option_list.add(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT);
+            option_list.add(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);
+            option_list.add(Option.ID_C_ARTICLE_LIST_STYLE);
 
-            final JSONObject feedOutputModeOpt = optionRepository.get(Option.ID_C_FEED_OUTPUT_MODE);
-            feedOutputModeOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_FEED_OUTPUT_MODE));
-            optionRepository.update(Option.ID_C_FEED_OUTPUT_MODE, feedOutputModeOpt);
+            option_list.add(Option.ID_C_BLOG_SUBTITLE);
+            option_list.add(Option.ID_C_BLOG_TITLE);
 
-            final JSONObject footerContentOpt = optionRepository.get(Option.ID_C_FOOTER_CONTENT);
-            footerContentOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_FOOTER_CONTENT));
-            optionRepository.update(Option.ID_C_FOOTER_CONTENT, footerContentOpt);
+            option_list.add(Option.ID_C_COMMENTABLE);
+            option_list.add(Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT);
+            option_list.add(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT);
+            option_list.add(Option.ID_C_FEED_OUTPUT_CNT);
+            option_list.add(Option.ID_C_FEED_OUTPUT_MODE);
+            option_list.add(Option.ID_C_FOOTER_CONTENT);
 
-            final JSONObject htmlHeadOpt = optionRepository.get(Option.ID_C_HTML_HEAD);
-            htmlHeadOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_HTML_HEAD));
-            optionRepository.update(Option.ID_C_HTML_HEAD, htmlHeadOpt);
+            option_list.add(Option.ID_C_HTML_HEAD);
+            option_list.add(Option.ID_C_CDN_JQUERY_JS);
+            option_list.add(Option.ID_C_CDN_ICONFONT);
+            option_list.add(Option.ID_C_BANNER_IMAGE_URL);
+
+            option_list.add(Option.ID_C_BAIDU_HM_CODE);
+            option_list.add(Option.ID_C_BAIDU_HM_ENABLE);
+            option_list.add(Option.ID_C_BAIDU_PUSH_ENABLE);
+
+            option_list.add(Option.ID_C_KEY_OF_SOLO);
+            option_list.add(Option.ID_C_LOCALE_STRING);
+            option_list.add(Option.ID_C_META_DESCRIPTION);
+            option_list.add(Option.ID_C_META_KEYWORDS);
+
+            option_list.add(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT);
+            option_list.add(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT);
+            option_list.add(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT);
+
+            option_list.add(Option.ID_C_NOTICE_BOARD);
+            option_list.add(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT);
+            option_list.add(Option.ID_C_RECENT_ARTICLE_DISPLAY_CNT);
+            option_list.add(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT);
+            option_list.add(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT);
+
+            option_list.add(Option.ID_C_SIGNS);
+            option_list.add(Option.ID_C_SKIN_DIR_NAME);
+            option_list.add(Option.ID_C_SKIN_NAME);
+            option_list.add(Option.ID_C_SKINS);
+
+            option_list.add(Option.ID_C_TIME_ZONE_ID);
+            option_list.add(Option.ID_C_VERSION);
 
 
-            final JSONObject cdnjQueryJsOpt = optionRepository.get(Option.ID_C_CDN_JQUERY_JS);
-            cdnjQueryJsOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_CDN_JQUERY_JS));
-            optionRepository.update(Option.ID_C_CDN_JQUERY_JS, cdnjQueryJsOpt);
+            for (String key: option_list) {
 
-
-            final JSONObject cdnIconfontOpt = optionRepository.get(Option.ID_C_CDN_ICONFONT);
-            cdnIconfontOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_CDN_ICONFONT));
-            optionRepository.update(Option.ID_C_CDN_ICONFONT, cdnIconfontOpt);
-
-
-            final JSONObject bannerImageUrlOpt = optionRepository.get(Option.ID_C_BANNER_IMAGE_URL);
-            bannerImageUrlOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_BANNER_IMAGE_URL));
-            optionRepository.update(Option.ID_C_BANNER_IMAGE_URL, bannerImageUrlOpt);
-
-
-            final JSONObject keyOfSoloOpt = optionRepository.get(Option.ID_C_KEY_OF_SOLO);
-            keyOfSoloOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_KEY_OF_SOLO));
-            optionRepository.update(Option.ID_C_KEY_OF_SOLO, keyOfSoloOpt);
-
-            final JSONObject localeStringOpt = optionRepository.get(Option.ID_C_LOCALE_STRING);
-            localeStringOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_LOCALE_STRING));
-            optionRepository.update(Option.ID_C_LOCALE_STRING, localeStringOpt);
-
-            final JSONObject metaDescriptionOpt = optionRepository.get(Option.ID_C_META_DESCRIPTION);
-            metaDescriptionOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_META_DESCRIPTION));
-            optionRepository.update(Option.ID_C_META_DESCRIPTION, metaDescriptionOpt);
-
-            final JSONObject metaKeywordsOpt = optionRepository.get(Option.ID_C_META_KEYWORDS);
-            metaKeywordsOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_META_KEYWORDS));
-            optionRepository.update(Option.ID_C_META_KEYWORDS, metaKeywordsOpt);
-
-            final JSONObject mostCommentArticleDisplayCountOpt = optionRepository.get(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT);
-            mostCommentArticleDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT, mostCommentArticleDisplayCountOpt);
-
-            final JSONObject mostUsedTagDisplayCountOpt = optionRepository.get(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT);
-            mostUsedTagDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT, mostUsedTagDisplayCountOpt);
-
-            final JSONObject mostViewArticleDisplayCountOpt = optionRepository.get(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT);
-            mostViewArticleDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT, mostViewArticleDisplayCountOpt);
-
-            final JSONObject noticeBoardOpt = optionRepository.get(Option.ID_C_NOTICE_BOARD);
-            noticeBoardOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_NOTICE_BOARD));
-            optionRepository.update(Option.ID_C_NOTICE_BOARD, noticeBoardOpt);
-
-            final JSONObject randomArticlesDisplayCountOpt = optionRepository.get(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT);
-            randomArticlesDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT, randomArticlesDisplayCountOpt);
-
-            final JSONObject recentArticleDisplayCountOpt = optionRepository.get(Option.ID_C_RECENT_ARTICLE_DISPLAY_CNT);
-            recentArticleDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_RECENT_ARTICLE_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_RECENT_ARTICLE_DISPLAY_CNT, recentArticleDisplayCountOpt);
-
-            final JSONObject recentCommentDisplayCountOpt = optionRepository.get(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT);
-            recentCommentDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT, recentCommentDisplayCountOpt);
-
-            final JSONObject relevantArticlesDisplayCountOpt = optionRepository.get(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT);
-            relevantArticlesDisplayCountOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT));
-            optionRepository.update(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT, relevantArticlesDisplayCountOpt);
-
-            final JSONObject signsOpt = optionRepository.get(Option.ID_C_SIGNS);
-            signsOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_SIGNS));
-            optionRepository.update(Option.ID_C_SIGNS, signsOpt);
-
-            final JSONObject skinDirNameOpt = optionRepository.get(Option.ID_C_SKIN_DIR_NAME);
-            skinDirNameOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_SKIN_DIR_NAME));
-            optionRepository.update(Option.ID_C_SKIN_DIR_NAME, skinDirNameOpt);
-
-            final JSONObject skinNameOpt = optionRepository.get(Option.ID_C_SKIN_NAME);
-            skinNameOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_SKIN_NAME));
-            optionRepository.update(Option.ID_C_SKIN_NAME, skinNameOpt);
-
-            final JSONObject skinsOpt = optionRepository.get(Option.ID_C_SKINS);
-            skinsOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_SKINS));
-            optionRepository.update(Option.ID_C_SKINS, skinsOpt);
-
-            final JSONObject timeZoneIdOpt = optionRepository.get(Option.ID_C_TIME_ZONE_ID);
-            timeZoneIdOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_TIME_ZONE_ID));
-            optionRepository.update(Option.ID_C_TIME_ZONE_ID, timeZoneIdOpt);
-
-            final JSONObject versionOpt = optionRepository.get(Option.ID_C_VERSION);
-            versionOpt.put(Option.OPTION_VALUE, preference.optString(Option.ID_C_VERSION));
-            optionRepository.update(Option.ID_C_VERSION, versionOpt);
+                final JSONObject optionValueOpt = optionRepository.get(key);
+                optionValueOpt.put(Option.OPTION_VALUE, preference.optString(key));
+                optionRepository.update(key, optionValueOpt);
+            }
+            
 
             transaction.commit();
         } catch (final Exception e) {

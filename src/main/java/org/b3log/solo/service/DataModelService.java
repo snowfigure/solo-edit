@@ -638,9 +638,15 @@ public class DataModelService {
             dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
             dataModel.put(Option.ID_C_BLOG_SUBTITLE, preference.getString(Option.ID_C_BLOG_SUBTITLE));
             dataModel.put(Option.ID_C_HTML_HEAD, preference.getString(Option.ID_C_HTML_HEAD));
+
             dataModel.put(Option.ID_C_CDN_ICONFONT, preference.getString(Option.ID_C_CDN_ICONFONT));
             dataModel.put(Option.ID_C_CDN_JQUERY_JS, preference.getString(Option.ID_C_CDN_JQUERY_JS));
             dataModel.put(Option.ID_C_BANNER_IMAGE_URL, preference.getString(Option.ID_C_BANNER_IMAGE_URL));
+
+            dataModel.put(Option.ID_C_BAIDU_HM_CODE, preference.getString(Option.ID_C_BAIDU_HM_CODE));
+            dataModel.put(Option.ID_C_BAIDU_HM_ENABLE, preference.getString(Option.ID_C_BAIDU_HM_ENABLE));
+            dataModel.put(Option.ID_C_BAIDU_PUSH_ENABLE, preference.getString(Option.ID_C_BAIDU_PUSH_ENABLE));
+
             String metaKeywords = preference.getString(Option.ID_C_META_KEYWORDS);
             if (StringUtils.isBlank(metaKeywords)) {
                 metaKeywords = "";

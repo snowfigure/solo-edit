@@ -45,6 +45,11 @@
             </div>
         </li>
         <li>
+            <div id="tabPreference_baidu">
+                <a href="#toos/preference/baidu">${baiduSiteLabel}</a>
+            </div>
+        </li>
+        <li>
             <div id="tabPreference_solo">
                 <a href="#tools/preference/solo">B3log</a>
             </div>
@@ -203,6 +208,26 @@
         <input id="qiniuDomain" type="text"/>
         <label for="qiniuBucket">${bucket1Label}</label>
         <input id="qiniuBucket" type="text"/>
+    </div>
+
+    <div id="tabPreference_baidu", class="form">
+        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+
+        <label for="baiduHMCode">${baiduHMCodeLabel}</label>
+        <input id="baiduHMCode" type="text"/>
+
+        <label for="baiduPushEnable">${baiduPushEnableLabel}</label>
+        <input id="baiduPushEnable" type="checkbox" class="normalInput"/>
+
+        <label for="baiduHMEnable">${baiduHMEnableLabel}</label>
+        <input id="baiduHMEnable" type="checkbox" class="normalInput"/>
+
+
+
+        <br><br>
+        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
     </div>
 </div>
 ${plugins}

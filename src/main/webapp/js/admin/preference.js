@@ -68,11 +68,15 @@ admin.preference = {
                 $("#relevantArticlesDisplayCount").val(preference.relevantArticlesDisplayCount);
                 $("#randomArticlesDisplayCount").val(preference.randomArticlesDisplayCount);
                 $("#keyOfSolo").val(preference.keyOfSolo);
+                $("#baiduHMCode").val(preference.baiduHMCode);
 
                 "true" === preference.enableArticleUpdateHint ? $("#enableArticleUpdateHint").attr("checked", "checked") : $("#enableArticleUpdateHint").removeAttr("checked");
                 "true" === preference.allowVisitDraftViaPermalink ? $("#allowVisitDraftViaPermalink").attr("checked", "checked") : $("allowVisitDraftViaPermalink").removeAttr("checked");
                 "true" === preference.allowRegister ? $("#allowRegister").attr("checked", "checked") : $("#allowRegister").removeAttr("checked");
                 "true" === preference.commentable ? $("#commentable").attr("checked", "checked") : $("commentable").removeAttr("checked");
+
+                "true" === preference.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("baiduPushEnable").removeAttr("checked");
+                "true" === preference.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("baiduHMEnable").removeAttr("checked");
 
                 admin.preference.locale = preference.localeString;
                 admin.preference.editorType = preference.editorType;
@@ -233,7 +237,11 @@ admin.preference = {
                 "feedOutputMode": $("#feedOutputMode").val(),
                 "feedOutputCnt": $("#feedOutputCnt").val(),
                 "commentable": $("#commentable").prop("checked"),
-                "allowRegister": $("#allowRegister").prop("checked")
+                "allowRegister": $("#allowRegister").prop("checked"),
+
+                "baiduPushEnable": $("#baiduPushEnable").prop("checked"),
+                "baiduHMEnable": $("#baiduHMEnable").prop("checked"),
+                "baiduHMCode": $("#baiduHMCode").val(),
             }
         };
 

@@ -171,6 +171,12 @@ public final class Option {
     public static final String ID_C_CDN_ICONFONT = "cdnIconfont";
 
     public static final String ID_C_BANNER_IMAGE_URL = "bannerImageUrl";
+
+    public static final String ID_C_BAIDU_PUSH_ENABLE = "baiduPushEnable";
+
+    public static final String ID_C_BAIDU_HM_ENABLE = "baiduHMEnable";
+
+    public static final String ID_C_BAIDU_HM_CODE = "baiduHMCode";
     /**
      * Key of meta keywords.
      */
