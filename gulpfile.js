@@ -120,7 +120,14 @@ function miniPjax (){
     pipe(gulp.dest('./src/main/webapp/js/lib/compress/'))
 }
 
-function scripts () {
+function common_scripts() {
+    return gulp.src('./src/main/webapp/js/*.js').
+        pipe(rename({suffix:'.min'})).
+        pipe(uglify()).
+        pipe(gulp.dest('./src/main/webapp/js/'))
+}
+
+function skin_scripts () {
   // minify js
   return gulp.src('./src/main/webapp/skins/*/js/*.js').
     pipe(rename({suffix: '.min'})).
@@ -128,7 +135,7 @@ function scripts () {
     pipe(gulp.dest('./src/main/webapp/skins/'))
 }
 
-function styles () {
+function skin_styles () {
   // minify css
   return gulp.src('./src/main/webapp/skins/*/css/*.css').
     pipe(rename({suffix: '.min'})).
@@ -144,8 +151,8 @@ function cleanProcess () {
 
 gulp.task('default',
   gulp.series(cleanProcess, sassProcess,
-      gulp.parallel(scripts, styles),
+      gulp.parallel(skin_scripts, skin_styles),
       gulp.parallel(miniPjax, miniAdmin, mergeLatkeAdmin),
-      gulp.parallel(miniLatkeAdmin)
+      gulp.parallel(common_scripts, miniLatkeAdmin)
   )
 )
