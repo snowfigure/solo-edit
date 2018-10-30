@@ -220,7 +220,7 @@
         <input id="qiniuBucket" type="text"/>
     </div>
     <div id="tabPreferencePanel_baidu" class="none form">
-        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
         <div class="clear"></div>
 
         <label for="baiduHMCode">${baiduHMCodeLabel}</label>
@@ -233,7 +233,7 @@
         <input id="baiduHMEnable" type="checkbox" class="normalInput"/>
 
         <br><br>
-        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>
 
@@ -259,7 +259,7 @@
     </div>
 
     <div id="tabPreferencePanel_wechat" class="none form">
-        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
         <div class="clear"></div>
 
         <label for="wechatAppID">${wechatAppIDLabel}</label>
@@ -282,9 +282,31 @@
         </select>
 
         <br><br>
+        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+    </div>
+
+    <div id="tabPreferencePanel_webHtmlExtend" class="none form">
+        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+
+        <label for="htmlHead">${htmlhead1Label}</label>
+        <textarea rows="6" id="htmlHead"></textarea>
+
+        <label for="cdnjQueryJS">${cdnjQueryJSLabel}</label>
+        <textarea rows="2" id="cdnjQueryJS"></textarea>
+
+        <label for="cdnIconfont">${cdnIconfontLabel}</label>
+        <textarea rows="2" id="cdnIconfont"></textarea>
+
+        <label for="bannerImageUrl">${bannerImageUrlLabel}</label>
+        <textarea rows="2" id="bannerImageUrl"></textarea>
+
+        <br><br>
         <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>
+
 
 
 </div>

@@ -464,35 +464,32 @@ public class PreferenceConsole {
                 domain = "http://" + domain;
             }
 
-            final List<String> option_list = new ArrayList<>();
-            option_list.add(Option.ID_C_QINIU_ACCESS_KEY);
-            option_list.add(Option.ID_C_QINIU_SECRET_KEY);
-            option_list.add(Option.ID_C_QINIU_DOMAIN);
-            option_list.add(Option.ID_C_QINIU_BUCKET);
+            final List<String> option_list_qiniu = new ArrayList<>();
+            option_list_qiniu.add(Option.ID_C_QINIU_ACCESS_KEY);
+            option_list_qiniu.add(Option.ID_C_QINIU_SECRET_KEY);
+            option_list_qiniu.add(Option.ID_C_QINIU_DOMAIN);
+            option_list_qiniu.add(Option.ID_C_QINIU_BUCKET);
+
 
             /*百度统计*/
-            option_list.add(Option.ID_C_BAIDU_HM_CODE);
-            option_list.add(Option.ID_C_BAIDU_HM_ENABLE);
-            option_list.add(Option.ID_C_BAIDU_PUSH_ENABLE);
+            final List<String> option_list_baidu = new ArrayList<>();
+            option_list_baidu.add(Option.ID_C_BAIDU_HM_CODE);
+            option_list_baidu.add(Option.ID_C_BAIDU_HM_ENABLE);
+            option_list_baidu.add(Option.ID_C_BAIDU_PUSH_ENABLE);
 
 
             /*微信公众号*/
-            option_list.add(Option.ID_C_WECHAT_APP_ID);
-            option_list.add(Option.ID_C_WECHAT_APP_SECERT);
-            option_list.add(Option.ID_C_WECHAT_APP_ENCODING_AES_KEY);
-            option_list.add(Option.ID_C_WECHAT_TOKEN);
-            option_list.add(Option.ID_C_WECHAT_MSG_ENCODE_MODE);
+            final List<String> option_list_wechat = new ArrayList<>();
+            option_list_wechat.add(Option.ID_C_WECHAT_APP_ID);
+            option_list_wechat.add(Option.ID_C_WECHAT_APP_SECERT);
+            option_list_wechat.add(Option.ID_C_WECHAT_APP_ENCODING_AES_KEY);
+            option_list_wechat.add(Option.ID_C_WECHAT_TOKEN);
+            option_list_wechat.add(Option.ID_C_WECHAT_MSG_ENCODE_MODE);
 
-            for (String key: option_list) {
 
-                final JSONObject jsonObject = new JSONObject();
-                jsonObject.put(Keys.OBJECT_ID, key);
-                jsonObject.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_QINIU);
-                jsonObject.put(Option.OPTION_VALUE, requestJSONObject.optString(key));
-
-                optionMgmtService.addOrUpdateOption(jsonObject);
-            }
-
+            updateCategory(option_list_qiniu, Option.CATEGORY_C_QINIU, requestJSONObject);
+            updateCategory(option_list_baidu, Option.CATEGORY_C_BAIDU, requestJSONObject);
+            updateCategory(option_list_wechat, Option.CATEGORY_C_WECHAT, requestJSONObject);
 
             ret.put(Keys.STATUS_CODE, true);
             ret.put(Keys.MSG, langPropsService.get("updateSuccLabel"));
@@ -505,6 +502,22 @@ public class PreferenceConsole {
             final JSONObject jsonObject = new JSONObject().put(Keys.STATUS_CODE, false);
             renderer.setJSONObject(jsonObject);
             jsonObject.put(Keys.MSG, e.getMessage());
+        }
+    }
+
+    private void updateCategory(final List<String> option_list, final String category, final JSONObject requestJSONObject) throws  ServiceException {
+        try {
+            for (String key : option_list) {
+
+                final JSONObject jsonObject = new JSONObject();
+                jsonObject.put(Keys.OBJECT_ID, key);
+                jsonObject.put(Option.OPTION_CATEGORY, category);
+                jsonObject.put(Option.OPTION_VALUE, requestJSONObject.optString(key));
+
+                optionMgmtService.addOrUpdateOption(jsonObject);
+            }
+        }catch (final ServiceException e) {
+            throw e;
         }
     }
 

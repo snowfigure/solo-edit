@@ -1,0 +1,1 @@
+package org.b3log.solo.service.wechat;

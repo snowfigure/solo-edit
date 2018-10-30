@@ -92,9 +92,16 @@ public class PreferenceQueryService {
             final JSONObject ret = optionQueryService.getOptions(Option.CATEGORY_C_PREFERENCE);
             final JSONObject baidu = optionQueryService.getOptions(Option.CATEGORY_C_BAIDU);
 
-            ret.put(Option.ID_C_BAIDU_PUSH_ENABLE, baidu.optString(Option.ID_C_BAIDU_PUSH_ENABLE));
-            ret.put(Option.ID_C_BAIDU_HM_ENABLE, baidu.optString(Option.ID_C_BAIDU_HM_ENABLE));
-            ret.put(Option.ID_C_BAIDU_HM_CODE, baidu.optString(Option.ID_C_BAIDU_HM_CODE));
+            if(null == baidu){
+                ret.put(Option.ID_C_BAIDU_PUSH_ENABLE, "false");
+                ret.put(Option.ID_C_BAIDU_HM_ENABLE, "false");
+                ret.put(Option.ID_C_BAIDU_HM_CODE, "");
+            }
+            else{
+                ret.put(Option.ID_C_BAIDU_PUSH_ENABLE, baidu.optString(Option.ID_C_BAIDU_PUSH_ENABLE));
+                ret.put(Option.ID_C_BAIDU_HM_ENABLE, baidu.optString(Option.ID_C_BAIDU_HM_ENABLE));
+                ret.put(Option.ID_C_BAIDU_HM_CODE, baidu.optString(Option.ID_C_BAIDU_HM_CODE));
+            }
 
             return ret;
         } catch (final RepositoryException e) {

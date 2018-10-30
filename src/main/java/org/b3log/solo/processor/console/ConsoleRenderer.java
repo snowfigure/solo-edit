@@ -18,9 +18,15 @@
 package org.b3log.solo.processor.console;
 
 import freemarker.template.Template;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.b3log.latke.Keys;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.renderer.AbstractFreeMarkerRenderer;
 import org.b3log.solo.util.Skins;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.StringWriter;
+import java.util.Map;
 
 /**
  * <a href="http://freemarker.org">FreeMarker</a> HTTP response renderer for administrator console and initialization rendering.
@@ -42,5 +48,32 @@ public final class ConsoleRenderer extends AbstractFreeMarkerRenderer {
 
     @Override
     protected void afterRender(final HTTPRequestContext context) {
+    }
+
+    /**
+     * Processes the specified FreeMarker template with the specified request, data model.
+     *
+     * @param request   the specified request
+     * @param dataModel the specified data model
+     * @param template  the specified FreeMarker template
+     * @return generated HTML
+     * @throws Exception exception
+     */
+    @Override
+    protected String genHTML(final HttpServletRequest request, final Map<String, Object> dataModel, final Template template)
+            throws Exception {
+        final StringWriter stringWriter = new StringWriter();
+        template.setOutputEncoding("UTF-8");
+        template.process(dataModel, stringWriter);
+
+        final StringBuilder pageContentBuilder = new StringBuilder(stringWriter.toString());
+        final long endimeMillis = System.currentTimeMillis();
+        final String dateString = DateFormatUtils.format(endimeMillis, "yyyy/MM/dd HH:mm:ss");
+        final long startTimeMillis = (Long) request.getAttribute(Keys.HttpRequest.START_TIME_MILLIS);
+        final String msg = String.format("\n<!-- Generated in %1$dms, %2$s -->",
+                endimeMillis - startTimeMillis, dateString);
+        pageContentBuilder.append(msg);
+
+        return pageContentBuilder.toString();
     }
 }

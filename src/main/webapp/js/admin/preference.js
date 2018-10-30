@@ -32,7 +32,6 @@ admin.preference = {
      */
     init: function () {
         $("#tabPreference").tabs();
-
         $.ajax({
             url: latkeConfig.servePath + "/console/preference/",
             type: "GET",
@@ -138,15 +137,15 @@ admin.preference = {
 
                 /*百度参数*/
                 $("#baiduHMCode").val(result.baidu.baiduHMCode);
-                "true" === preference.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("baiduPushEnable").removeAttr("checked");
-                "true" === preference.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("baiduHMEnable").removeAttr("checked");
+                "true" === result.baidu.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("baiduPushEnable").removeAttr("checked");
+                "true" === result.baidu.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("baiduHMEnable").removeAttr("checked");
 
                 /*微信参数*/
                 $("#wechatAppID").val(result.wechat.wechatAppID);
                 $("#wechatAppSecret").val(result.wechat.wechatAppSecret);
                 $("#wechatAppEncodingAESKey").val(result.wechat.wechatAppEncodingAESKey);
                 $("#wechatToken").val(result.wechat.wechatToken);
-                $("#wechatMsgEncodeMode").val(preference.wechatMsgEncodeMode);
+                $("#wechatMsgEncodeMode").val(result.wechat.wechatMsgEncodeMode);
             }
         });
     },
