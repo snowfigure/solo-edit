@@ -138,7 +138,6 @@ public class TagProcessor {
             final String tagId = tag.getString(Keys.OBJECT_ID);
 
             final JSONObject preference = preferenceQueryService.getPreference();
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
 
             final int pageSize = preference.getInt(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT);
             final int windowSize = preference.getInt(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);

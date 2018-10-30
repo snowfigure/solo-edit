@@ -190,20 +190,10 @@ public class PreferenceMgmtService {
             final String skinName = Latkes.getSkinName(skinDirName);
 
             preference.put(Skin.SKIN_NAME, skinName);
-            final Set<String> skinDirNames = Skins.getSkinDirNames();
-            final JSONArray skinArray = new JSONArray();
 
-            for (final String dirName : skinDirNames) {
-                final JSONObject skin = new JSONObject();
-                skinArray.put(skin);
-
-                final String name = Latkes.getSkinName(dirName);
-                skin.put(Skin.SKIN_NAME, name);
-                skin.put(Skin.SKIN_DIR_NAME, dirName);
-            }
+            final JSONArray skinArray = Skins.getSkinsArray();
 
             preference.put(Skin.SKINS, skinArray.toString());
-
             preference.put(Option.ID_C_SIGNS, preference.get(Option.ID_C_SIGNS).toString());
 
             final JSONObject oldPreference = preferenceQueryService.getPreference();
@@ -248,16 +238,22 @@ public class PreferenceMgmtService {
             option_list.add(Option.ID_C_FEED_OUTPUT_MODE);
             option_list.add(Option.ID_C_FOOTER_CONTENT);
 
+            /*页面标签*/
             option_list.add(Option.ID_C_HTML_HEAD);
             option_list.add(Option.ID_C_CDN_JQUERY_JS);
             option_list.add(Option.ID_C_CDN_ICONFONT);
             option_list.add(Option.ID_C_BANNER_IMAGE_URL);
 
-            option_list.add(Option.ID_C_BAIDU_HM_CODE);
-            option_list.add(Option.ID_C_BAIDU_HM_ENABLE);
-            option_list.add(Option.ID_C_BAIDU_PUSH_ENABLE);
 
+
+
+            /*solo*/
             option_list.add(Option.ID_C_KEY_OF_SOLO);
+            option_list.add(Option.ID_C_ENABLE_SEND_ARTICLE_TO_B3);
+
+
+            option_list.add(Option.ID_C_ENABLE_SEND_MAIL);
+
             option_list.add(Option.ID_C_LOCALE_STRING);
             option_list.add(Option.ID_C_META_DESCRIPTION);
             option_list.add(Option.ID_C_META_KEYWORDS);

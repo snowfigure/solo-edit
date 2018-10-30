@@ -162,33 +162,15 @@ public class AdminConsole {
 
 
         try {
-            String footerContent = "";
-            final JSONObject opt = optionQueryService.getOptionById(Option.ID_C_FOOTER_CONTENT);
-            if (null != opt) {
-                footerContent = opt.optString(Option.OPTION_VALUE);
-            }
 
             final JSONObject preference = preferenceQueryService.getPreference();
 
             dataModelService.fillCommon(request, response, dataModel, preference);
+            dataModelService.fillMinified(dataModel);
 
-            dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
-            dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
-            dataModel.put(Option.ID_C_BLOG_SUBTITLE, preference.getString(Option.ID_C_BLOG_SUBTITLE));
-            dataModel.put(Common.VERSION, SoloServletListener.VERSION);
-            dataModel.put(Common.STATIC_RESOURCE_VERSION, Latkes.getStaticResourceVersion());
-            dataModel.put(Common.YEAR, String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
-            dataModel.put(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT, preference.getInt(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT));
-            dataModel.put(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE, preference.getInt(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE));
-            dataModel.put(Option.ID_C_LOCALE_STRING, preference.getString(Option.ID_C_LOCALE_STRING));
             dataModel.put(Option.ID_C_EDITOR_TYPE, preference.getString(Option.ID_C_EDITOR_TYPE));
-            dataModel.put(Skin.SKIN_DIR_NAME, preference.getString(Skin.SKIN_DIR_NAME));
-            dataModel.put(Option.ID_C_FOOTER_CONTENT, footerContent);
-            dataModel.put(Keys.Server.STATIC_SERVER, Latkes.getStaticServer());
-            dataModel.put(Keys.Server.SERVER, Latkes.getServer());
 
             Keys.fillRuntime(dataModel);
-            dataModelService.fillMinified(dataModel);
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, "Admin index render failed", e);
         }

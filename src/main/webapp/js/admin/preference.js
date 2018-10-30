@@ -47,12 +47,14 @@ admin.preference = {
                 var preference = result.preference;
 
                 $("#metaKeywords").val(preference.metaKeywords),
-                        $("#metaDescription").val(preference.metaDescription),
-                        $("#blogTitle").val(preference.blogTitle),
-                        $("#blogSubtitle").val(preference.blogSubtitle),
-                        $("#mostCommentArticleDisplayCount").val(preference.mostCommentArticleDisplayCount);
+                $("#metaDescription").val(preference.metaDescription),
+                $("#blogTitle").val(preference.blogTitle),
+                $("#blogSubtitle").val(preference.blogSubtitle),
+                $("#mostCommentArticleDisplayCount").val(preference.mostCommentArticleDisplayCount);
+                $("#recentArticleDisplayCount").val(preference.recentArticleDisplayCount);
+
                 $("#mostViewArticleDisplayCount").val(preference.mostViewArticleDisplayCount),
-                        $("#recentCommentDisplayCount").val(preference.recentCommentDisplayCount);
+                $("#recentCommentDisplayCount").val(preference.recentCommentDisplayCount);
                 $("#mostUsedTagDisplayCount").val(preference.mostUsedTagDisplayCount);
                 $("#articleListDisplayCount").val(preference.articleListDisplayCount);
                 $("#articleListPaginationWindowSize").val(preference.articleListPaginationWindowSize);
@@ -68,15 +70,14 @@ admin.preference = {
                 $("#relevantArticlesDisplayCount").val(preference.relevantArticlesDisplayCount);
                 $("#randomArticlesDisplayCount").val(preference.randomArticlesDisplayCount);
                 $("#keyOfSolo").val(preference.keyOfSolo);
-                $("#baiduHMCode").val(preference.baiduHMCode);
+
+
 
                 "true" === preference.enableArticleUpdateHint ? $("#enableArticleUpdateHint").attr("checked", "checked") : $("#enableArticleUpdateHint").removeAttr("checked");
                 "true" === preference.allowVisitDraftViaPermalink ? $("#allowVisitDraftViaPermalink").attr("checked", "checked") : $("allowVisitDraftViaPermalink").removeAttr("checked");
                 "true" === preference.allowRegister ? $("#allowRegister").attr("checked", "checked") : $("#allowRegister").removeAttr("checked");
                 "true" === preference.commentable ? $("#commentable").attr("checked", "checked") : $("commentable").removeAttr("checked");
 
-                "true" === preference.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("baiduPushEnable").removeAttr("checked");
-                "true" === preference.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("baiduHMEnable").removeAttr("checked");
 
                 admin.preference.locale = preference.localeString;
                 admin.preference.editorType = preference.editorType;
@@ -134,6 +135,18 @@ admin.preference = {
                 $("#qiniuSecretKey").val(result.qiniu.qiniuSecretKey);
                 $("#qiniuDomain").val(result.qiniu.qiniuDomain);
                 $("#qiniuBucket").val(result.qiniu.qiniuBucket);
+
+                /*百度参数*/
+                $("#baiduHMCode").val(result.baidu.baiduHMCode);
+                "true" === preference.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("baiduPushEnable").removeAttr("checked");
+                "true" === preference.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("baiduHMEnable").removeAttr("checked");
+
+                /*微信参数*/
+                $("#wechatAppID").val(result.wechat.wechatAppID);
+                $("#wechatAppSecret").val(result.wechat.wechatAppSecret);
+                $("#wechatAppEncodingAESKey").val(result.wechat.wechatAppEncodingAESKey);
+                $("#wechatToken").val(result.wechat.wechatToken);
+                $("#wechatMsgEncodeMode").val(preference.wechatMsgEncodeMode);
             }
         });
     },
@@ -211,6 +224,7 @@ admin.preference = {
                 "blogTitle": $("#blogTitle").val(),
                 "blogSubtitle": $("#blogSubtitle").val(),
                 "mostCommentArticleDisplayCount": $("#mostCommentArticleDisplayCount").val(),
+                "recentArticleDisplayCount" : $("#recentArticleDisplayCount").val(),
                 "mostViewArticleDisplayCount": $("#mostViewArticleDisplayCount").val(),
                 "recentCommentDisplayCount": $("#recentCommentDisplayCount").val(),
                 "mostUsedTagDisplayCount": $("#mostUsedTagDisplayCount").val(),
@@ -239,9 +253,9 @@ admin.preference = {
                 "commentable": $("#commentable").prop("checked"),
                 "allowRegister": $("#allowRegister").prop("checked"),
 
-                "baiduPushEnable": $("#baiduPushEnable").prop("checked"),
-                "baiduHMEnable": $("#baiduHMEnable").prop("checked"),
-                "baiduHMCode": $("#baiduHMCode").val(),
+
+
+
             }
         };
 
@@ -285,7 +299,18 @@ admin.preference = {
             "qiniuAccessKey": $("#qiniuAccessKey").val(),
             "qiniuSecretKey": $("#qiniuSecretKey").val(),
             "qiniuDomain": $("#qiniuDomain").val(),
-            "qiniuBucket": $("#qiniuBucket").val()
+            "qiniuBucket": $("#qiniuBucket").val(),
+
+            "baiduPushEnable": $("#baiduPushEnable").prop("checked"),
+            "baiduHMEnable": $("#baiduHMEnable").prop("checked"),
+            "baiduHMCode": $("#baiduHMCode").val(),
+
+            "wechatAppID": $("#wechatAppID").val(),
+            "wechatAppSecret": $("#wechatAppSecret").val(),
+            "wechatAppEncodingAESKey": $("#wechatAppEncodingAESKey").val(),
+            "wechatToken": $("#wechatToken").val(),
+            "wechatMsgEncodeMode": $("#wechatMsgEncodeMode").val(),
+
         };
 
         $.ajax({

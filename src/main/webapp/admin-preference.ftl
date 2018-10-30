@@ -46,12 +46,17 @@
         </li>
         <li>
             <div id="tabPreference_qiniu">
-                <a href="#toos/preference/qiniu">${qiniuLabel}</a>
+                <a href="#tools/preference/qiniu">${qiniuLabel}</a>
             </div>
         </li>
         <li>
             <div id="tabPreference_baidu">
-                <a href="#toos/preference/baidu">${baiduSiteLabel}</a>
+                <a href="#tools/preference/baidu">${baiduSiteLabel}</a>
+            </div>
+        </li>
+        <li>
+            <div id="tabPreference_wechat">
+                <a href="#tools/preference/wechat">${wechatConfigLabel}</a>
             </div>
         </li>
         <li>
@@ -91,9 +96,19 @@
         <div class="clear"></div>
     </div>
     <div id="tabPreferencePanel_solo" class="none form">
+        <button class="right" onclick="admin.preference.update()">${updateLabel}</button>
+        <div class="clear"></div>
+
         <label for="keyOfSolo">${keyOfSolo1Label}</label>
         <input id="keyOfSolo" class="normalInput" type="text" readonly="readonly"/><br><br>
         <a href="https://hacpai.com/article/1457158841475" target="_blank">${APILabel}</a>
+
+        <label for="enableSendArticelToB3">${enableSendArticelToB3Label}</label>
+        <input id="enableSendArticelToB3" type="checkbox" class="normalInput"/>
+
+        <br><br>
+        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
     </div>
     <div id="tabPreferencePanel_setting" class="none form">
         <button class="right" onclick="admin.preference.update()">${updateLabel}</button>
@@ -115,7 +130,9 @@
         </select>
         <label for="mostUsedTagDisplayCount">${indexTagDisplayCnt1Label}</label>
         <input id="mostUsedTagDisplayCount" class="normalInput" type="text"/>
-        <label for="recentCommentDisplayCount">${indexRecentCommentDisplayCnt1Label}</label>
+        <label for="recentArticleDisplayCount">${indexRecentArticleDisplayCnt1Label}</label>
+        <input id="recentArticleDisplayCount" class="normalInput" type="text"/>
+        <label for="recentArticleDisplayCount">${indexRecentCommentDisplayCnt1Label}</label>
         <input id="recentCommentDisplayCount" class="normalInput" type="text"/>
         <label for="mostCommentArticleDisplayCount">${indexMostCommentArticleDisplayCnt1Label}</label>
         <input id="mostCommentArticleDisplayCount" class="normalInput" type="text"/>
@@ -235,6 +252,34 @@
 
         <label for="bannerImageUrl">${bannerImageUrlLabel}</label>
         <textarea rows="2" id="bannerImageUrl"></textarea>
+
+        <br><br>
+        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+    </div>
+
+    <div id="tabPreferencePanel_wechat" class="none form">
+        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+
+        <label for="wechatAppID">${wechatAppIDLabel}</label>
+        <input id="wechatAppID" type="text"/>
+
+        <label for="wechatAppSecret">${wechatAppSecretLabel}</label>
+        <input id="wechatAppSecret" type="text"/>
+
+        <label for="wechatAppEncodingAESKey">${wechatAppEncodingAESKeyLabel}</label>
+        <input id="wechatAppEncodingAESKey" type="text"/>
+
+        <label for="wechatToken">${wechatTokenLabel}</label>
+        <input id="wechatToken" type="text"/>
+
+        <label for="wechatMsgEncodeMode">${wechatMsgEncodeModeLabel}</label>
+        <select id="wechatMsgEncodeMode">
+            <option value="0">${wechatEncodeModePlainLabel}</option>
+            <option value="1">${wechatEncodeModeCompatibilityLabel}</option>
+            <option value="2">${wechatEncodeModeEncryptionLabel}</option>
+        </select>
 
         <br><br>
         <button onclick="admin.preference.update()" class="right">${updateLabel}</button>

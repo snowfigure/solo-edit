@@ -83,14 +83,35 @@ public class PreferenceQueryService {
      */
     public JSONObject getPreference() throws ServiceException {
         try {
+
             final JSONObject checkInit = optionRepository.get(Option.ID_C_ADMIN_EMAIL);
             if (null == checkInit) {
                 return null;
             }
 
-            return optionQueryService.getOptions(Option.CATEGORY_C_PREFERENCE);
+            final JSONObject ret = optionQueryService.getOptions(Option.CATEGORY_C_PREFERENCE);
+            final JSONObject baidu = optionQueryService.getOptions(Option.CATEGORY_C_BAIDU);
+
+            ret.put(Option.ID_C_BAIDU_PUSH_ENABLE, baidu.optString(Option.ID_C_BAIDU_PUSH_ENABLE));
+            ret.put(Option.ID_C_BAIDU_HM_ENABLE, baidu.optString(Option.ID_C_BAIDU_HM_ENABLE));
+            ret.put(Option.ID_C_BAIDU_HM_CODE, baidu.optString(Option.ID_C_BAIDU_HM_CODE));
+
+            return ret;
         } catch (final RepositoryException e) {
             return null;
+        }
+    }
+
+    public JSONObject getThirdPreperence() throws ServiceException{
+        try{
+            final  JSONObject ret = new JSONObject();
+            ret.put(Option.CATEGORY_C_QINIU, optionQueryService.getOptions(Option.CATEGORY_C_QINIU));
+            ret.put(Option.CATEGORY_C_WECHAT, optionQueryService.getOptions(Option.CATEGORY_C_WECHAT));
+            ret.put(Option.CATEGORY_C_BAIDU, optionQueryService.getOptions(Option.CATEGORY_C_BAIDU));
+
+            return ret;
+        } catch (final Exception e){
+            return  null;
         }
     }
 }

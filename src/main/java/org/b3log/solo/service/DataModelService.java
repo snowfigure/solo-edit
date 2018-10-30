@@ -545,6 +545,9 @@ public class DataModelService {
         fillSide(request, dataModel, preference);
         fillBlogHeader(request, response, dataModel, preference);
         fillBlogFooter(request, response, dataModel, preference);
+
+        /*语言*/
+        Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
     }
 
     /**
@@ -561,6 +564,13 @@ public class DataModelService {
         Stopwatchs.start("Fill Footer");
         try {
             LOGGER.debug("Filling footer....");
+
+            /*百度统计信息*/
+            dataModel.put(Option.ID_C_BAIDU_HM_CODE, preference.getString(Option.ID_C_BAIDU_HM_CODE));
+            dataModel.put(Option.ID_C_BAIDU_HM_ENABLE, preference.getString(Option.ID_C_BAIDU_HM_ENABLE));
+            dataModel.put(Option.ID_C_BAIDU_PUSH_ENABLE, preference.getString(Option.ID_C_BAIDU_PUSH_ENABLE));
+
+            /*网站基础信息*/
             final String blogTitle = preference.getString(Option.ID_C_BLOG_TITLE);
             dataModel.put(Option.ID_C_BLOG_TITLE, blogTitle);
             dataModel.put("blogHost", Latkes.getServePath());
@@ -643,9 +653,6 @@ public class DataModelService {
             dataModel.put(Option.ID_C_CDN_JQUERY_JS, preference.getString(Option.ID_C_CDN_JQUERY_JS));
             dataModel.put(Option.ID_C_BANNER_IMAGE_URL, preference.getString(Option.ID_C_BANNER_IMAGE_URL));
 
-            dataModel.put(Option.ID_C_BAIDU_HM_CODE, preference.getString(Option.ID_C_BAIDU_HM_CODE));
-            dataModel.put(Option.ID_C_BAIDU_HM_ENABLE, preference.getString(Option.ID_C_BAIDU_HM_ENABLE));
-            dataModel.put(Option.ID_C_BAIDU_PUSH_ENABLE, preference.getString(Option.ID_C_BAIDU_PUSH_ENABLE));
 
             String metaKeywords = preference.getString(Option.ID_C_META_KEYWORDS);
             if (StringUtils.isBlank(metaKeywords)) {

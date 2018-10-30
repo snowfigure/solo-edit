@@ -172,11 +172,24 @@ public final class Option {
 
     public static final String ID_C_BANNER_IMAGE_URL = "bannerImageUrl";
 
+    public static final String CATEGORY_C_BAIDU = "baidu";
+
     public static final String ID_C_BAIDU_PUSH_ENABLE = "baiduPushEnable";
 
     public static final String ID_C_BAIDU_HM_ENABLE = "baiduHMEnable";
 
     public static final String ID_C_BAIDU_HM_CODE = "baiduHMCode";
+
+
+    public static final String ID_C_ENABLE_SEND_ARTICLE_TO_B3 = "enableSendArticelToB3";
+    public static final String ID_C_ENABLE_SEND_MAIL = "enableSendMail";
+
+    public static final String CATEGORY_C_WECHAT = "wechat";
+    public static final String ID_C_WECHAT_APP_ID = "wechatAppID";
+    public static final String ID_C_WECHAT_APP_SECERT = "wechatAppSecret";
+    public static final String ID_C_WECHAT_APP_ENCODING_AES_KEY = "wechatAppEncodingAESKey";
+    public static final String ID_C_WECHAT_TOKEN = "wechatToken";
+    public static final String ID_C_WECHAT_MSG_ENCODE_MODE = "wechatMsgEncodeMode";
     /**
      * Key of meta keywords.
      */

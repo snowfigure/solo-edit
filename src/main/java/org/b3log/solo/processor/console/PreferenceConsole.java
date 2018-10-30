@@ -43,7 +43,7 @@ import org.json.JSONObject;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Preference console request processing.
@@ -411,15 +411,19 @@ public class PreferenceConsole {
 
         try {
             final JSONObject qiniu = optionQueryService.getOptions(Option.CATEGORY_C_QINIU);
-            if (null == qiniu) {
+            final JSONObject baidu = optionQueryService.getOptions(Option.CATEGORY_C_BAIDU);
+            final JSONObject wechat = optionQueryService.getOptions(Option.CATEGORY_C_WECHAT);
+            if (null == qiniu || null == baidu || null == wechat) {
                 renderer.setJSONObject(new JSONObject().put(Keys.STATUS_CODE, false));
-
                 return;
             }
 
             final JSONObject ret = new JSONObject();
             renderer.setJSONObject(ret);
             ret.put(Option.CATEGORY_C_QINIU, qiniu);
+            ret.put(Option.CATEGORY_C_BAIDU, baidu);
+            ret.put(Option.CATEGORY_C_WECHAT, wechat);
+
             ret.put(Keys.STATUS_CODE, true);
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
@@ -450,11 +454,9 @@ public class PreferenceConsole {
         final JSONObject ret = new JSONObject();
         renderer.setJSONObject(ret);
         try {
-            final String accessKey = requestJSONObject.optString(Option.ID_C_QINIU_ACCESS_KEY).trim();
-            final String secretKey = requestJSONObject.optString(Option.ID_C_QINIU_SECRET_KEY).trim();
+
             String domain = requestJSONObject.optString(Option.ID_C_QINIU_DOMAIN).trim();
             domain = StringUtils.lowerCase(domain);
-            final String bucket = requestJSONObject.optString(Option.ID_C_QINIU_BUCKET).trim();
             if (StringUtils.isNotBlank(domain) && !StringUtils.endsWith(domain, "/")) {
                 domain += "/";
             }
@@ -462,27 +464,35 @@ public class PreferenceConsole {
                 domain = "http://" + domain;
             }
 
-            final JSONObject accessKeyOpt = new JSONObject();
-            accessKeyOpt.put(Keys.OBJECT_ID, Option.ID_C_QINIU_ACCESS_KEY);
-            accessKeyOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_QINIU);
-            accessKeyOpt.put(Option.OPTION_VALUE, accessKey);
-            final JSONObject secretKeyOpt = new JSONObject();
-            secretKeyOpt.put(Keys.OBJECT_ID, Option.ID_C_QINIU_SECRET_KEY);
-            secretKeyOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_QINIU);
-            secretKeyOpt.put(Option.OPTION_VALUE, secretKey);
-            final JSONObject domainOpt = new JSONObject();
-            domainOpt.put(Keys.OBJECT_ID, Option.ID_C_QINIU_DOMAIN);
-            domainOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_QINIU);
-            domainOpt.put(Option.OPTION_VALUE, domain);
-            final JSONObject bucketOpt = new JSONObject();
-            bucketOpt.put(Keys.OBJECT_ID, Option.ID_C_QINIU_BUCKET);
-            bucketOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_QINIU);
-            bucketOpt.put(Option.OPTION_VALUE, bucket);
+            final List<String> option_list = new ArrayList<>();
+            option_list.add(Option.ID_C_QINIU_ACCESS_KEY);
+            option_list.add(Option.ID_C_QINIU_SECRET_KEY);
+            option_list.add(Option.ID_C_QINIU_DOMAIN);
+            option_list.add(Option.ID_C_QINIU_BUCKET);
 
-            optionMgmtService.addOrUpdateOption(accessKeyOpt);
-            optionMgmtService.addOrUpdateOption(secretKeyOpt);
-            optionMgmtService.addOrUpdateOption(domainOpt);
-            optionMgmtService.addOrUpdateOption(bucketOpt);
+            /*百度统计*/
+            option_list.add(Option.ID_C_BAIDU_HM_CODE);
+            option_list.add(Option.ID_C_BAIDU_HM_ENABLE);
+            option_list.add(Option.ID_C_BAIDU_PUSH_ENABLE);
+
+
+            /*微信公众号*/
+            option_list.add(Option.ID_C_WECHAT_APP_ID);
+            option_list.add(Option.ID_C_WECHAT_APP_SECERT);
+            option_list.add(Option.ID_C_WECHAT_APP_ENCODING_AES_KEY);
+            option_list.add(Option.ID_C_WECHAT_TOKEN);
+            option_list.add(Option.ID_C_WECHAT_MSG_ENCODE_MODE);
+
+            for (String key: option_list) {
+
+                final JSONObject jsonObject = new JSONObject();
+                jsonObject.put(Keys.OBJECT_ID, key);
+                jsonObject.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_QINIU);
+                jsonObject.put(Option.OPTION_VALUE, requestJSONObject.optString(key));
+
+                optionMgmtService.addOrUpdateOption(jsonObject);
+            }
+
 
             ret.put(Keys.STATUS_CODE, true);
             ret.put(Keys.MSG, langPropsService.get("updateSuccLabel"));
@@ -511,84 +521,36 @@ public class PreferenceConsole {
         final StringBuilder errMsgBuilder = new StringBuilder('[' + langPropsService.get("paramSettingsLabel"));
         errMsgBuilder.append(" - ");
 
-        String input = preference.optString(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("externalRelevantArticlesDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
+        Map<String,String>  validMap = new HashMap<>();
 
-        input = preference.optString(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("relevantArticlesDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
+        validMap.put(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT, "externalRelevantArticlesDisplayCntLabel");
+        validMap.put(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT,         "relevantArticlesDisplayCntLabel");
+        validMap.put(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT,           "randomArticlesDisplayCntLabel");
+        validMap.put(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT,      "indexMostCommentArticleDisplayCntLabel");
+        validMap.put(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT,         "indexMostViewArticleDisplayCntLabel");
+        validMap.put(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT,            "indexRecentCommentDisplayCntLabel");
+        validMap.put(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT,             "indexTagDisplayCntLabel");
+        validMap.put(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT,            "pageSizeLabel");
+        validMap.put(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE,   "windowSizeLabel");
+        validMap.put(Option.ID_C_FEED_OUTPUT_CNT,                       "externalRelevantArticlesDisplayCntLabel");
 
-        input = preference.optString(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("randomArticlesDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
+        Iterator iterator = validMap.entrySet().iterator();
 
-        input = preference.optString(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("indexMostCommentArticleDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
+        while(iterator.hasNext()) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            String option_key = entry.getKey().toString();
+            String label_key = entry.getValue().toString();
 
-        input = preference.optString(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("indexMostViewArticleDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
+            String input = preference.optString(option_key);
+            if (!isNonNegativeInteger(input)) {
+                errMsgBuilder.append(langPropsService.get(label_key)).
+                        append("]  ").
+                        append(langPropsService.get("nonNegativeIntegerOnlyLabel"));
 
-        input = preference.optString(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("indexRecentCommentDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
+                responseObject.put(Keys.MSG, errMsgBuilder.toString());
+                return true;
+            }
 
-        input = preference.optString(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("indexTagDisplayCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
-
-        input = preference.optString(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("pageSizeLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
-
-        input = preference.optString(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("windowSizeLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
-        }
-
-        input = preference.optString(Option.ID_C_FEED_OUTPUT_CNT);
-        if (!isNonNegativeInteger(input)) {
-            errMsgBuilder.append(langPropsService.get("feedOutputCntLabel")).append("]  ").append(
-                    langPropsService.get("nonNegativeIntegerOnlyLabel"));
-            responseObject.put(Keys.MSG, errMsgBuilder.toString());
-            return true;
         }
 
         return false;

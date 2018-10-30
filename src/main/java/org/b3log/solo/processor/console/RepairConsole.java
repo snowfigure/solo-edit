@@ -138,7 +138,7 @@ public class RepairConsole {
             renderer.setContent("Restores signs succeeded.");
 
             // Sends the sample signs to developer
-            if (!Solos.isConfigured()) {
+            if (!Solos.isMailUserConfigured()) {
                 return;
             }
 

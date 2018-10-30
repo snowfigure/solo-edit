@@ -77,13 +77,6 @@
 
             <label for="postToCommunity"   style="margin: 13px 0 0 0">${postToCommunityLabel}</label>
             <input type="checkbox" id="postToCommunity"/>
-
-            <!--span id="postToCommunityPanel" class="none">
-                <label for="postToCommunity">
-                    <a class="no-underline" href="https://hacpai.com/article/1440573175609" target="_blank">${postToCommunityLabel}</a>
-                </label>
-                <input id="postToCommunity" type="checkbox" checked="unchecked"/>
-            </span-->
         </div>
         <div class="clear"></div>
     </div>

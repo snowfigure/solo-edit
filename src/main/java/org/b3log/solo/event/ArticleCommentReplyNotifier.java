@@ -40,7 +40,7 @@ import org.json.JSONObject;
 
 /**
  * This listener is responsible for processing article comment reply.
- *
+ * 文章评论是进行邮件回复
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @author <a href="http://www.wanglay.com">Lei Wang</a>
  * @version 1.2.2.12, Oct 23, 2018
@@ -80,7 +80,8 @@ public class ArticleCommentReplyNotifier extends AbstractEventListener<JSONObjec
             return;
         }
 
-        if (!Solos.isConfigured()) {
+        /*检测是否配置的邮件服务器*/
+        if (!Solos.isMailUserConfigured()) {
             return;
         }
 

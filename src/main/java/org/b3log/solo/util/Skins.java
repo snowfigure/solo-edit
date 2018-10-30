@@ -33,6 +33,8 @@ import org.b3log.latke.util.Stopwatchs;
 import org.b3log.solo.SoloServletListener;
 import org.b3log.solo.model.Option;
 import org.b3log.solo.model.Skin;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -278,4 +280,22 @@ public final class Skins {
 
         return ret;
     }
+
+
+    public static JSONArray getSkinsArray(){
+        JSONArray skinArray = new JSONArray();
+        final Set<String> skinDirNames = Skins.getSkinDirNames();
+        for (final String dirName : skinDirNames) {
+            final JSONObject skin = new JSONObject();
+            skinArray.put(skin);
+
+            final String name = Latkes.getSkinName(dirName);
+            skin.put(Skin.SKIN_NAME, name);
+            skin.put(Skin.SKIN_DIR_NAME, dirName);
+        }
+
+        return skinArray;
+    }
+
+
 }

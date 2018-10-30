@@ -168,8 +168,6 @@ public class LoginProcessor {
 
             final JSONObject preference = preferenceQueryService.getPreference();
 
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-
             dataModel.put("resetMsg", "");
             statisticMgmtService.incBlogViewCount(request, response);
             dataModelService.fillCommon(request, response, dataModel, preference);
@@ -430,7 +428,7 @@ public class LoginProcessor {
         message.setSubject(mailSubject);
         message.setHtmlBody(mailBody);
 
-        if (Solos.isConfigured()) {
+        if (Solos.isMailUserConfigured()) {
             mailService.send(message);
         } else {
             LOGGER.log(Level.INFO, "Do not send mail caused by not configure mail.properties");

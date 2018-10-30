@@ -191,7 +191,6 @@ public class CategoryProcessor {
                 return;
             }
 
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
             dataModelService.setArticlesExProperties(request, articles, preference);
 
             final List<Integer> pageNums = (List) result.optJSONObject(Pagination.PAGINATION).opt(Pagination.PAGINATION_PAGE_NUMS);

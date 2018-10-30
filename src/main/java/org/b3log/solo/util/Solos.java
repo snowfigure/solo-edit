@@ -341,10 +341,10 @@ public final class Solos {
 
     /**
      * Whether user configures the mail.properties.
-     *
+     * 检测是否运行推送邮件
      * @return {@code true} if user configured, returns {@code false} otherwise
      */
-    public static boolean isConfigured() {
+    public static boolean isMailUserConfigured() {
         try {
             return StringUtils.isNotBlank(mailConf.getString("mail.user")) &&
                     StringUtils.isNotBlank(mailConf.getString("mail.password")) &&

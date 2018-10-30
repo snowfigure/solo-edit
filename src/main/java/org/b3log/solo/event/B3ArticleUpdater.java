@@ -59,6 +59,7 @@ public class B3ArticleUpdater extends AbstractEventListener<JSONObject> {
 
     /**
      * URL of updating article to Rhythm.
+     * 把更新文章推送到黑客派论坛
      */
     private static String UPDATE_ARTICLE_URL = Solos.B3LOG_RHYTHM_SERVE_PATH + "/article";
 
@@ -122,6 +123,7 @@ public class B3ArticleUpdater extends AbstractEventListener<JSONObject> {
             requestJSONObject.put("clientAdminEmail", preference.optString(Option.ID_C_ADMIN_EMAIL));
             requestJSONObject.put("clientRuntimeEnv", "LOCAL");
 
+            /*启动文章推送*/
             HttpRequest.put(UPDATE_ARTICLE_URL).bodyText(requestJSONObject.toString()).
                     contentTypeJson().header("User-Agent", Solos.USER_AGENT).sendAsync();
         } catch (final Exception e) {

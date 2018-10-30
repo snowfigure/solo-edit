@@ -114,8 +114,6 @@ public class ErrorProcessor {
                 dataModel.putAll(langs);
                 final JSONObject preference = preferenceQueryService.getPreference();
 
-                Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-
                 dataModelService.fillCommon(request, response, dataModel, preference);
                 statisticMgmtService.incBlogViewCount(request, response);
                 dataModel.put(Common.LOGIN_URL, userQueryService.getLoginURL(Common.ADMIN_INDEX_URI));

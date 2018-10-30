@@ -121,7 +121,11 @@ function miniPjax (){
 }
 
 function common_scripts() {
-    return gulp.src('./src/main/webapp/js/*.js').
+    const jsfiles = [
+        './src/main/webapp/js/common.js',
+        './src/main/webapp/js/page.js'
+    ]
+    return gulp.src(jsfiles).
         pipe(rename({suffix:'.min'})).
         pipe(uglify()).
         pipe(gulp.dest('./src/main/webapp/js/'))

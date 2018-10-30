@@ -137,6 +137,7 @@ public class BlogProcessor {
 
     /**
      * Sync user to https://hacpai.com.
+     * 同步用户信息到黑客派论坛
      *
      * @param context the specified context
      * @throws Exception exception

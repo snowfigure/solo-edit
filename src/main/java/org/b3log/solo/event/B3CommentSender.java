@@ -52,6 +52,7 @@ public class B3CommentSender extends AbstractEventListener<JSONObject> {
 
     /**
      * URL of adding comment to Symphony.
+     * 同步评论到Symphony
      */
     private static final String ADD_COMMENT_URL = Solos.B3LOG_SYMPHONY_SERVE_PATH + "/solo/comment";
 

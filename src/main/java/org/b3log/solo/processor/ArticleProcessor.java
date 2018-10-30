@@ -183,16 +183,10 @@ public class ArticleProcessor {
         dataModel.putAll(langs);
 
         final JSONObject preference = preferenceQueryService.getPreference();
-        dataModel.put(Option.ID_C_BLOG_TITLE, preference.getString(Option.ID_C_BLOG_TITLE));
-        dataModel.put(Common.VERSION, SoloServletListener.VERSION);
-        dataModel.put(Common.STATIC_RESOURCE_VERSION, Latkes.getStaticResourceVersion());
-        dataModel.put(Common.YEAR, String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
         dataModelService.fillCommon(request, response, dataModel, preference);
-
-        Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
+        dataModelService.fillMinified(dataModel);
 
         Keys.fillRuntime(dataModel);
-        dataModelService.fillMinified(dataModel);
     }
 
     /**
@@ -628,8 +622,6 @@ public class ArticleProcessor {
             final Map<String, Object> dataModel = renderer.getDataModel();
             prepareShowAuthorArticles(pageNums, dataModel, pageCount, currentPageNum, articles, author);
             dataModelService.fillCommon(request, response, dataModel, preference);
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-
             statisticMgmtService.incBlogViewCount(request, response);
         } catch (final Exception e) {
             LOGGER.log(Level.ERROR, e.getMessage(), e);
@@ -696,7 +688,6 @@ public class ArticleProcessor {
             dataModelService.setArticlesExProperties(request, articles, preference);
 
             final Map<String, Object> dataModel = renderer.getDataModel();
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
             prepareShowArchiveArticles(preference, dataModel, articles, currentPageNum, pageCount, archiveDateString, archiveDate);
             dataModelService.fillCommon(request, response, dataModel, preference);
 
@@ -780,7 +771,6 @@ public class ArticleProcessor {
             prepareShowArticle(preference, dataModel, article);
 
             dataModelService.fillCommon(request, response, dataModel, preference);
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
 
             if (!StatisticMgmtService.hasBeenServed(request, response)) {
                 articleMgmtService.incViewCount(articleId);

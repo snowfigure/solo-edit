@@ -123,8 +123,6 @@ public class IndexProcessor {
             cookie.setPath("/");
             response.addCookie(cookie);
 
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-
             dataModelService.fillIndexArticles(request, dataModel, currentPageNum, preference);
             dataModelService.fillCommon(request, response, dataModel, preference);
 

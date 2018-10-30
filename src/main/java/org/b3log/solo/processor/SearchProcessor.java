@@ -162,8 +162,6 @@ public class SearchProcessor {
 
             dataModelService.fillIndexArticles(request, dataModel, currentPageNum, preference);
             dataModelService.fillCommon(request, context.getResponse(), dataModel, preference);
-            Skins.fillLangs(preference.optString(Option.ID_C_LOCALE_STRING), (String) request.getAttribute(Keys.TEMAPLTE_DIR_NAME), dataModel);
-
             dataModelService.setArticlesExProperties(request, articles, preference);
 
             dataModel.put(Article.ARTICLES, articles);

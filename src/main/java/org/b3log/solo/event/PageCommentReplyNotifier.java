@@ -41,7 +41,7 @@ import org.json.JSONObject;
 
 /**
  * This listener is responsible for processing page comment reply.
- *
+ * 页面回复时邮件通知
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
  * @version 1.0.2.6, Sep 25, 2018
  * @since 0.3.1
@@ -74,7 +74,15 @@ public class PageCommentReplyNotifier extends AbstractEventListener<JSONObject> 
             return;
         }
 
-        if (!Solos.isConfigured()) {
+        if (Latkes.getServePath().contains("localhost") || Strings.isIPv4(Latkes.getServePath())) {
+            LOGGER.log(Level.INFO, "Solo runs on local server, so should not send mail");
+
+            return;
+        }
+
+
+        /*检测是否配置的邮件服务器*/
+        if (!Solos.isMailUserConfigured()) {
             return;
         }
 
@@ -125,8 +133,12 @@ public class PageCommentReplyNotifier extends AbstractEventListener<JSONObject> 
                 commenter = commentName;
             }
 
-            final String mailBody = replyNotificationTemplate.getString("body").replace("${postLink}", pageLink).replace("${postTitle}", pageTitle).replace("${replier}", commenter).replace("${replyURL}", Latkes.getServePath() + commentSharpURL).replace(
-                    "${replyContent}", commentContent);
+            final String mailBody = replyNotificationTemplate.getString("body").
+                    replace("${postLink}", pageLink).
+                    replace("${postTitle}", pageTitle).
+                    replace("${replier}", commenter).
+                    replace("${replyURL}", Latkes.getServePath() + commentSharpURL).
+                    replace("${replyContent}", commentContent);
 
             message.setHtmlBody(mailBody);
             LOGGER.log(Level.DEBUG, "Sending a mail[mailSubject={0}, mailBody=[{1}] to [{2}]",

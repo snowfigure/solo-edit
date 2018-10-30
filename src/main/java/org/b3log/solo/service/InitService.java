@@ -50,8 +50,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Solo initialization service.
@@ -584,222 +583,90 @@ public class InitService {
     private void initPreference(final JSONObject requestJSONObject) throws Exception {
         LOGGER.debug("Initializing preference....");
 
-        final JSONObject noticeBoardOpt = new JSONObject();
-        noticeBoardOpt.put(Keys.OBJECT_ID, Option.ID_C_NOTICE_BOARD);
-        noticeBoardOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        noticeBoardOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_NOTICE_BOARD);
-        optionRepository.add(noticeBoardOpt);
+        HashMap<String, Object> initMap = new HashMap<>();
 
-        final JSONObject metaDescriptionOpt = new JSONObject();
-        metaDescriptionOpt.put(Keys.OBJECT_ID, Option.ID_C_META_DESCRIPTION);
-        metaDescriptionOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        metaDescriptionOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_META_DESCRIPTION);
-        optionRepository.add(metaDescriptionOpt);
+        /*信息配置页面*/
+        initMap.put(Option.ID_C_BLOG_TITLE,         requestJSONObject.optString(User.USER_NAME) + " 的个人博客");        /*博客标题*/
+        initMap.put(Option.ID_C_BLOG_SUBTITLE,      DefaultPreference.DEFAULT_BLOG_SUBTITLE);                           /*博客子标题*/
 
-        final JSONObject metaKeywordsOpt = new JSONObject();
-        metaKeywordsOpt.put(Keys.OBJECT_ID, Option.ID_C_META_KEYWORDS);
-        metaKeywordsOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        metaKeywordsOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_META_KEYWORDS);
-        optionRepository.add(metaKeywordsOpt);
+        initMap.put(Option.ID_C_META_KEYWORDS,      DefaultPreference.DEFAULT_META_KEYWORDS);
+        initMap.put(Option.ID_C_META_DESCRIPTION,   DefaultPreference.DEFAULT_META_DESCRIPTION);
+        initMap.put(Option.ID_C_NOTICE_BOARD,       DefaultPreference.DEFAULT_NOTICE_BOARD);
+        initMap.put(Option.ID_C_FOOTER_CONTENT,     DefaultPreference.DEFAULT_FOOTER_CONTENT);
 
-        final JSONObject htmlHeadOpt = new JSONObject();
-        htmlHeadOpt.put(Keys.OBJECT_ID, Option.ID_C_HTML_HEAD);
-        htmlHeadOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        htmlHeadOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_HTML_HEAD);
-        optionRepository.add(htmlHeadOpt);
+        /*HTML 扩展*/
+        initMap.put(Option.ID_C_HTML_HEAD, DefaultPreference.DEFAULT_HTML_HEAD);
 
-        final JSONObject relevantArticlesDisplayCountOpt = new JSONObject();
-        relevantArticlesDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT);
-        relevantArticlesDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        relevantArticlesDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_RELEVANT_ARTICLES_DISPLAY_COUNT);
-        optionRepository.add(relevantArticlesDisplayCountOpt);
 
-        final JSONObject randomArticlesDisplayCountOpt = new JSONObject();
-        randomArticlesDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT);
-        randomArticlesDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        randomArticlesDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_RANDOM_ARTICLES_DISPLAY_COUNT);
-        optionRepository.add(randomArticlesDisplayCountOpt);
+        /*皮肤*/
+        initMap.put(Option.ID_C_SKINS,          Skins.getSkinsArray().toString());
+        initMap.put(Option.ID_C_SKIN_NAME,      Latkes.getSkinName(DefaultPreference.DEFAULT_SKIN_DIR_NAME));
+        initMap.put(Option.ID_C_SKIN_DIR_NAME,  DefaultPreference.DEFAULT_SKIN_DIR_NAME);
 
-        final JSONObject externalRelevantArticlesDisplayCountOpt = new JSONObject();
-        externalRelevantArticlesDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT);
-        externalRelevantArticlesDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        externalRelevantArticlesDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_COUNT);
-        optionRepository.add(externalRelevantArticlesDisplayCountOpt);
+        /*签名档*/
+        initMap.put(Option.ID_C_SIGNS,          DefaultPreference.DEFAULT_SIGNS);
 
-        final JSONObject mostViewArticleDisplayCountOpt = new JSONObject();
-        mostViewArticleDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT);
-        mostViewArticleDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        mostViewArticleDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_MOST_VIEW_ARTICLES_DISPLAY_COUNT);
-        optionRepository.add(mostViewArticleDisplayCountOpt);
+        /*参数设置*/
+        initMap.put(Option.ID_C_LOCALE_STRING,                  DefaultPreference.DEFAULT_LANGUAGE);                    /*语言*/
+        initMap.put(Option.ID_C_TIME_ZONE_ID,                   DefaultPreference.DEFAULT_TIME_ZONE);                   /*时区*/
+        initMap.put(Option.ID_C_ARTICLE_LIST_STYLE,             DefaultPreference.DEFAULT_ARTICLE_LIST_STYLE);          /*文章显示方式*/
 
-        final JSONObject articleListDisplayCountOpt = new JSONObject();
-        articleListDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT);
-        articleListDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        articleListDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_ARTICLE_LIST_DISPLAY_COUNT);
-        optionRepository.add(articleListDisplayCountOpt);
+        initMap.put(Option.ID_C_MOST_USED_TAG_DISPLAY_CNT,          DefaultPreference.DEFAULT_MOST_USED_TAG_DISPLAY_COUNT);             /*首页标签显示数*/
+        initMap.put(Option.ID_C_RECENT_COMMENT_DISPLAY_CNT,         DefaultPreference.DEFAULT_RECENT_COMMENT_DISPLAY_COUNT);            /*最新评论显示数目*/
+        initMap.put(Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT,   DefaultPreference.DEFAULT_MOST_COMMENT_ARTICLE_DISPLAY_COUNT);      /*评论最多文章显示数目*/
+        initMap.put(Option.ID_C_MOST_VIEW_ARTICLE_DISPLAY_CNT,      DefaultPreference.DEFAULT_MOST_VIEW_ARTICLES_DISPLAY_COUNT);        /*访问最多文章显示数目*/
+        initMap.put(Option.ID_C_RECENT_ARTICLE_DISPLAY_CNT,         DefaultPreference.DEFAULT_RECENT_ARTICLE_DISPLAY_COUNT);            /*最新文章显示数目*/
+        initMap.put(Option.ID_C_ARTICLE_LIST_DISPLAY_COUNT,         DefaultPreference.DEFAULT_ARTICLE_LIST_DISPLAY_COUNT);              /*分页每页显示文章数*/
+        initMap.put(Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE, DefaultPreference.DEFAULT_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);    /*分页页码最大宽度*/
 
-        final JSONObject articleListPaginationWindowSizeOpt = new JSONObject();
-        articleListPaginationWindowSizeOpt.put(Keys.OBJECT_ID, Option.ID_C_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);
-        articleListPaginationWindowSizeOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        articleListPaginationWindowSizeOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_ARTICLE_LIST_PAGINATION_WINDOW_SIZE);
-        optionRepository.add(articleListPaginationWindowSizeOpt);
 
-        final JSONObject mostUsedTagDisplayCountOpt = new JSONObject();
-        mostUsedTagDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_MOST_USED_TAG_DISPLAY_CNT);
-        mostUsedTagDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        mostUsedTagDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_MOST_USED_TAG_DISPLAY_COUNT);
-        optionRepository.add(mostUsedTagDisplayCountOpt);
+        initMap.put(Option.ID_C_RANDOM_ARTICLES_DISPLAY_CNT,            DefaultPreference.DEFAULT_RANDOM_ARTICLES_DISPLAY_COUNT);               /*随机阅读显示数目*/
+        initMap.put(Option.ID_C_RELEVANT_ARTICLES_DISPLAY_CNT,          DefaultPreference.DEFAULT_RELEVANT_ARTICLES_DISPLAY_COUNT);             /*相关阅读显示数目*/
+        initMap.put(Option.ID_C_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_CNT, DefaultPreference.DEFAULT_EXTERNAL_RELEVANT_ARTICLES_DISPLAY_COUNT);    /*站外相关阅读显示数目*/
 
-        final JSONObject mostCommentArticleDisplayCountOpt = new JSONObject();
-        mostCommentArticleDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_MOST_COMMENT_ARTICLE_DISPLAY_CNT);
-        mostCommentArticleDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        mostCommentArticleDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_MOST_COMMENT_ARTICLE_DISPLAY_COUNT);
-        optionRepository.add(mostCommentArticleDisplayCountOpt);
 
-        final JSONObject recentArticleDisplayCountOpt = new JSONObject();
-        recentArticleDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_RECENT_ARTICLE_DISPLAY_CNT);
-        recentArticleDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        recentArticleDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_RECENT_ARTICLE_DISPLAY_COUNT);
-        optionRepository.add(recentArticleDisplayCountOpt);
+        initMap.put(Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT,             DefaultPreference.DEFAULT_ENABLE_ARTICLE_UPDATE_HINT);              /*启动文章提示*/
+        initMap.put(Option.ID_C_ALLOW_VISIT_DRAFT_VIA_PERMALINK,        DefaultPreference.DEFAULT_ALLOW_VISIT_DRAFT_VIA_PERMALINK);         /*允许通过链接访问草稿*/
+        initMap.put(Option.ID_C_COMMENTABLE,                            DefaultPreference.DEFAULT_COMMENTABLE);                             /*允许评论*/
+        initMap.put(Option.ID_C_ALLOW_REGISTER,                         DefaultPreference.DEFAULT_ALLOW_REGISTER);                          /*允许注册*/
 
-        final JSONObject recentCommentDisplayCountOpt = new JSONObject();
-        recentCommentDisplayCountOpt.put(Keys.OBJECT_ID, Option.ID_C_RECENT_COMMENT_DISPLAY_CNT);
-        recentCommentDisplayCountOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        recentCommentDisplayCountOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_RECENT_COMMENT_DISPLAY_COUNT);
-        optionRepository.add(recentCommentDisplayCountOpt);
 
-        final JSONObject blogTitleOpt = new JSONObject();
-        blogTitleOpt.put(Keys.OBJECT_ID, Option.ID_C_BLOG_TITLE);
-        blogTitleOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        blogTitleOpt.put(Option.OPTION_VALUE, requestJSONObject.optString(User.USER_NAME) + " 的个人博客");
-        optionRepository.add(blogTitleOpt);
+        initMap.put(Option.ID_C_FEED_OUTPUT_MODE,           DefaultPreference.DEFAULT_FEED_OUTPUT_MODE);                /*订阅输出模式*/
+        initMap.put(Option.ID_C_FEED_OUTPUT_CNT,            DefaultPreference.DEFAULT_FEED_OUTPUT_CNT);                 /*订阅输出文章数*/
 
-        final JSONObject blogSubtitleOpt = new JSONObject();
-        blogSubtitleOpt.put(Keys.OBJECT_ID, Option.ID_C_BLOG_SUBTITLE);
-        blogSubtitleOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        blogSubtitleOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_BLOG_SUBTITLE);
-        optionRepository.add(blogSubtitleOpt);
 
-        final JSONObject adminEmailOpt = new JSONObject();
-        adminEmailOpt.put(Keys.OBJECT_ID, Option.ID_C_ADMIN_EMAIL);
-        adminEmailOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        adminEmailOpt.put(Option.OPTION_VALUE, requestJSONObject.getString(User.USER_EMAIL));
-        optionRepository.add(adminEmailOpt);
 
-        final JSONObject localeStringOpt = new JSONObject();
-        localeStringOpt.put(Keys.OBJECT_ID, Option.ID_C_LOCALE_STRING);
-        localeStringOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        localeStringOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_LANGUAGE);
-        optionRepository.add(localeStringOpt);
 
-        final JSONObject enableArticleUpdateHintOpt = new JSONObject();
-        enableArticleUpdateHintOpt.put(Keys.OBJECT_ID, Option.ID_C_ENABLE_ARTICLE_UPDATE_HINT);
-        enableArticleUpdateHintOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        enableArticleUpdateHintOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_ENABLE_ARTICLE_UPDATE_HINT);
-        optionRepository.add(enableArticleUpdateHintOpt);
 
-        final JSONObject signsOpt = new JSONObject();
-        signsOpt.put(Keys.OBJECT_ID, Option.ID_C_SIGNS);
-        signsOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        signsOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_SIGNS);
-        optionRepository.add(signsOpt);
 
-        final JSONObject timeZoneIdOpt = new JSONObject();
-        timeZoneIdOpt.put(Keys.OBJECT_ID, Option.ID_C_TIME_ZONE_ID);
-        timeZoneIdOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        timeZoneIdOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_TIME_ZONE);
-        optionRepository.add(timeZoneIdOpt);
+        initMap.put(Option.ID_C_ADMIN_EMAIL, requestJSONObject.getString(User.USER_EMAIL));
 
-        final JSONObject allowVisitDraftViaPermalinkOpt = new JSONObject();
-        allowVisitDraftViaPermalinkOpt.put(Keys.OBJECT_ID, Option.ID_C_ALLOW_VISIT_DRAFT_VIA_PERMALINK);
-        allowVisitDraftViaPermalinkOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        allowVisitDraftViaPermalinkOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_ALLOW_VISIT_DRAFT_VIA_PERMALINK);
-        optionRepository.add(allowVisitDraftViaPermalinkOpt);
 
-        final JSONObject allowRegisterOpt = new JSONObject();
-        allowRegisterOpt.put(Keys.OBJECT_ID, Option.ID_C_ALLOW_REGISTER);
-        allowRegisterOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        allowRegisterOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_ALLOW_REGISTER);
-        optionRepository.add(allowRegisterOpt);
+        /*Solo相关配置*/
+        initMap.put(Option.ID_C_VERSION,  SoloServletListener.VERSION);
+        initMap.put(Option.ID_C_KEY_OF_SOLO, Ids.genTimeMillisId());
 
-        final JSONObject commentableOpt = new JSONObject();
-        commentableOpt.put(Keys.OBJECT_ID, Option.ID_C_COMMENTABLE);
-        commentableOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        commentableOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_COMMENTABLE);
-        optionRepository.add(commentableOpt);
+        initMap.put(Option.ID_C_EDITOR_TYPE, DefaultPreference.DEFAULT_EDITOR_TYPE);
 
-        final JSONObject versionOpt = new JSONObject();
-        versionOpt.put(Keys.OBJECT_ID, Option.ID_C_VERSION);
-        versionOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        versionOpt.put(Option.OPTION_VALUE, SoloServletListener.VERSION);
-        optionRepository.add(versionOpt);
 
-        final JSONObject articleListStyleOpt = new JSONObject();
-        articleListStyleOpt.put(Keys.OBJECT_ID, Option.ID_C_ARTICLE_LIST_STYLE);
-        articleListStyleOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        articleListStyleOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_ARTICLE_LIST_STYLE);
-        optionRepository.add(articleListStyleOpt);
 
-        final JSONObject keyOfSoloOpt = new JSONObject();
-        keyOfSoloOpt.put(Keys.OBJECT_ID, Option.ID_C_KEY_OF_SOLO);
-        keyOfSoloOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        keyOfSoloOpt.put(Option.OPTION_VALUE, Ids.genTimeMillisId());
-        optionRepository.add(keyOfSoloOpt);
 
-        final JSONObject feedOutputModeOpt = new JSONObject();
-        feedOutputModeOpt.put(Keys.OBJECT_ID, Option.ID_C_FEED_OUTPUT_MODE);
-        feedOutputModeOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        feedOutputModeOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_FEED_OUTPUT_MODE);
-        optionRepository.add(feedOutputModeOpt);
 
-        final JSONObject feedOutputCntOpt = new JSONObject();
-        feedOutputCntOpt.put(Keys.OBJECT_ID, Option.ID_C_FEED_OUTPUT_CNT);
-        feedOutputCntOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        feedOutputCntOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_FEED_OUTPUT_CNT);
-        optionRepository.add(feedOutputCntOpt);
 
-        final JSONObject editorTypeOpt = new JSONObject();
-        editorTypeOpt.put(Keys.OBJECT_ID, Option.ID_C_EDITOR_TYPE);
-        editorTypeOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        editorTypeOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_EDITOR_TYPE);
-        optionRepository.add(editorTypeOpt);
+        Iterator iterator = initMap.entrySet().iterator();
 
-        final JSONObject footerContentOpt = new JSONObject();
-        footerContentOpt.put(Keys.OBJECT_ID, Option.ID_C_FOOTER_CONTENT);
-        footerContentOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        footerContentOpt.put(Option.OPTION_VALUE, DefaultPreference.DEFAULT_FOOTER_CONTENT);
-        optionRepository.add(footerContentOpt);
+        while (iterator.hasNext()) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            Object option_key = entry.getKey();
+            Object option_val = entry.getValue();
 
-        final String skinDirName = DefaultPreference.DEFAULT_SKIN_DIR_NAME;
-        final JSONObject skinDirNameOpt = new JSONObject();
-        skinDirNameOpt.put(Keys.OBJECT_ID, Option.ID_C_SKIN_DIR_NAME);
-        skinDirNameOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        skinDirNameOpt.put(Option.OPTION_VALUE, skinDirName);
-        optionRepository.add(skinDirNameOpt);
+            final JSONObject jsonObject = new JSONObject();
+            jsonObject.put(Keys.OBJECT_ID, option_key);
+            jsonObject.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
+            jsonObject.put(Option.OPTION_VALUE, option_val);
 
-        final String skinName = Latkes.getSkinName(skinDirName);
-        final JSONObject skinNameOpt = new JSONObject();
-        skinNameOpt.put(Keys.OBJECT_ID, Option.ID_C_SKIN_NAME);
-        skinNameOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        skinNameOpt.put(Option.OPTION_VALUE, skinName);
-        optionRepository.add(skinNameOpt);
-
-        final Set<String> skinDirNames = Skins.getSkinDirNames();
-        final JSONArray skinArray = new JSONArray();
-        for (final String dirName : skinDirNames) {
-            final JSONObject skin = new JSONObject();
-            skinArray.put(skin);
-
-            final String name = Latkes.getSkinName(dirName);
-            skin.put(Skin.SKIN_NAME, name);
-            skin.put(Skin.SKIN_DIR_NAME, dirName);
+            optionRepository.add(jsonObject);
         }
-
-        final JSONObject skinsOpt = new JSONObject();
-        skinsOpt.put(Keys.OBJECT_ID, Option.ID_C_SKINS);
-        skinsOpt.put(Option.OPTION_CATEGORY, Option.CATEGORY_C_PREFERENCE);
-        skinsOpt.put(Option.OPTION_VALUE, skinArray.toString());
-        optionRepository.add(skinsOpt);
 
         LOGGER.debug("Initialized preference");
     }
