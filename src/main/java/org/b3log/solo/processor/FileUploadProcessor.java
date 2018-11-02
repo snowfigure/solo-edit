@@ -26,6 +26,7 @@ import jodd.io.upload.MultipartStreamParser;
 import jodd.io.upload.impl.MemoryFileUploadFactory;
 import jodd.net.MimeTypes;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -87,23 +88,11 @@ public class FileUploadProcessor {
         }
     }
 
-    /**
-     * Gets file by the specified URL.
-     *
-     * @param req  the specified request
-     * @param resp the specified response
-     * @throws Exception exception
-     */
-    @RequestProcessing(value = "/upload/*", method = HTTPRequestMethod.GET)
-    public void getFile(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
+
+    private void getFileCommon(final HttpServletRequest req, final HttpServletResponse resp, final  String key) throws Exception {
         if (QN_ENABLED) {
             return;
         }
-
-        final String uri = req.getRequestURI();
-        String key = StringUtils.substringAfter(uri, "/upload/");
-        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
-        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
 
         String path = Solos.UPLOAD_DIR_PATH + key;
         path = URLs.decode(path);
@@ -136,6 +125,43 @@ public class FileUploadProcessor {
             IOUtils.write(data, output);
             output.flush();
         }
+    }
+
+    /**
+     * Gets file by the specified URL.
+     *
+     * @param req  the specified request
+     * @param resp the specified response
+     * @throws Exception exception
+     */
+    @RequestProcessing(value = "/file/*", method = HTTPRequestMethod.GET)
+    public void getFileWithFile(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
+
+
+        final String uri = req.getRequestURI();
+        String key = StringUtils.substringAfter(uri, "/file/");
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+
+        getFileCommon(req,resp,key);
+    }
+    /**
+     * Gets file by the specified URL.
+     *
+     * @param req  the specified request
+     * @param resp the specified response
+     * @throws Exception exception
+     */
+    @RequestProcessing(value = "/upload/*", method = HTTPRequestMethod.GET)
+    public void getFile(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
+
+        final String uri = req.getRequestURI();
+        String key = StringUtils.substringAfter(uri, "/upload/");
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+
+
+        getFileCommon(req,resp,key);
     }
 
     /**
@@ -208,6 +234,7 @@ public class FileUploadProcessor {
                 final String uuid = UUID.randomUUID().toString().replaceAll("-", "");
                 fileName = uuid + '_' + processName + "." + suffix;
 
+
                 if (QN_ENABLED) {
                     fileName = "file/" + date + "/" + fileName;
                     if (!ArrayUtils.isEmpty(names)) {
@@ -216,8 +243,12 @@ public class FileUploadProcessor {
                     uploadManager.put(file.getFileInputStream(), fileName, uploadToken, null, contentType);
                     succMap.put(originalName, qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/" + fileName);
                 } else {
+                    fileName = date + "/" + fileName;
+                    FileUtils.forceMkdir(new File(Solos.UPLOAD_DIR_PATH + date));
                     try (final OutputStream output = new FileOutputStream(Solos.UPLOAD_DIR_PATH + fileName);
-                         final InputStream input = file.getFileInputStream()) {
+                         final InputStream input = file.getFileInputStream())
+                    {
+
                         IOUtils.copy(input, output);
                     }
                     succMap.put(originalName, Latkes.getServePath() + "/upload/" + fileName);

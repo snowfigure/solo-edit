@@ -64,9 +64,17 @@ public class ArchiveDateArticleRepository extends AbstractRepository {
      * @throws RepositoryException repository exception
      */
     public JSONObject getByArchiveDateId(final String archiveDateId, final int currentPageNum, final int pageSize) throws RepositoryException {
-        final Query query = new Query().setFilter(new PropertyFilter(ArchiveDate.ARCHIVE_DATE + "_" + Keys.OBJECT_ID, FilterOperator.EQUAL, archiveDateId)).
-                addSort(Article.ARTICLE + "_" + Keys.OBJECT_ID, SortDirection.DESCENDING).
-                setCurrentPageNum(currentPageNum).setPageSize(pageSize).setPageCount(1);
+        final Query query = new Query().
+                setFilter(
+                    new PropertyFilter(
+                    ArchiveDate.ARCHIVE_DATE + "_" + Keys.OBJECT_ID,
+                            FilterOperator.EQUAL, archiveDateId)).
+                            addSort(
+                                    Article.ARTICLE + "_" + Keys.OBJECT_ID,
+                                    SortDirection.DESCENDING).
+                            setCurrentPageNum(currentPageNum).
+                            setPageSize(pageSize).
+                            setPageCount(1);
 
         return get(query);
     }
