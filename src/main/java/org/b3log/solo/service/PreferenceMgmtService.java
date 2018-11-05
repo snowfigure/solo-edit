@@ -279,9 +279,14 @@ public class PreferenceMgmtService {
 
             for (String key: option_list) {
 
-                final JSONObject optionValueOpt = optionRepository.get(key);
-                optionValueOpt.put(Option.OPTION_VALUE, preference.optString(key));
-                optionRepository.update(key, optionValueOpt);
+                try {
+                    final JSONObject optionValueOpt = optionRepository.get(key);
+                    optionValueOpt.put(Option.OPTION_VALUE, preference.optString(key));
+                    optionRepository.update(key, optionValueOpt);
+                }catch (Exception ex){
+                    LOGGER.log(Level.ERROR, String.format("Updates preference[%s] failed", key), ex);
+                }
+
             }
             
 

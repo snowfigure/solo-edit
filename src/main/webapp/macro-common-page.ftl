@@ -36,7 +36,7 @@
     <div class="content">
         <div class="logo">
             <a href="${servePath}" target="_blank">
-                <img width="128" border="0" alt="${blogTitle}" title="${blogTitle}" src="${staticServePath}/images/logo.png"/>
+                <img width="128" border="0" alt="solo" title="solo" src="${staticServePath}/images/logo.png"/>
             </a>
         </div>
         <div class="main">
@@ -46,31 +46,9 @@
     </div>
 </div>
 <div class="footerWrapper">
-
-    <footer class="footer">
-        <div class="fn-clear">
-            <span>
-                ${viewCount1Label}${statistic.statisticBlogViewCount}
-                &nbsp;
-                    ${articleCount1Label}${statistic.statisticPublishedBlogArticleCount}
-                &nbsp;
-                    ${commentCount1Label}${statistic.statisticPublishedBlogCommentCount}
-                &nbsp;
-                    ${onlineVisitor1Label}${onlineVisitorCnt}
-            </span>
-        </div>
-        <div class="fn-clear">
-            <span>
-                &copy; 2013 - ${year} <a href="${servePath}">${blogTitle}</a>
-                ${footerContent}
-            </span>
-            <span>
-                Powered by <a href="https://b3log.org" target="_blank">B3log</a> •
-                <a href="https://solo.b3log.org" target="_blank">Solo</a> ${version}
-            </span>
-        </div>
-        <span onclick="Util.goTop()" class="icon-goup"></span>
-    </footer>
+    <div class="footer">
+        Powered by <a href="https://b3log.org" target="_blank">B3log 开源</a> • <a href="https://hacpai.com/tag/Solo" target="_blank">Solo</a> ${version}
+    </div>
 </div>
 </body>
 </html>
