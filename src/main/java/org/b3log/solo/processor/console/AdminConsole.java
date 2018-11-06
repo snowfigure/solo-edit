@@ -34,6 +34,7 @@ import org.b3log.latke.model.User;
 import org.b3log.latke.plugin.ViewLoadEventData;
 import org.b3log.latke.repository.jdbc.util.Connections;
 import org.b3log.latke.service.LangPropsService;
+import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.Before;
@@ -225,7 +226,7 @@ public class AdminConsole {
      * @param context the specified context
      */
     @RequestProcessing(value = "/admin-preference.do", method = HTTPRequestMethod.GET)
-    public void showAdminPreferenceFunction(final HttpServletRequest request, final HTTPRequestContext context) {
+    public void showAdminPreferenceFunction(final HttpServletRequest request, final HTTPRequestContext context) throws ServiceException {
         final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
         context.setRenderer(renderer);
         final String templateName = "admin-preference.ftl";

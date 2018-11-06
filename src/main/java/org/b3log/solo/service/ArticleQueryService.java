@@ -160,7 +160,7 @@ public class ArticleQueryService {
 
             final List<JSONObject> articles = CollectionUtils.jsonArrayToList(result.optJSONArray(Keys.RESULTS));
             ret.put(Article.ARTICLES, (Object) articles);
-        } catch (final RepositoryException e) {
+        } catch (final RepositoryException | ServiceException e) {
             LOGGER.log(Level.ERROR, "Searches articles error", e);
         }
 
