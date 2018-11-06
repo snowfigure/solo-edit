@@ -25,7 +25,6 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.b3log.latke.Keys;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.event.Event;
-import org.b3log.latke.event.EventException;
 import org.b3log.latke.event.EventManager;
 import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
@@ -35,7 +34,6 @@ import org.b3log.latke.model.User;
 import org.b3log.latke.plugin.ViewLoadEventData;
 import org.b3log.latke.repository.jdbc.util.Connections;
 import org.b3log.latke.service.LangPropsService;
-import org.b3log.latke.service.ServiceException;
 import org.b3log.latke.servlet.HTTPRequestContext;
 import org.b3log.latke.servlet.HTTPRequestMethod;
 import org.b3log.latke.servlet.annotation.Before;
@@ -69,7 +67,7 @@ import java.util.*;
  * Admin console render processing.
  *
  * @author <a href="http://88250.b3log.org">Liang Ding</a>
- * @version 1.7.0.6, Oct 5, 2018
+ * @version 1.7.0.7, Nov 6, 2018
  * @since 0.4.1
  */
 @RequestProcessor
@@ -239,13 +237,7 @@ public class AdminConsole {
         dataModel.putAll(langs);
         dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
 
-        JSONObject preference = null;
-        try {
-            preference = preferenceQueryService.getPreference();
-        } catch (final ServiceException e) {
-            LOGGER.log(Level.ERROR, "Loads preference failed", e);
-        }
-
+        final JSONObject preference = preferenceQueryService.getPreference();
         final StringBuilder timeZoneIdOptions = new StringBuilder();
         final String[] availableIDs = TimeZone.getAvailableIDs();
         for (int i = 0; i < availableIDs.length; i++) {
@@ -510,18 +502,14 @@ public class AdminConsole {
      * @param dataModel        the specified data model
      */
     private void fireFreeMarkerActionEvent(final String hostTemplateName, final Map<String, Object> dataModel) {
-        try {
-            final ViewLoadEventData data = new ViewLoadEventData();
+        final ViewLoadEventData data = new ViewLoadEventData();
 
-            data.setViewName(hostTemplateName);
-            data.setDataModel(dataModel);
-            eventManager.fireEventSynchronously(new Event<>(Keys.FREEMARKER_ACTION, data));
-            if (StringUtils.isBlank((String) dataModel.get(Plugin.PLUGINS))) {
-                // There is no plugin for this template, fill ${plugins} with blank.
-                dataModel.put(Plugin.PLUGINS, "");
-            }
-        } catch (final EventException e) {
-            LOGGER.log(Level.WARN, "Event[FREEMARKER_ACTION] handle failed, ignores this exception for kernel health", e);
+        data.setViewName(hostTemplateName);
+        data.setDataModel(dataModel);
+        eventManager.fireEventSynchronously(new Event<>(Keys.FREEMARKER_ACTION, data));
+        if (StringUtils.isBlank((String) dataModel.get(Plugin.PLUGINS))) {
+            // There is no plugin for this template, fill ${plugins} with blank.
+            dataModel.put(Plugin.PLUGINS, "");
         }
     }
 
