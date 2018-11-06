@@ -174,6 +174,24 @@ public class FileUploadProcessor {
     public void uploadFile(final HTTPRequestContext context, final HttpServletRequest req) throws Exception {
         context.renderJSON();
 
+        HttpServletRequest request = context.getRequest();
+        HttpServletResponse response = context.getResponse();
+
+        if (!Solos.isLoggedIn(request, response)){
+            final String msg = "Users are not logged in, no permission to upload file，please login with admin user.";
+            LOGGER.log(Level.ERROR, msg);
+            context.renderMsg(msg);
+            return;
+        }else{
+            JSONObject currentUser = Solos.getCurrentUser(request, response);
+            String userRole = currentUser.optString("userRole");
+            if ("visitorRole".equals(userRole)) {
+                final String msg = "Visitor user forbidden upload file，please login with admin user.";
+                LOGGER.log(Level.ERROR, msg);
+                context.renderMsg(msg);
+                return;
+            }
+        }
         final int maxSize = 1024 * 1024 * 100;
         final MultipartStreamParser parser = new MultipartStreamParser(new MemoryFileUploadFactory().setMaxFileSize(maxSize));
         parser.parseRequestStream(req.getInputStream(), "UTF-8");
@@ -215,6 +233,7 @@ public class FileUploadProcessor {
 
         for (int i = 0; i < files.length; i++) {
             final FileUpload file = files[i];
+
             String originalName = fileName = file.getHeader().getFileName();
             originalName = originalName.replaceAll("\\W", "");
             try {
@@ -241,7 +260,14 @@ public class FileUploadProcessor {
                         fileName = names[i];
                     }
                     uploadManager.put(file.getFileInputStream(), fileName, uploadToken, null, contentType);
-                    succMap.put(originalName, qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/" + fileName);
+                    String qiniu_file_name = "";
+                    if(qiniu.optString(Option.ID_C_QINIU_DOMAIN).endsWith("/")){
+                        qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + fileName;
+                    }else{
+                        qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/" + fileName;
+                    }
+
+                    succMap.put(originalName, qiniu_file_name);
                 } else {
                     fileName = date + "/" + fileName;
                     FileUtils.forceMkdir(new File(Solos.UPLOAD_DIR_PATH + date));
