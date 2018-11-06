@@ -218,6 +218,8 @@
         <input id="qiniuDomain" type="text"/>
         <label for="qiniuBucket">${bucket1Label}</label>
         <input id="qiniuBucket" type="text"/>
+        <label for="qiniuImageView">${qiniuImageViewLabel}</label>
+        <textarea rows="4" id="qiniuImageView"></textarea><br>
     </div>
     <div id="tabPreferencePanel_baidu" class="none form">
         <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>

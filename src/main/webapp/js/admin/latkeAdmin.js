@@ -3256,6 +3256,7 @@ admin.preference = {
                 $("#qiniuSecretKey").val(result.qiniu.qiniuSecretKey);
                 $("#qiniuDomain").val(result.qiniu.qiniuDomain);
                 $("#qiniuBucket").val(result.qiniu.qiniuBucket);
+                $("#qiniuImageView").val(result.qiniu.qiniuImageView);
 
                 /*百度参数*/
                 $("#baiduHMCode").val(result.baidu.baiduHMCode);
@@ -3421,6 +3422,7 @@ admin.preference = {
             "qiniuSecretKey": $("#qiniuSecretKey").val(),
             "qiniuDomain": $("#qiniuDomain").val(),
             "qiniuBucket": $("#qiniuBucket").val(),
+            "qiniuImageView": $("#qiniuImageView").val(),
 
             "baiduPushEnable": $("#baiduPushEnable").prop("checked"),
             "baiduHMEnable": $("#baiduHMEnable").prop("checked"),

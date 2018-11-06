@@ -80,6 +80,8 @@ public final class Option {
      */
     public static final String ID_C_QINIU_BUCKET = "qiniuBucket";
 
+    public static final String ID_C_QINIU_IMAGE_VIEW = "qiniuImageView";
+
     /**
      * Key of blog title.
      */

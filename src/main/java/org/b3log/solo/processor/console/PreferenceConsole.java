@@ -469,6 +469,7 @@ public class PreferenceConsole {
             option_list_qiniu.add(Option.ID_C_QINIU_SECRET_KEY);
             option_list_qiniu.add(Option.ID_C_QINIU_DOMAIN);
             option_list_qiniu.add(Option.ID_C_QINIU_BUCKET);
+            option_list_qiniu.add(Option.ID_C_QINIU_IMAGE_VIEW);
 
 
             /*百度统计*/
