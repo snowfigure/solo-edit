@@ -73,9 +73,9 @@ admin.preference = {
 
 
                 "true" === preference.enableArticleUpdateHint ? $("#enableArticleUpdateHint").attr("checked", "checked") : $("#enableArticleUpdateHint").removeAttr("checked");
-                "true" === preference.allowVisitDraftViaPermalink ? $("#allowVisitDraftViaPermalink").attr("checked", "checked") : $("allowVisitDraftViaPermalink").removeAttr("checked");
+                "true" === preference.allowVisitDraftViaPermalink ? $("#allowVisitDraftViaPermalink").attr("checked", "checked") : $("#allowVisitDraftViaPermalink").removeAttr("checked");
                 "true" === preference.allowRegister ? $("#allowRegister").attr("checked", "checked") : $("#allowRegister").removeAttr("checked");
-                "true" === preference.commentable ? $("#commentable").attr("checked", "checked") : $("commentable").removeAttr("checked");
+                "true" === preference.commentable ? $("#commentable").attr("checked", "checked") : $("#commentable").removeAttr("checked");
 
 
                 admin.preference.locale = preference.localeString;
@@ -135,11 +135,16 @@ admin.preference = {
                 $("#qiniuDomain").val(result.qiniu.qiniuDomain);
                 $("#qiniuBucket").val(result.qiniu.qiniuBucket);
                 $("#qiniuImageView").val(result.qiniu.qiniuImageView);
+                $("#qiniuLocalUrlPrefix").val(result.qiniu.qiniuLocalUrlPrefix);
+                $("#qiniuEnableACAODomainList").val(result.qiniu.qiniuEnableACAODomainList);
+
+                "true" === result.qiniu.qiniuEnableLocalUrl ? $("#qiniuEnableLocalUrl").attr("checked", "checked") : $("#qiniuEnableLocalUrl").removeAttr("checked");
+                "true" === result.qiniu.qiniuEnableACAO ? $("#qiniuEnableACAO").attr("checked", "checked") : $("#qiniuEnableACAO").removeAttr("checked");
 
                 /*百度参数*/
                 $("#baiduHMCode").val(result.baidu.baiduHMCode);
-                "true" === result.baidu.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("baiduPushEnable").removeAttr("checked");
-                "true" === result.baidu.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("baiduHMEnable").removeAttr("checked");
+                "true" === result.baidu.baiduPushEnable ? $("#baiduPushEnable").attr("checked", "checked") : $("#baiduPushEnable").removeAttr("checked");
+                "true" === result.baidu.baiduHMEnable ? $("#baiduHMEnable").attr("checked", "checked") : $("#baiduHMEnable").removeAttr("checked");
 
                 /*微信参数*/
                 $("#wechatAppID").val(result.wechat.wechatAppID);
@@ -301,6 +306,11 @@ admin.preference = {
             "qiniuDomain": $("#qiniuDomain").val(),
             "qiniuBucket": $("#qiniuBucket").val(),
             "qiniuImageView": $("#qiniuImageView").val(),
+
+            "qiniuLocalUrlPrefix": $("#qiniuLocalUrlPrefix").val(),
+            "qiniuEnableACAODomainList": $("#qiniuEnableACAODomainList").val(),
+            "qiniuEnableLocalUrl": $("#qiniuEnableLocalUrl").prop("checked"),
+            "qiniuEnableACAO": $("#qiniuEnableACAO").prop("checked"),
 
             "baiduPushEnable": $("#baiduPushEnable").prop("checked"),
             "baiduHMEnable": $("#baiduHMEnable").prop("checked"),

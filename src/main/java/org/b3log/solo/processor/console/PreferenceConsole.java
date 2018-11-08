@@ -470,6 +470,10 @@ public class PreferenceConsole {
             option_list_qiniu.add(Option.ID_C_QINIU_DOMAIN);
             option_list_qiniu.add(Option.ID_C_QINIU_BUCKET);
             option_list_qiniu.add(Option.ID_C_QINIU_IMAGE_VIEW);
+            option_list_qiniu.add(Option.ID_C_QINIU_ENABLE_ACAO_LIST);
+            option_list_qiniu.add(Option.ID_C_QINIU_ENABLE_ACCESS_CTRL_AO);
+            option_list_qiniu.add(Option.ID_C_QINIU_LOCAL_URL_PREFIX);
+            option_list_qiniu.add(Option.ID_C_QINIU_ENABLE_LOCAL_URL);
 
 
             /*百度统计*/

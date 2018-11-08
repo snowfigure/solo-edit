@@ -82,6 +82,11 @@ public final class Option {
 
     public static final String ID_C_QINIU_IMAGE_VIEW = "qiniuImageView";
 
+    public static final String ID_C_QINIU_ENABLE_LOCAL_URL = "qiniuEnableLocalUrl";
+    public static final String ID_C_QINIU_LOCAL_URL_PREFIX= "qiniuLocalUrlPrefix";
+    public static final String ID_C_QINIU_ENABLE_ACCESS_CTRL_AO = "qiniuEnableACAO";
+    public static final String ID_C_QINIU_ENABLE_ACAO_LIST = "qiniuEnableACAODomainList";
+
     /**
      * Key of blog title.
      */

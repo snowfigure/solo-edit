@@ -219,7 +219,31 @@
         <label for="qiniuBucket">${bucket1Label}</label>
         <input id="qiniuBucket" type="text"/>
         <label for="qiniuImageView">${qiniuImageViewLabel}</label>
-        <textarea rows="4" id="qiniuImageView"></textarea><br>
+        <textarea rows="3" id="qiniuImageView"></textarea>
+
+
+
+
+
+        <label for="qiniuEnableLocalUrl">${qiniuEnableLocalUrlLabel}</label>
+        <input id="qiniuEnableLocalUrl" type="checkbox" class="normalInput"/>
+
+        <label for="qiniuLocalUrlPrefix">${qiniuLocalUrlPrefixLabel}</label>
+        <input id="qiniuLocalUrlPrefix" type="text"/>
+
+        <label for="qiniuEnableACAO">${qiniuEnableACAOLabel}</label>
+        <input id="qiniuEnableACAO" type="checkbox" class="normalInput"/>
+
+        <label for="qiniuEnableACAODomainList">${qiniuEnableACAODomainListLabel}</label>
+        <textarea rows="3" id="qiniuEnableACAODomainList"></textarea>
+
+
+        <br/><br/>
+
+        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+
+
     </div>
     <div id="tabPreferencePanel_baidu" class="none form">
         <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
