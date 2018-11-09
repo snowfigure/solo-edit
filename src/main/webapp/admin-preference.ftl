@@ -45,6 +45,11 @@
             </div>
         </li>
         <li>
+            <div id="tabPreference_uploadFile">
+                <a href="#tools/preference/uploadFile">${uploadFileConfigLabel}</a>
+            </div>
+        </li>
+        <li>
             <div id="tabPreference_qiniu">
                 <a href="#tools/preference/qiniu">${qiniuLabel}</a>
             </div>
@@ -203,11 +208,14 @@
         <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>
+
+
+
     <div id="tabPreferencePanel_qiniu" class="none form">
         <span class="right">
             <a href="https://hacpai.com/article/1442418791213" target="_blank">${howConfigLabel}</a>
             &nbsp;
-            <button onclick="admin.preference.updateQiniu()">${updateLabel}</button>
+            <button onclick="admin.preference.updateExtra()">${updateLabel}</button>
         </span>
         <div class="clear"></div>
         <label for="qiniuAccessKey">${accessKey1Label}</label>
@@ -225,28 +233,15 @@
 
 
 
-        <label for="qiniuEnableLocalUrl">${qiniuEnableLocalUrlLabel}</label>
-        <input id="qiniuEnableLocalUrl" type="checkbox" class="normalInput"/>
-
-        <label for="qiniuLocalUrlPrefix">${qiniuLocalUrlPrefixLabel}</label>
-        <input id="qiniuLocalUrlPrefix" type="text"/>
-
-        <label for="qiniuEnableACAO">${qiniuEnableACAOLabel}</label>
-        <input id="qiniuEnableACAO" type="checkbox" class="normalInput"/>
-
-        <label for="qiniuEnableACAODomainList">${qiniuEnableACAODomainListLabel}</label>
-        <textarea rows="3" id="qiniuEnableACAODomainList"></textarea>
-
-
         <br/><br/>
 
-        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
         <div class="clear"></div>
 
 
     </div>
     <div id="tabPreferencePanel_baidu" class="none form">
-        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
         <div class="clear"></div>
 
         <label for="baiduHMCode">${baiduHMCodeLabel}</label>
@@ -259,7 +254,7 @@
         <input id="baiduHMEnable" type="checkbox" class="normalInput"/>
 
         <br><br>
-        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>
 
@@ -285,7 +280,7 @@
     </div>
 
     <div id="tabPreferencePanel_wechat" class="none form">
-        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
         <div class="clear"></div>
 
         <label for="wechatAppID">${wechatAppIDLabel}</label>
@@ -308,7 +303,7 @@
         </select>
 
         <br><br>
-        <button onclick="admin.preference.updateQiniu()" class="right">${updateLabel}</button>
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>
 
@@ -330,6 +325,42 @@
 
         <br><br>
         <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+    </div>
+
+    <div id="tabPreferencePanel_uploadFile" class="none form">
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
+        <div class="clear"></div>
+
+        <!--本地上传路径 -->
+
+        <label for="uploadFileLocalPath">${uploadFileLocalPathLabel}</label>
+        <input id="uploadFileLocalPath" type="text" disabled readonly/>
+
+        <label for="uploadFileMode">${uploadFileModeLabel}</label>
+        <select id="uploadFileMode">
+            <option value="0">${uploadFileSelectLocalLabel}</option>
+            <option value="1">${uploadFileSelectQiniuLabel}</option>
+        </select>
+
+        <label for="uploadFileEnableCDNSyncToLocal">${uploadFileEnableCDNSyncToLocalLabel}</label>
+        <input id="uploadFileEnableCDNSyncToLocal" type="checkbox" class="normalInput" disabled/>
+
+        <label for="uploadFileEnableCDNUploadURLEncode">${uploadFileEnableCDNUploadURLEncodeLabel}</label>
+        <input id="uploadFileEnableCDNUploadURLEncode" type="checkbox" class="normalInput" disabled/>
+
+        <label for="uploadFileQiniuCDNURLEncodeDomain">${uploadFileQiniuCDNURLEncodeDomainLabel}</label>
+        <input id="uploadFileQiniuCDNURLEncodeDomain" type="text" disabled/>
+
+
+        <label for="uploadFileEnableCDNUploadURLAcao">${uploadFileEnableCDNUploadURLAcaoLabel}</label>
+        <input id="uploadFileEnableCDNUploadURLAcao" type="checkbox" class="normalInput" disabled/>
+
+        <label for="uploadFileCDNUploadURLAcaoWhiteList">${uploadFileCDNUploadURLAcaoWhiteListLabel}</label>
+        <textarea rows="3" id="uploadFileCDNUploadURLAcaoWhiteList" disabled></textarea>
+
+        <br><br>
+        <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
         <div class="clear"></div>
     </div>
 

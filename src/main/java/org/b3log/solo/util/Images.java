@@ -22,7 +22,14 @@ import org.apache.commons.lang.time.DateUtils;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 
-import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -93,6 +100,85 @@ public final class Images {
         }
 
         return ret;
+    }
+
+    /**
+     * 获得图片的后缀名
+     * @param path
+     * @return
+     */
+    private static String getFileSuffix(final String path) {
+        String result = null;
+        if (path != null) {
+            result = "";
+            if (path.lastIndexOf('.') != -1) {
+                result = path.substring(path.lastIndexOf('.'));
+                if (result.startsWith(".")) {
+                    result = result.substring(1);
+                }
+            }
+        }
+        System.out.println("getFileSuffix:" + result);
+        return result;
+    }
+    /**
+     * 获取图片的分辨率
+     *
+     * @param path
+     * @return
+     */
+    public static Dimension getImageDim(String path) {
+        Dimension result = null;
+        String suffix = getFileSuffix(path);
+        //解码具有给定后缀的文件
+        Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
+        System.out.println(ImageIO.getImageReadersBySuffix(suffix));
+        if (iter.hasNext()) {
+            ImageReader reader = iter.next();
+            try {
+                ImageInputStream stream = new FileImageInputStream(new File(
+                        path));
+                reader.setInput(stream);
+                int width = reader.getWidth(reader.getMinIndex());
+                int height = reader.getHeight(reader.getMinIndex());
+                result = new Dimension(width, height);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                reader.dispose();
+            }
+        }
+        System.out.println("getImageDim:" + result);
+        return result;
+    }
+
+    /**
+     * 截取Dimension对象获得分辨率
+     * @param path
+     *
+     * @return
+     */
+    public static Map<String, Integer> getImageResolution(String path) {
+        Map<String, Integer> resolution = new HashMap<>();
+
+        String s = getImageDim(path).toString();
+        s = s.substring(s.indexOf("[") + 1, s.indexOf("]"));
+        String w = s.substring(s.indexOf("=") + 1, s.indexOf(","));
+        String h = s.substring(s.lastIndexOf("=") + 1);
+        String result = w + " x " + h;
+        System.out.println("getResolution:" + result);
+
+        try {
+            resolution.put("w", new Integer(w));
+            resolution.put("h", new Integer(h));
+        }catch (Exception e){
+            e.printStackTrace();
+            resolution.put("w", 0);
+            resolution.put("h", 0);
+        }
+
+
+        return resolution;
     }
 
     /**

@@ -19,6 +19,7 @@ package org.b3log.solo.processor.console;
 
 import org.apache.commons.lang.StringUtils;
 import org.b3log.latke.Keys;
+import org.b3log.latke.Latkes;
 import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
@@ -37,6 +38,7 @@ import org.b3log.solo.service.OptionMgmtService;
 import org.b3log.solo.service.OptionQueryService;
 import org.b3log.solo.service.PreferenceMgmtService;
 import org.b3log.solo.service.PreferenceQueryService;
+import org.b3log.solo.util.Solos;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -385,7 +387,7 @@ public class PreferenceConsole {
     }
 
     /**
-     * Gets Qiniu preference.
+     * Gets extra preference.
      * <p>
      * Renders the response with a json object, for example,
      * <pre>
@@ -403,7 +405,7 @@ public class PreferenceConsole {
      * @param response the specified http servlet response
      * @param context  the specified http request context
      */
-    @RequestProcessing(value = PREFERENCE_URI_PREFIX + "qiniu", method = HTTPRequestMethod.GET)
+    @RequestProcessing(value = PREFERENCE_URI_PREFIX + "extra", method = HTTPRequestMethod.GET)
     public void getQiniuPreference(final HttpServletRequest request, final HttpServletResponse response,
                                    final HTTPRequestContext context) {
         final JSONRenderer renderer = new JSONRenderer();
@@ -413,16 +415,37 @@ public class PreferenceConsole {
             final JSONObject qiniu = optionQueryService.getOptions(Option.CATEGORY_C_QINIU);
             final JSONObject baidu = optionQueryService.getOptions(Option.CATEGORY_C_BAIDU);
             final JSONObject wechat = optionQueryService.getOptions(Option.CATEGORY_C_WECHAT);
-            if (null == qiniu || null == baidu || null == wechat) {
-                renderer.setJSONObject(new JSONObject().put(Keys.STATUS_CODE, false));
-                return;
-            }
+            JSONObject upload = optionQueryService.getOptions(Option.CATEGORY_C_UPLOADFILE);
 
             final JSONObject ret = new JSONObject();
             renderer.setJSONObject(ret);
-            ret.put(Option.CATEGORY_C_QINIU, qiniu);
-            ret.put(Option.CATEGORY_C_BAIDU, baidu);
-            ret.put(Option.CATEGORY_C_WECHAT, wechat);
+
+            if(null != qiniu){
+                ret.put(Option.CATEGORY_C_QINIU, qiniu);
+            }
+
+            if(null != baidu){
+                ret.put(Option.CATEGORY_C_BAIDU, baidu);
+            }
+
+            if(null != wechat){
+                ret.put(Option.CATEGORY_C_WECHAT, wechat);
+            }
+
+            if(null != upload){
+                upload.put(Option.ID_C_UPLOADFILE_LOCAL_PATH, Solos.UPLOAD_DIR_PATH);
+            }else{
+                upload = new JSONObject();
+                upload.put(Option.ID_C_UPLOADFILE_LOCAL_PATH, Solos.UPLOAD_DIR_PATH);
+            }
+
+            /*如果不存在，或者路径为空，则用当前域名*/
+            if(!upload.has(Option.ID_C_UPLOADFILE_QINIU_CND_URL_ENCODE_DOMAIN) || StringUtils.isBlank(upload.getString(Option.ID_C_UPLOADFILE_QINIU_CND_URL_ENCODE_DOMAIN))){
+                upload.put(Option.ID_C_UPLOADFILE_QINIU_CND_URL_ENCODE_DOMAIN, Latkes.getServePath());
+            }
+
+            ret.put(Option.CATEGORY_C_UPLOADFILE, upload);
+
 
             ret.put(Keys.STATUS_CODE, true);
         } catch (final Exception e) {
@@ -435,7 +458,7 @@ public class PreferenceConsole {
     }
 
     /**
-     * Updates the Qiniu preference by the specified request.
+     * Updates the extra preference by the specified request.
      *
      * @param request           the specified http servlet request
      * @param response          the specified http servlet response
@@ -446,7 +469,7 @@ public class PreferenceConsole {
      *                          "qiniuDomain": "",
      *                          "qiniuBucket": ""
      */
-    @RequestProcessing(value = PREFERENCE_URI_PREFIX + "qiniu", method = HTTPRequestMethod.PUT)
+    @RequestProcessing(value = PREFERENCE_URI_PREFIX + "extra", method = HTTPRequestMethod.PUT)
     public void updateQiniu(final HttpServletRequest request, final HttpServletResponse response,
                             final HTTPRequestContext context, final JSONObject requestJSONObject) {
         final JSONRenderer renderer = new JSONRenderer();
@@ -464,16 +487,13 @@ public class PreferenceConsole {
                 domain = "http://" + domain;
             }
 
+            /*七牛云设置*/
             final List<String> option_list_qiniu = new ArrayList<>();
             option_list_qiniu.add(Option.ID_C_QINIU_ACCESS_KEY);
             option_list_qiniu.add(Option.ID_C_QINIU_SECRET_KEY);
             option_list_qiniu.add(Option.ID_C_QINIU_DOMAIN);
             option_list_qiniu.add(Option.ID_C_QINIU_BUCKET);
             option_list_qiniu.add(Option.ID_C_QINIU_IMAGE_VIEW);
-            option_list_qiniu.add(Option.ID_C_QINIU_ENABLE_ACAO_LIST);
-            option_list_qiniu.add(Option.ID_C_QINIU_ENABLE_ACCESS_CTRL_AO);
-            option_list_qiniu.add(Option.ID_C_QINIU_LOCAL_URL_PREFIX);
-            option_list_qiniu.add(Option.ID_C_QINIU_ENABLE_LOCAL_URL);
 
 
             /*百度统计*/
@@ -491,10 +511,20 @@ public class PreferenceConsole {
             option_list_wechat.add(Option.ID_C_WECHAT_TOKEN);
             option_list_wechat.add(Option.ID_C_WECHAT_MSG_ENCODE_MODE);
 
+            /*文件上传*/
+            final List<String> option_list_upload = new ArrayList<>();
+            option_list_upload.add(Option.ID_C_UPLOADFILE_MODE);
+            option_list_upload.add(Option.ID_C_UPLOADFILE_ENABLE_CDN_SYNC_TO_LOCAL);
+            option_list_upload.add(Option.ID_C_UPLOADFILE_ENABLE_CDN_UPLOAD_URL_ENCODE);
+            option_list_upload.add(Option.ID_C_UPLOADFILE_QINIU_CND_URL_ENCODE_DOMAIN);
+            option_list_upload.add(Option.ID_C_UPLOADFILE_ENABLE_CDN_UPLOAD_URL_ACAO);
+            option_list_upload.add(Option.ID_C_UPLOADFILE_CDN_UPLOAD_URL_ACAO_WHITE_LIST);
+
 
             updateCategory(option_list_qiniu, Option.CATEGORY_C_QINIU, requestJSONObject);
             updateCategory(option_list_baidu, Option.CATEGORY_C_BAIDU, requestJSONObject);
             updateCategory(option_list_wechat, Option.CATEGORY_C_WECHAT, requestJSONObject);
+            updateCategory(option_list_upload, Option.CATEGORY_C_UPLOADFILE, requestJSONObject);
 
             ret.put(Keys.STATUS_CODE, true);
             ret.put(Keys.MSG, langPropsService.get("updateSuccLabel"));

@@ -3242,7 +3242,7 @@ admin.preference = {
         });
 
         $.ajax({
-            url: latkeConfig.servePath + "/console/preference/qiniu",
+            url: latkeConfig.servePath + "/console/preference/extra",
             type: "GET",
             cache: false,
             success: function (result, textStatus) {
@@ -3260,8 +3260,17 @@ admin.preference = {
                 $("#qiniuLocalUrlPrefix").val(result.qiniu.qiniuLocalUrlPrefix);
                 $("#qiniuEnableACAODomainList").val(result.qiniu.qiniuEnableACAODomainList);
 
-                "true" === result.qiniu.qiniuEnableLocalUrl ? $("#qiniuEnableLocalUrl").attr("checked", "checked") : $("#qiniuEnableLocalUrl").removeAttr("checked");
-                "true" === result.qiniu.qiniuEnableACAO ? $("#qiniuEnableACAO").attr("checked", "checked") : $("#qiniuEnableACAO").removeAttr("checked");
+
+                /*如果本地目录没有设置，则不可以配置"使能同步本地目录"*/
+                if("true" === result.qiniu.localPathIsSet){
+                    $("#qiniuEnableSyncLocal").removeAttr("readonly");
+                    "true" === result.qiniu.qiniuEnableSyncLocal ? $("#qiniuEnableSyncLocal").attr("checked", "checked") : $("#qiniuEnableSyncLocal").removeAttr("checked");
+
+                }else{
+                    $("#qiniuSyncLocalSavePath").attr("readonly", "readonly");
+                    $("#qiniuEnableSyncLocal").removeAttr("checked")
+                }
+
 
                 /*百度参数*/
                 $("#baiduHMCode").val(result.baidu.baiduHMCode);
@@ -3274,8 +3283,60 @@ admin.preference = {
                 $("#wechatAppEncodingAESKey").val(result.wechat.wechatAppEncodingAESKey);
                 $("#wechatToken").val(result.wechat.wechatToken);
                 $("#wechatMsgEncodeMode").val(result.wechat.wechatMsgEncodeMode);
+
+
+                /*文件上传*/
+                $("#uploadFileMode").val(result.uploadfile.uploadFileMode);
+                $("#uploadFileLocalPath").val(result.uploadfile.uploadFileLocalPath);
+                $("#uploadFileQiniuCDNURLEncodeDomain").val(result.uploadfile.uploadFileQiniuCDNURLEncodeDomain);
+
+                "true" === result.uploadfile.uploadFileEnableCDNSyncToLocal ? $("#uploadFileEnableCDNSyncToLocal").attr("checked", "checked") : $("#uploadFileEnableCDNSyncToLocal").removeAttr("checked");
+                "true" === result.uploadfile.uploadFileEnableCDNUploadURLEncode ? $("#uploadFileEnableCDNUploadURLEncode").attr("checked", "checked") : $("#uploadFileEnableCDNUploadURLEncode").removeAttr("checked");
+                "true" === result.uploadfile.uploadFileEnableCDNUploadURLAcao ? $("#uploadFileEnableCDNUploadURLAcao").attr("checked", "checked") : $("#uploadFileEnableCDNUploadURLAcao").removeAttr("checked");
+
+
+                $("#uploadFileCDNUploadURLAcaoWhiteList").val(result.uploadfile.uploadFileCDNUploadURLAcaoWhiteList);
+
+                var select_val = $("#uploadFileMode").children('option:selected').val();
+                if("1" === select_val){
+                    $("#uploadFileEnableCDNSyncToLocal").removeAttr("disabled");
+                    $("#uploadFileEnableCDNUploadURLEncode").removeAttr("disabled");
+                    $("#uploadFileEnableCDNUploadURLAcao").removeAttr("disabled");
+                    $("#uploadFileCDNUploadURLAcaoWhiteList").removeAttr("disabled");
+                    $("#uploadFileQiniuCDNURLEncodeDomain").removeAttr("disabled");
+                }
+
+                if("" === $("#qiniuSyncLocalSavePath").val()){
+                    $("#uploadFileEnableCDNSyncToLocal").attr("disabled", "disabled");
+                }
+
             }
         });
+
+        $("#uploadFileMode").change(function(){
+            var select_val = $("#uploadFileMode").children('option:selected').val();
+            if("0" === select_val){
+                $("#uploadFileEnableCDNSyncToLocal").attr("disabled", "disabled");
+                $("#uploadFileEnableCDNUploadURLEncode").attr("disabled", "disabled");
+                $("#uploadFileEnableCDNUploadURLAcao").attr("disabled", "disabled");
+                $("#uploadFileCDNUploadURLAcaoWhiteList").attr("disabled", "disabled");
+            }
+
+            if("1" === select_val){
+                $("#uploadFileEnableCDNSyncToLocal").removeAttr("disabled");
+                $("#uploadFileEnableCDNUploadURLEncode").removeAttr("disabled");
+                $("#uploadFileEnableCDNUploadURLAcao").removeAttr("disabled");
+                $("#uploadFileCDNUploadURLAcaoWhiteList").removeAttr("disabled");
+            }
+
+            if("" === $("#qiniuSyncLocalSavePath").val()){
+                $("#uploadFileEnableCDNSyncToLocal").attr("disabled", "disabled");
+            }
+        });
+    },
+
+    changeUploadModeSelect: function(){
+
     },
     /*
      * @description 参数校验
@@ -3418,7 +3479,7 @@ admin.preference = {
     /*
      * @description 更新 Qiniu 参数
      */
-    updateQiniu: function () {
+    updateExtra: function () {
         $("#tipMsg").text("");
         $("#loadMsg").text(Label.loadingLabel);
 
@@ -3429,10 +3490,6 @@ admin.preference = {
             "qiniuBucket": $("#qiniuBucket").val(),
             "qiniuImageView": $("#qiniuImageView").val(),
 
-            "qiniuLocalUrlPrefix": $("#qiniuLocalUrlPrefix").val(),
-            "qiniuEnableACAODomainList": $("#qiniuEnableACAODomainList").val(),
-            "qiniuEnableLocalUrl": $("#qiniuEnableLocalUrl").prop("checked"),
-            "qiniuEnableACAO": $("#qiniuEnableACAO").prop("checked"),
 
             "baiduPushEnable": $("#baiduPushEnable").prop("checked"),
             "baiduHMEnable": $("#baiduHMEnable").prop("checked"),
@@ -3444,10 +3501,25 @@ admin.preference = {
             "wechatToken": $("#wechatToken").val(),
             "wechatMsgEncodeMode": $("#wechatMsgEncodeMode").val(),
 
+
+
+
+            "uploadFileMode": $("#uploadFileMode").val(),
+
+            "uploadFileEnableCDNSyncToLocal": $("#uploadFileEnableCDNSyncToLocal").prop("checked"),
+            "uploadFileEnableCDNUploadURLEncode": $("#uploadFileEnableCDNUploadURLEncode").prop("checked"),
+            "uploadFileQiniuCDNURLEncodeDomain": $("#uploadFileQiniuCDNURLEncodeDomain").val(),
+            "uploadFileEnableCDNUploadURLAcao": $("#uploadFileEnableCDNUploadURLAcao").prop("checked"),
+
+            "uploadFileCDNUploadURLAcaoWhiteList": $("#uploadFileCDNUploadURLAcaoWhiteList").val(),
+
+
+
+
         };
 
         $.ajax({
-            url: latkeConfig.servePath + "/console/preference/qiniu",
+            url: latkeConfig.servePath + "/console/preference/extra",
             type: "PUT",
             cache: false,
             data: JSON.stringify(requestJSONObject),

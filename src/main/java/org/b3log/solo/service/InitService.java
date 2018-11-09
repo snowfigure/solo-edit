@@ -637,7 +637,7 @@ public class InitService {
 
 
         initMap.put(Option.ID_C_CDN_JQUERY_JS, "/js/lib/jquery/jquery.min.js");
-        initMap.put(Option.ID_C_CDN_ICONFONT, "");
+        initMap.put(Option.ID_C_CDN_ICONFONT, "/skins/amaze-2.0/css/font_alicdn.css");
         initMap.put(Option.ID_C_BANNER_IMAGE_URL, "/images/banner.jpg");
         initMap.put(Option.ID_C_BAIDU_HM_ENABLE, false);
         initMap.put(Option.ID_C_BAIDU_PUSH_ENABLE, false);

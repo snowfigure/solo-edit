@@ -61,31 +61,27 @@ public final class Option {
     public static final String ID_C_BROADCAST_CHANCE_EXPIRATION_TIME = "broadcastChanceExpirationTime";
 
     /**
-     * Key of Qiniu access key.
+     * Key of Qiniu
      */
     public static final String ID_C_QINIU_ACCESS_KEY = "qiniuAccessKey";
-
-    /**
-     * Key of Qiniu secret key.
-     */
     public static final String ID_C_QINIU_SECRET_KEY = "qiniuSecretKey";
-
-    /**
-     * Key of Qiniu domain.
-     */
     public static final String ID_C_QINIU_DOMAIN = "qiniuDomain";
-
-    /**
-     * Key of Qiniu bucket.
-     */
     public static final String ID_C_QINIU_BUCKET = "qiniuBucket";
-
     public static final String ID_C_QINIU_IMAGE_VIEW = "qiniuImageView";
 
-    public static final String ID_C_QINIU_ENABLE_LOCAL_URL = "qiniuEnableLocalUrl";
-    public static final String ID_C_QINIU_LOCAL_URL_PREFIX= "qiniuLocalUrlPrefix";
-    public static final String ID_C_QINIU_ENABLE_ACCESS_CTRL_AO = "qiniuEnableACAO";
-    public static final String ID_C_QINIU_ENABLE_ACAO_LIST = "qiniuEnableACAODomainList";
+
+    /**
+     * Key of Upload File
+     */
+    public static final String CATEGORY_C_UPLOADFILE = "uploadfile";
+    public static final String ID_C_UPLOADFILE_LOCAL_PATH =  "uploadFileLocalPath";
+    public static final String ID_C_UPLOADFILE_MODE = "uploadFileMode";
+    public static final String ID_C_UPLOADFILE_ENABLE_CDN_SYNC_TO_LOCAL = "uploadFileEnableCDNSyncToLocal";
+    public static final String ID_C_UPLOADFILE_ENABLE_CDN_UPLOAD_URL_ENCODE = "uploadFileEnableCDNUploadURLEncode";
+    public static final String ID_C_UPLOADFILE_QINIU_CND_URL_ENCODE_DOMAIN = "uploadFileQiniuCDNURLEncodeDomain";
+    public static final String ID_C_UPLOADFILE_ENABLE_CDN_UPLOAD_URL_ACAO = "uploadFileEnableCDNUploadURLAcao";
+    public static final String ID_C_UPLOADFILE_CDN_UPLOAD_URL_ACAO_WHITE_LIST = "uploadFileCDNUploadURLAcaoWhiteList";
+
 
     /**
      * Key of blog title.
@@ -434,7 +430,7 @@ public final class Option {
         /**
          * Default skin directory name.
          */
-        public static final String DEFAULT_SKIN_DIR_NAME = "nijigen";
+        public static final String DEFAULT_SKIN_DIR_NAME = "amaze-2.0";
 
         /**
          * Default language.

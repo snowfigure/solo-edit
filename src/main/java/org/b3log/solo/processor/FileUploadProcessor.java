@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.b3log.latke.Latkes;
 import org.b3log.latke.ioc.BeanManager;
+import org.b3log.latke.ioc.Inject;
 import org.b3log.latke.logging.Level;
 import org.b3log.latke.logging.Logger;
 import org.b3log.latke.servlet.HTTPRequestContext;
@@ -43,6 +44,7 @@ import org.b3log.latke.util.URLs;
 import org.b3log.solo.SoloServletListener;
 import org.b3log.solo.model.Option;
 import org.b3log.solo.service.OptionQueryService;
+import org.b3log.solo.util.Images;
 import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
 
@@ -50,6 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * File upload processor.
@@ -66,13 +69,16 @@ public class FileUploadProcessor {
      */
     private static final Logger LOGGER = Logger.getLogger(FileUploadProcessor.class);
 
+    @Inject
+    private OptionQueryService optionQueryService;
+
     /**
      * Qiniu enabled.
      */
-    private static final Boolean QN_ENABLED = StringUtils.isBlank(Solos.UPLOAD_DIR_PATH);
+    private static final Boolean LOCAL_PATH_NOT_ENABLE = StringUtils.isBlank(Solos.UPLOAD_DIR_PATH);
 
     static {
-        if (!QN_ENABLED) {
+        if (!LOCAL_PATH_NOT_ENABLE) {
             final File file = new File(Solos.UPLOAD_DIR_PATH);
             if (!FileUtil.isExistingFolder(file)) {
                 try {
@@ -90,7 +96,7 @@ public class FileUploadProcessor {
 
 
     private void getFileCommon(final HttpServletRequest req, final HttpServletResponse resp, final  String key) throws Exception {
-        if (QN_ENABLED) {
+        if (LOCAL_PATH_NOT_ENABLE) {
             return;
         }
 
@@ -145,6 +151,35 @@ public class FileUploadProcessor {
 
         getFileCommon(req,resp,key);
     }
+
+    /**
+     * Gets file by the specified URL.
+     *
+     * @param req  the specified request
+     * @param resp the specified response
+     * @throws Exception exception
+     */
+    @RequestProcessing(value = "/qiniu/*", method = HTTPRequestMethod.GET)
+    public void getEncodeQiniuFile(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
+
+        final String uri = req.getRequestURI();
+        String qiniu_file_name = "";
+        String fileName = StringUtils.substringAfter(uri, "/qiniu/").trim();
+
+        JSONObject qiniu = optionQueryService.getOptions(Option.CATEGORY_C_QINIU);
+        String qiniu_domain = qiniu.optString(Option.ID_C_QINIU_DOMAIN).trim();
+        /*七牛的image_view 水印*/
+        String image_view = qiniu.optString((Option.ID_C_QINIU_IMAGE_VIEW).trim()) + "";
+
+        if(qiniu_domain.endsWith("/")){
+            qiniu_file_name = qiniu_domain + "file/" + fileName + "?" + image_view;
+        }else{
+            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/file/" + fileName + "?" + image_view;
+        }
+
+        resp.sendRedirect(qiniu_file_name.trim());
+    }
+
     /**
      * Gets file by the specified URL.
      *
@@ -176,13 +211,58 @@ public class FileUploadProcessor {
         if(!uploadCheckIsLogin(context)){
             return;
         }
+        try {
+            //final BeanManager beanManager = BeanManager.getInstance();
+            //final OptionQueryService optionQueryService = beanManager.getReference(OptionQueryService.class);
+            JSONObject uploadfile_opt = optionQueryService.getOptions(Option.CATEGORY_C_UPLOADFILE);
 
-        /*判断是否可以使用七牛CDN上传文件*/
-        if (QN_ENABLED){
-            uploadFileWithQiniu(context,req);
-        }else{
-            uploadFileLocal(context,req);
+            /*判断是否可以使用本地模式上传文件*/
+
+            String upload_mode = uploadfile_opt.getString(Option.ID_C_UPLOADFILE_MODE);
+            boolean enable_sync_local = uploadfile_opt.getBoolean(Option.ID_C_UPLOADFILE_ENABLE_CDN_SYNC_TO_LOCAL);
+            if(upload_mode != null && !StringUtils.isBlank(upload_mode)){
+
+                /*本地上传模式*/
+                if(upload_mode.equals("0")){
+                    if (!LOCAL_PATH_NOT_ENABLE){
+                        uploadFileLocal(context,req);
+                    }else{
+                        final String msg = "Local path is not set, please set it first or use cdn mode.";
+                        LOGGER.log(Level.ERROR, msg);
+                        context.renderMsg(msg);
+                    }
+                    return;
+                }
+
+                /*七牛CDN上传模式*/
+                if(upload_mode.equals("1")){
+                    uploadFileWithQiniu(context, req);
+                    return;
+                }
+
+                final String msg = "Unsupported file upload mode is not set, please check it first.";
+                LOGGER.log(Level.ERROR, msg);
+                context.renderMsg(msg);
+                return;
+            }
+
+            /*上传模式有问题，则跳出*/
+            {
+                final String msg = "File upload mode is not set, please set it first.";
+                LOGGER.log(Level.ERROR, msg);
+                context.renderMsg(msg);
+            }
+        }catch (Exception e){
+            final String msg = "upload file failed.";
+            LOGGER.log(Level.ERROR, msg);
+            context.renderMsg(msg);
+
+            throw e;
         }
+
+
+
+
     }
 
     /**
@@ -247,6 +327,9 @@ public class FileUploadProcessor {
         return fileName;
     }
 
+
+
+
     /**
      * 文件上传到七牛CDN
      * @param context
@@ -269,23 +352,39 @@ public class FileUploadProcessor {
         final String date = DateFormatUtils.format(System.currentTimeMillis(), "yyyy/MM");
 
         try {
-            final BeanManager beanManager = BeanManager.getInstance();
-            final OptionQueryService optionQueryService = beanManager.getReference(OptionQueryService.class);
+            //final BeanManager beanManager = BeanManager.getInstance();
+            //final OptionQueryService optionQueryService = beanManager.getReference(OptionQueryService.class);
             JSONObject qiniu = optionQueryService.getOptions(Option.CATEGORY_C_QINIU);
+            JSONObject uploadfile_opt = optionQueryService.getOptions(Option.CATEGORY_C_UPLOADFILE);
             if (null == qiniu) {
-                final String msg = "Qiniu settings failed, please set it first. ";
+                final String msg = "Qiniu settings get failed, please set it first. ";
                 LOGGER.log(Level.ERROR, msg);
                 context.renderMsg(msg);
 
                 return;
             }
 
+            if (null == uploadfile_opt) {
+                final String msg = "UploadFile settings get failed, please set it first. ";
+                LOGGER.log(Level.ERROR, msg);
+                context.renderMsg(msg);
+
+                return;
+            }
+
+
             Auth auth = Auth.create(qiniu.optString(Option.ID_C_QINIU_ACCESS_KEY), qiniu.optString(Option.ID_C_QINIU_SECRET_KEY));
             String uploadToken = auth.uploadToken(qiniu.optString(Option.ID_C_QINIU_BUCKET), null, 3600 * 6, null);
             UploadManager uploadManager = new UploadManager(new Configuration());
 
-            /*七牛的image_view*/
+
+            /*七牛的image_view 水印*/
             String image_view = qiniu.optString((Option.ID_C_QINIU_IMAGE_VIEW)) + "";
+            String qiniu_file_name = "";
+            boolean enable_sync_local = uploadfile_opt.optBoolean(Option.ID_C_UPLOADFILE_ENABLE_CDN_SYNC_TO_LOCAL);
+            boolean enable_url_encode = uploadfile_opt.optBoolean(Option.ID_C_UPLOADFILE_ENABLE_CDN_UPLOAD_URL_ENCODE);
+            String qiniu_decode_domain = uploadfile_opt.optString(Option.ID_C_UPLOADFILE_QINIU_CND_URL_ENCODE_DOMAIN);
+
 
             for (int i = 0; i < files.length; i++) {
                 final FileUpload file = files[i];
@@ -299,22 +398,64 @@ public class FileUploadProcessor {
                     if (!ArrayUtils.isEmpty(names)) {
                         fileName = names[i];
                     }
-                    uploadManager.put(file.getFileInputStream(), fileName, uploadToken, null, contentType);
-                    String qiniu_file_name = "";
-                    if(qiniu.optString(Option.ID_C_QINIU_DOMAIN).endsWith("/")){
-                        qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + fileName;
-                    }else{
-                        qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/" + fileName;
+
+                    /*先保存到temp目录*/
+                    FileUtils.forceMkdir(new File("/tmp/" + date));
+                    try (final OutputStream output = new FileOutputStream("/tmp/" + fileName);
+                         final InputStream input = file.getFileInputStream())
+                    {
+                        IOUtils.copy(input, output);
                     }
-                    /*如果是图片文件*/
+
+
+
+                    /*上传到七牛云*/
+                    uploadManager.put(file.getFileInputStream(), fileName, uploadToken, null, contentType);
+
+                    boolean need_add_image_view = false;
+                    /*获取图片文件的分辨率，确定是否加水印*/
                     if(     fileName.toLowerCase().endsWith(".jpg") ||
                             fileName.toLowerCase().endsWith(".png") ||
                             fileName.toLowerCase().endsWith(".gif") ||
                             fileName.toLowerCase().endsWith(".bpm"))
                     {
+                        Map<String, Integer> resolution = Images.getImageResolution("/tmp/" + fileName);
+                        int w = resolution.get("w");
+                        int h = resolution.get("h");
 
-                        qiniu_file_name = qiniu_file_name + "?" + image_view;
+                        /*宽大于600， 高大于200，允许添加水印*/
+                        if(w > 600 && h > 200){
+                            need_add_image_view = true;
+                        }
                     }
+
+                    /*确认是否保存到本地，如果不保存本地，则从temp目录移除*/
+                    if(enable_sync_local){
+                        FileUtils.forceMkdir(new File(Solos.UPLOAD_DIR_PATH + date));
+                        FileUtils.moveFile(new File("/tmp/" + fileName), new File(Solos.UPLOAD_DIR_PATH + fileName));
+                    }else{
+                        FileUtils.forceDelete(new File("/tmp/" + fileName));
+                    }
+
+
+                    /*确认CDN上传是否使用本地代理方式（需同时满足添加imageview）*/
+                    if(enable_url_encode && need_add_image_view){
+                        qiniu_file_name = qiniu_decode_domain + "/qiniu/" + fileName;
+
+                    }else{
+                        /*常规模式*/
+                        if(qiniu.optString(Option.ID_C_QINIU_DOMAIN).endsWith("/")){
+                            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "file/" + fileName;
+                        }else{
+                            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/file/" + fileName;
+                        }
+                        if(need_add_image_view){
+                            fileName = fileName + "?" + image_view;
+                        }
+                    }
+
+
+
                     succMap.put(originalName, qiniu_file_name);
 
                 } catch (final Exception e) {
