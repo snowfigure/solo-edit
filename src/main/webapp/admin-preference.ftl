@@ -25,11 +25,6 @@
             </div>
         </li>
         <li>
-            <div id="tabPreference_webHtmlExtend">
-                <a href="#tools/preference/webHtmlExtend">${webHtmlExtendLabel}</a>
-            </div>
-        </li>
-        <li>
             <div id="tabPreference_skins">
                 <a href="#tools/preference/skins">${skinLabel}</a>
             </div>
@@ -95,6 +90,18 @@
 
         <label for="footerContent">${footerContent1Label}</label>
         <textarea rows="2" id="footerContent"></textarea>
+
+        <label for="htmlHead">${htmlhead1Label}</label>
+        <textarea rows="6" id="htmlHead"></textarea>
+
+        <label for="cdnjQueryJS">${cdnjQueryJSLabel}</label>
+        <textarea rows="2" id="cdnjQueryJS"></textarea>
+
+        <label for="cdnIconfont">${cdnIconfontLabel}</label>
+        <textarea rows="2" id="cdnIconfont"></textarea>
+
+        <label for="bannerImageUrl">${bannerImageUrlLabel}</label>
+        <textarea rows="2" id="bannerImageUrl"></textarea>
 
         <br><br>
         <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
@@ -229,10 +236,6 @@
         <label for="qiniuImageView">${qiniuImageViewLabel}</label>
         <textarea rows="3" id="qiniuImageView"></textarea>
 
-
-
-
-
         <br/><br/>
 
         <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
@@ -258,26 +261,6 @@
         <div class="clear"></div>
     </div>
 
-    <div id="tabPreferencePanel_webHtmlExtend" class="none form">
-        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
-        <div class="clear"></div>
-
-        <label for="htmlHead">${htmlhead1Label}</label>
-        <textarea rows="6" id="htmlHead"></textarea>
-
-        <label for="cdnjQueryJS">${cdnjQueryJSLabel}</label>
-        <textarea rows="2" id="cdnjQueryJS"></textarea>
-
-        <label for="cdnIconfont">${cdnIconfontLabel}</label>
-        <textarea rows="2" id="cdnIconfont"></textarea>
-
-        <label for="bannerImageUrl">${bannerImageUrlLabel}</label>
-        <textarea rows="2" id="bannerImageUrl"></textarea>
-
-        <br><br>
-        <button onclick="admin.preference.update()" class="right">${updateLabel}</button>
-        <div class="clear"></div>
-    </div>
 
     <div id="tabPreferencePanel_wechat" class="none form">
         <button onclick="admin.preference.updateExtra()" class="right">${updateLabel}</button>
