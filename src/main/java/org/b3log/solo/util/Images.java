@@ -181,6 +181,18 @@ public final class Images {
         return resolution;
     }
 
+    public static boolean isImageFileName(String fileName){
+        if(     fileName.toLowerCase().endsWith(".jpg") ||
+                fileName.toLowerCase().endsWith(".png") ||
+                fileName.toLowerCase().endsWith(".gif") ||
+                fileName.toLowerCase().endsWith(".bpm"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Private constructor.
      */

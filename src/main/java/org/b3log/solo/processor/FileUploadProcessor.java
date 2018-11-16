@@ -44,6 +44,7 @@ import org.b3log.latke.util.URLs;
 import org.b3log.solo.SoloServletListener;
 import org.b3log.solo.model.Option;
 import org.b3log.solo.service.OptionQueryService;
+import org.b3log.solo.util.Https;
 import org.b3log.solo.util.Images;
 import org.b3log.solo.util.Solos;
 import org.json.JSONObject;
@@ -51,6 +52,8 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
 
@@ -152,6 +155,23 @@ public class FileUploadProcessor {
         getFileCommon(req,resp,key);
     }
 
+    private String getQiniuFileFullUrl(String key) throws Exception{
+
+        String qiniu_file_name = "";
+
+        JSONObject qiniu = optionQueryService.getOptions(Option.CATEGORY_C_QINIU);
+        String qiniu_domain = qiniu.optString(Option.ID_C_QINIU_DOMAIN).trim();
+        /*七牛的image_view 水印*/
+        String image_view = qiniu.optString((Option.ID_C_QINIU_IMAGE_VIEW).trim()) + "";
+
+        if(qiniu_domain.endsWith("/")){
+            qiniu_file_name = qiniu_domain + "file/" + key + "?" + image_view;
+        }else{
+            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/file/" + key + "?" + image_view;
+        }
+
+        return qiniu_file_name;
+    }
     /**
      * Gets file by the specified URL.
      *
@@ -163,21 +183,36 @@ public class FileUploadProcessor {
     public void getEncodeQiniuFile(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
 
         final String uri = req.getRequestURI();
-        String qiniu_file_name = "";
-        String fileName = StringUtils.substringAfter(uri, "/qiniu/").trim();
 
-        JSONObject qiniu = optionQueryService.getOptions(Option.CATEGORY_C_QINIU);
-        String qiniu_domain = qiniu.optString(Option.ID_C_QINIU_DOMAIN).trim();
-        /*七牛的image_view 水印*/
-        String image_view = qiniu.optString((Option.ID_C_QINIU_IMAGE_VIEW).trim()) + "";
+        String key = StringUtils.substringAfter(uri, "/qiniu/");
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
 
-        if(qiniu_domain.endsWith("/")){
-            qiniu_file_name = qiniu_domain + "file/" + fileName + "?" + image_view;
-        }else{
-            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/file/" + fileName + "?" + image_view;
+        final String qiniu_file_name = getQiniuFileFullUrl(key);
+
+
+        /*检查当前文件的URL是否存在，如果不存在，本次请求使用本地的URL进行转发*/
+
+        /*文件可达，直接使用七牛的地址进行响应*/
+        if(Https.checkImageUrlExist(qiniu_file_name)){
+            resp.sendRedirect(qiniu_file_name.trim());
+            return;
         }
 
-        resp.sendRedirect(qiniu_file_name.trim());
+        /*获取本地保存路径*/
+        String path = Solos.UPLOAD_DIR_PATH + key;
+        path = URLs.decode(path);
+
+        if (FileUtil.isExistingFile(new File(path))) {
+            getFileCommon(req,resp,key);
+
+            /*尝试进行文件上传到七牛云*/
+
+        }
+
+
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        return;
     }
 
     /**
@@ -195,6 +230,8 @@ public class FileUploadProcessor {
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
 
+
+        /*七牛模式下，优先使用七牛的文件进行重定向*/
 
         getFileCommon(req,resp,key);
     }
@@ -217,9 +254,8 @@ public class FileUploadProcessor {
             JSONObject uploadfile_opt = optionQueryService.getOptions(Option.CATEGORY_C_UPLOADFILE);
 
             /*判断是否可以使用本地模式上传文件*/
-
             String upload_mode = uploadfile_opt.getString(Option.ID_C_UPLOADFILE_MODE);
-            boolean enable_sync_local = uploadfile_opt.getBoolean(Option.ID_C_UPLOADFILE_ENABLE_CDN_SYNC_TO_LOCAL);
+
             if(upload_mode != null && !StringUtils.isBlank(upload_mode)){
 
                 /*本地上传模式*/
@@ -414,10 +450,7 @@ public class FileUploadProcessor {
 
                     boolean need_add_image_view = false;
                     /*获取图片文件的分辨率，确定是否加水印*/
-                    if(     fileName.toLowerCase().endsWith(".jpg") ||
-                            fileName.toLowerCase().endsWith(".png") ||
-                            fileName.toLowerCase().endsWith(".gif") ||
-                            fileName.toLowerCase().endsWith(".bpm"))
+                    if(Images.isImageFileName(fileName))
                     {
                         Map<String, Integer> resolution = Images.getImageResolution("/tmp/" + fileName);
                         int w = resolution.get("w");
@@ -450,7 +483,7 @@ public class FileUploadProcessor {
                             qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/file/" + fileName;
                         }
                         if(need_add_image_view){
-                            fileName = fileName + "?" + image_view;
+                            qiniu_file_name = qiniu_file_name + "?" + image_view;
                         }
                     }
 
