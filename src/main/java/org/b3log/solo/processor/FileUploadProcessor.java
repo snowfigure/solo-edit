@@ -103,6 +103,8 @@ public class FileUploadProcessor {
             return;
         }
 
+        LOGGER.info( "getFileCommon, key:" + key);
+
         String path = Solos.UPLOAD_DIR_PATH + key;
         path = URLs.decode(path);
 
@@ -145,12 +147,24 @@ public class FileUploadProcessor {
      */
     @RequestProcessing(value = "/file/*", method = HTTPRequestMethod.GET)
     public void getFileWithFile(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
-
-
         final String uri = req.getRequestURI();
         String key = StringUtils.substringAfter(uri, "/file/");
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+
+        key = key.substring(0, key.indexOf("?"));
+
+        getFileCommon(req,resp,key);
+    }
+
+    @RequestProcessing(value = "//file/*", method = HTTPRequestMethod.GET)
+    public void getFileWithFileDobule(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
+        final String uri = req.getRequestURI();
+        String key = StringUtils.substringAfter(uri, "//file/");
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+        key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+
+        key = key.substring(0, key.indexOf("?"));
 
         getFileCommon(req,resp,key);
     }
@@ -187,6 +201,8 @@ public class FileUploadProcessor {
         String key = StringUtils.substringAfter(uri, "/qiniu/");
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+
+        key = key.substring(0, key.indexOf("?"));
 
         final String qiniu_file_name = getQiniuFileFullUrl(key);
 
@@ -229,6 +245,8 @@ public class FileUploadProcessor {
         String key = StringUtils.substringAfter(uri, "/upload/");
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
         key = StringUtils.substringBeforeLast(key, "?"); // Erase Qiniu template
+
+        key = key.substring(0, key.indexOf("?"));
 
 
         /*七牛模式下，优先使用七牛的文件进行重定向*/
