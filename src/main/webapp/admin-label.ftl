@@ -151,7 +151,9 @@
         "previewLabel": '${previewLabel}',
         "helpLabel": '${helpLabel}',
         "fullscreenLabel": '${fullscreenLabel}',
-        "uploadFilesLabel": '${uploadFilesLabel}'
+        "uploadFilesLabel": '${uploadFilesLabel}',
+        "unPublishLabel": '${unPublishLabel}',
+        "publishLabel": '${publishLabel}',
     };    
     
     admin.init();

@@ -542,6 +542,36 @@ admin.article = {
         }
         return false;
     },
+
+    moveToUnpublish: function(oid){
+      var that = this;
+      that._addDisabled();
+      $.ajax({
+          url: latkeConfig.servePath + "/console/article/unpublish/" + oid,
+          type: "PUT",
+          cache: false,
+          success: function(result, textStatus){
+              $("#tipMsg").text(result.msg);
+              if (!result.sc) {
+                  return;
+              }
+
+              admin.selectTab("article/draft-list");
+              admin.article.status.id = undefined;
+              admin.article.isConfirm = false;
+              admin.selectTab("article/article-list");
+          },
+          complete: function (jqXHR, textStatus) {
+              that._removeDisabled();
+              $("#loadMsg").text("");
+              if (jqXHR.status === 403) {
+                  $.get("/admin-index.do");
+                  that.unPublish();
+              }
+          }
+      });
+    },
+
     /**
      * @description 取消发布 
      * @param {Boolean} isAuto 是否为自动保存

@@ -41,12 +41,12 @@
         <div class="tip tip-msg"><span id="tipMsg"></span></div>
         <div id="allPanel">
             <div id="top">
-                <a href="${servePath}" target="_blank" class="hover">
+                <!--a href="${servePath}" target="_blank" class="hover">
                     ${blogTitle}
-                </a>
+                </a-->
                 <span class="icon-unordered-list top__menu none"
                       onclick="admin.toggleMenu()"></span>
-                <span class="right"> 
+                <span class="right" style="margin-right: 100px">
                     <a href="${servePath}" title='${indexLabel}'>
                         <div class="avatar" style="background-image: url(${gravatar})"></div>
                         ${userName}
@@ -56,6 +56,13 @@
             </div>
             <div id="tabs">
                 <ul>
+                    <li>
+                        <div id="tabs_media">
+                            <a a href="${servePath}" target="_blank" class="hover">
+                                <span class="icon-play"></span> ${indexHomeLabel}
+                            </a>
+                        </div>
+                    </li>
                     <li>
                         <div id="tabs_main">
                             <a href="#main">
@@ -71,13 +78,13 @@
                         </div>
                         <ul id="tabArticleMgt">
                             <li>
-                                <div id="tabs_article">
-                                    <a href="#article/article" onclick="admin.article.prePost()">${postArticleLabel}</a>
+                                <div id="tabs_article-list">
+                                    <a href="#article/article-list">${articleListLabel}</a>
                                 </div>
                             </li>
                             <li>
-                                <div id="tabs_article-list">
-                                    <a href="#article/article-list">${articleListLabel}</a>
+                                <div id="tabs_article">
+                                    <a href="#article/article" onclick="admin.article.prePost()">${postArticleLabel}</a>
                                 </div>
                             </li>
                             <li>
@@ -85,15 +92,15 @@
                                     <a href="#article/draft-list">${draftListLabel}</a>
                                 </div>
                             </li>
+                            <li>
+                                <div id="tabs_comment-list">
+                                    <a href="#comment-list"><!--span class="icon-cmts"></span--> ${commentListLabel}</a>
+                                </div>
+                            </li>
                         </ul>
                     </li>
-                    <li>
-                        <div id="tabs_comment-list">
-                            <a href="#comment-list">
-                                <span class="icon-cmts"></span> ${commentListLabel}
-                            </a>
-                        </div>
-                    </li>
+
+
                     <li>
                         <div id="tabToolsTitle" onclick="admin.collapseNav(this)">
                             <span class="icon-setting"></span>
@@ -175,8 +182,6 @@
                         &nbsp;
                         ${onlineVisitor1Label}${onlineVisitorCnt}
                     </span>
-                </div>
-                <div class="fn-clear">
                     <span>
                         &copy; 2013 - ${year} <a href="${servePath}">${blogTitle}</a>
                     ${footerContent}
@@ -186,6 +191,7 @@
                         <a href="https://solo.b3log.org" target="_blank">Solo</a> ${version}
                     </span>
                 </div>
+
             </div>
         </div>
         <script src="${staticServePath}/js/lib/compress/admin-lib.min.js"></script>
