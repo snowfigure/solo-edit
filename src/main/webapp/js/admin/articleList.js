@@ -101,7 +101,7 @@ admin.articleList = {
                         " <a target='_blank' href='" + latkeConfig.servePath + articles[i].articlePermalink + "'>" + Label.viewLabel + "</a> " +
                         " <a href='javascript:void(0)' onclick=\"admin.article.get('" + articles[i].oId + "', true)\">" + Label.updateLabel + "</a> " +
                         " <a href='javascript:void(0)' onclick=\"admin.article.moveToUnpublish('" + articles[i].oId + "')\">" + Label.unPublishLabel + "</a> " +
-                        " <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'article', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a> " +
+                        //" <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'article', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a> " +
                         " <a href='javascript:void(0)' onclick=\"admin.articleList.popTop(this, '" + articles[i].oId + "')\">" + topClass + "</a> " +
                         " <a href='javascript:void(0)' onclick=\"admin.comment.open('" + articles[i].oId + "', 'article')\">" + Label.commentLabel + "</a> ";
                 }

@@ -95,7 +95,7 @@ admin.draftList = {
                     articles[i].articleTitle + "</a><span class='table-tag'>" + articles[i].articleTags + "</span>";
                     articleData[i].expendRow =
                         " <a href='javascript:void(0)' onclick=\"admin.article.get('" + articles[i].oId + "', false);\">" + Label.updateLabel + "</a> "  +
-                        " <a href='javascript:void(0)' onclick=\"admin.article.update('" + articles[i].oId + "', false);\">" + Label.publishLabel + "</a> "  +
+                        //" <a href='javascript:void(0)' onclick=\"admin.article.update('" + articles[i].oId + "', false);\">" + Label.publishLabel + "</a> "  +
                         " <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'draft', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a> " +
                         " <a href='javascript:void(0)' onclick=\"admin.comment.open('" + articles[i].oId + "', 'draft')\">" + Label.commentLabel + "</a>";
                 }

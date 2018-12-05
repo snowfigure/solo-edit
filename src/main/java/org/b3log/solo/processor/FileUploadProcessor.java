@@ -157,7 +157,7 @@ public class FileUploadProcessor {
         getFileCommon(req,resp,key);
     }
 
-    @RequestProcessing(value = "//file/*", method = HTTPRequestMethod.GET)
+    //@RequestProcessing(value = "//file/*", method = HTTPRequestMethod.GET)
     public void getFileWithFileDobule(final HttpServletRequest req, final HttpServletResponse resp) throws Exception {
         final String uri = req.getRequestURI();
         String key = StringUtils.substringAfter(uri, "//file/");
