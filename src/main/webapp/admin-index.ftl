@@ -71,9 +71,17 @@
                         </div>
                     </li>
                     <li>
+                        <div id="tabs_article">
+                            <a href="#article/article" onclick="admin.article.prePost()">
+                                <span class="icon-edit"></span>
+                                ${postArticleLabel}
+                            </a>
+                        </div>
+                    </li>
+                    <li>
                         <div id="tabArticleTitle" class="tab-current" onclick="admin.collapseNav(this)">
                             <span class="icon-article"></span>
-                            ${articleLabel}
+                            ${managerLabel}
                             <span class="icon-chevron-up right"></span>
                         </div>
                         <ul id="tabArticleMgt">
@@ -82,11 +90,7 @@
                                     <a href="#article/article-list">${articleListLabel}</a>
                                 </div>
                             </li>
-                            <li>
-                                <div id="tabs_article">
-                                    <a href="#article/article" onclick="admin.article.prePost()">${postArticleLabel}</a>
-                                </div>
-                            </li>
+
                             <li>
                                 <div id="tabs_draft-list">
                                     <a href="#article/draft-list">${draftListLabel}</a>
@@ -95,22 +99,6 @@
                             <li>
                                 <div id="tabs_comment-list">
                                     <a href="#comment-list"><!--span class="icon-cmts"></span--> ${commentListLabel}</a>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-
-
-                    <li>
-                        <div id="tabToolsTitle" onclick="admin.collapseNav(this)">
-                            <span class="icon-setting"></span>
-                            ${ToolLabel}
-                            <span class="icon-chevron-down right"></span>
-                        </div>
-                        <ul class="none" id="tabTools">
-                            <li>
-                                <div id="tabs_preference">
-                                    <a href="#tools/preference">${preferenceLabel}</a>
                                 </div>
                             </li>
                             <li>
@@ -133,6 +121,23 @@
                                     <a href="#tools/user-list">${userManageLabel}</a>
                                 </div>
                             </li>
+                        </ul>
+                    </li>
+
+
+                    <li>
+                        <div id="tabToolsTitle" onclick="admin.collapseNav(this)">
+                            <span class="icon-setting"></span>
+                            ${ToolLabel}
+                            <span class="icon-chevron-down right"></span>
+                        </div>
+                        <ul class="none" id="tabTools">
+                            <li>
+                                <div id="tabs_preference">
+                                    <a href="#tools/preference">${preferenceLabel}</a>
+                                </div>
+                            </li>
+
                             <li>
                                 <div id="tabs_plugin-list">
                                     <a href="#tools/plugin-list">${pluginMgmtLabel}</a>

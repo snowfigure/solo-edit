@@ -827,7 +827,7 @@ a[class*=" icon-"]:hover {
 
 #tabs ul {
     list-style: none;
-    width: 120px;
+    width: 100px;
     overflow-x: hidden;
     overflow-y: scroll;
 }
