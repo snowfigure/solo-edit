@@ -68,6 +68,7 @@ public class PreferenceConsole {
      */
     private static final String PREFERENCE_URI_PREFIX = "/console/preference/";
 
+    private static final String SETTING_URI_PREFIX = "/console/setting/";
     /**
      * Preference query service.
      */
@@ -384,6 +385,35 @@ public class PreferenceConsole {
             renderer.setJSONObject(jsonObject);
             jsonObject.put(Keys.MSG, e.getMessage());
         }
+    }
+
+    /**
+     * Todo
+     * @param context
+     */
+    @RequestProcessing(value = {SETTING_URI_PREFIX + "upload",
+            SETTING_URI_PREFIX + "qiniu",
+            SETTING_URI_PREFIX + "baidu",
+            SETTING_URI_PREFIX + "wechat",
+            SETTING_URI_PREFIX + "b3log"
+            },
+            method = HTTPRequestMethod.GET)
+    public void getSettings(final HTTPRequestContext context){
+        final HttpServletRequest request = context.getRequest();
+        final HttpServletResponse response = context.getResponse();
+        final JSONRenderer renderer = new JSONRenderer();
+        context.setRenderer(renderer);
+
+        final String requestURI = request.getRequestURI();
+        String subUrl = StringUtils.substringAfter(requestURI,SETTING_URI_PREFIX);
+
+        System.out.println(subUrl);
+
+        final JSONObject ret = new JSONObject();
+        renderer.setJSONObject(ret);
+        ret.put("url", requestURI);
+        ret.put("sub", subUrl);
+
     }
 
     /**

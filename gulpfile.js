@@ -70,6 +70,7 @@ function miniAdmin () {
 
 }
 
+
 function mergeLatkeAdmin() {
     const jsJqueryAdmin = [
         './src/main/webapp/js/admin/admin.js',
@@ -139,6 +140,18 @@ function skin_scripts () {
     pipe(gulp.dest('./src/main/webapp/skins/'))
 }
 
+function admin_styles(){
+    const cssfiles = [
+        './src/main/webapp/css/default-admin.css',
+        './src/main/webapp/css/default-base.css',
+        './src/main/webapp/css/default-init.css'
+    ]
+    return gulp.src(cssfiles).
+    pipe(rename({suffix: '.min'})).
+    pipe(minifycss()).
+    pipe(gulp.dest('./src/main/webapp/css/'))
+}
+
 function skin_styles () {
   // minify css
   return gulp.src('./src/main/webapp/skins/*/css/*.css').
@@ -146,6 +159,7 @@ function skin_styles () {
     pipe(minifycss()).
     pipe(gulp.dest('./src/main/webapp/skins/'))
 }
+
 
 function cleanProcess () {
   return del([
@@ -156,7 +170,7 @@ function cleanProcess () {
 gulp.task('default',
   gulp.series(cleanProcess, sassProcess,
       gulp.parallel(skin_scripts, skin_styles),
-      gulp.parallel(miniPjax, miniAdmin, mergeLatkeAdmin),
+      gulp.parallel(miniPjax, miniAdmin, mergeLatkeAdmin, admin_styles),
       gulp.parallel(common_scripts, miniLatkeAdmin)
   )
 )

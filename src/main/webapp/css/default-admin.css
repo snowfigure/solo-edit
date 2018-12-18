@@ -735,7 +735,7 @@ a[class*=" icon-"]:hover {
     position: fixed;
     text-align: center;
     top: 3px;
-    left: 255px;
+    left: 120px;
     z-index: 1001;
 }
 
@@ -839,6 +839,7 @@ a[class*=" icon-"]:hover {
 
 #tabs li > div > a,
 #tabs #tabToolsTitle,
+#tabs #tabSettingTitle,
 #tabs #tabArticleTitle {
     color: #aeb2b7;
     display: block;
@@ -855,7 +856,9 @@ a[class*=" icon-"]:hover {
 #tabs a.tab-current,
 #tabs #tabToolsTitle.tab-current,
 #tabs #tabArticleTitle.tab-current,
+#tabs #tabSettingTitle.tab-current,
 #tabs #tabToolsTitle:hover,
+#tabs #tabSettingTitle:hover,
 #tabs #tabArticleTitle:hover {
     background-color: #28282e;
     color: #1fb5ad;

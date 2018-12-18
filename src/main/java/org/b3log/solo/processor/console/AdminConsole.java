@@ -219,6 +219,67 @@ public class AdminConsole {
         fireFreeMarkerActionEvent(templateName, dataModel);
     }
 
+
+    /**
+     * TODO
+     * @param context
+     */
+    @RequestProcessing(value = {"/admin-setting-upload.do",
+            "/admin-setting-qiniu.do",
+            "/admin-setting-baidu.do",
+            "/admin-setting-wechat.do"
+        }, method = HTTPRequestMethod.GET)
+    public void showAdminSettingFunction(final  HTTPRequestContext context)throws ServiceException{
+        final AbstractFreeMarkerRenderer renderer = new ConsoleRenderer();
+        context.setRenderer(renderer);
+
+
+        final String requestUri = context.getRequest().getRequestURI();
+        final String subUri = StringUtils.substringBetween(requestUri, "/admin-setting-", ".do");
+
+        final String templateName = "admin-setting.ftl";
+        renderer.setTemplateName(templateName);
+
+        final Locale locale = Latkes.getLocale();
+        final Map<String, String> langs = langPropsService.getAll(locale);
+        final Map<String, Object> dataModel = renderer.getDataModel();
+        dataModel.putAll(langs);
+        dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
+        dataModel.put("settingUri", subUri);
+
+        final JSONObject preference = preferenceQueryService.getPreference();
+
+        final String[] availableIDs = TimeZone.getAvailableIDs();
+        final StringBuilder timeZoneIdOptions = getTimeZoneIdOption(preference, availableIDs);
+
+        dataModel.put("timeZoneIdOptions", timeZoneIdOptions.toString());
+        fireFreeMarkerActionEvent(templateName, dataModel);
+    }
+
+    /**
+     * 获取时区信息
+     * @param preference
+     * @param availableIDs
+     * @return
+     */
+    private StringBuilder getTimeZoneIdOption(JSONObject preference,  String[] availableIDs) {
+        final StringBuilder timeZoneIdOptions = new StringBuilder();
+        for (int i = 0; i < availableIDs.length; i++) {
+            final String id = availableIDs[i];
+            String option;
+
+            if (id.equals(preference.optString(Option.ID_C_TIME_ZONE_ID))) {
+                option = "<option value=\"" + id + "\" selected=\"true\">" + id + "</option>";
+            } else {
+                option = "<option value=\"" + id + "\">" + id + "</option>";
+            }
+
+            timeZoneIdOptions.append(option);
+        }
+
+        return timeZoneIdOptions;
+    }
+
     /**
      * Shows administrator preference function with the specified context.
      *
@@ -239,20 +300,9 @@ public class AdminConsole {
         dataModel.put(Option.ID_C_LOCALE_STRING, locale.toString());
 
         final JSONObject preference = preferenceQueryService.getPreference();
-        final StringBuilder timeZoneIdOptions = new StringBuilder();
+
         final String[] availableIDs = TimeZone.getAvailableIDs();
-        for (int i = 0; i < availableIDs.length; i++) {
-            final String id = availableIDs[i];
-            String option;
-
-            if (id.equals(preference.optString(Option.ID_C_TIME_ZONE_ID))) {
-                option = "<option value=\"" + id + "\" selected=\"true\">" + id + "</option>";
-            } else {
-                option = "<option value=\"" + id + "\">" + id + "</option>";
-            }
-
-            timeZoneIdOptions.append(option);
-        }
+        final StringBuilder timeZoneIdOptions = getTimeZoneIdOption(preference, availableIDs);
 
         dataModel.put("timeZoneIdOptions", timeZoneIdOptions.toString());
         fireFreeMarkerActionEvent(templateName, dataModel);

@@ -1,6 +1,6 @@
 /*
- *
- * Copyright (c) 2010-2018, 791211.com & fdq.ln.cn &
+ * Solo - A small and beautiful blogging system written in Java.
+ * Copyright (c) 2010-2018, b3log.org & hacpai.com
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,12 +14,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * Date  : 2018-11-16
- * Time  : 2:09 PM
- * Author: fengduqing
- **/
-
+ */
 package org.b3log.solo.util;
 
 import java.net.HttpURLConnection;

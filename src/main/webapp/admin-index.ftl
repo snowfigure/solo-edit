@@ -150,12 +150,37 @@
                             </li>  
                         </ul>
                     </li>
+                    <!--li>
+                        <div id="tabSettingTitle" onclick="admin.collapseNav(this)">
+                            <span class="icon-setting"></span>
+                            设置
+                            <span class="icon-chevron-down right"></span>
+                        </div>
+                        <ul class="none" id="tabSetting">
+                            <li>
+                                <div id="tabs_setting-upload">
+                                    <a href="#setting/setting-upload">上传</a>
+                                </div>
+                                <div id="tabs_setting-qiniu">
+                                    <a href="#setting/setting-qiniu">七牛</a>
+                                </div>
+                                <div id="tabs_setting-baidu">
+                                    <a href="#setting/setting-baidu">百度</a>
+                                </div>
+                                <div id="tabs_setting-wechat">
+                                    <a href="#setting/setting-wechat">微信</a>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </li-->
                     <li>
                         <div id="tabs_about">
                             <a href="#about">
                                 <span class="icon-info"></span> ${aboutLabel}
                             </a>
                         </div>
+
                     </li>
                 </ul>
             </div>
@@ -174,6 +199,10 @@
                 <div id="tabsPanel_comment-list" class="none"></div>
                 <div id="tabsPanel_plugin-list" class="none"></div>
                 <div id="tabsPanel_about" class="none"></div>
+                <!--div id="tabsPanel_setting-upload" class="none"></div>
+                <div id="tabsPanel_setting-baidu" class="none"></div>
+                <div id="tabsPanel_setting-qiniu" class="none"></div>
+                <div id="tabsPanel_setting-wechat" class="none"></div-->
             </div>
             <div class="clear"></div>
             <div class="footer">
@@ -218,6 +247,7 @@
         <script src="${staticServePath}/js/admin/others.js"></script>
         <script src="${staticServePath}/js/admin/linkList.js"></script>
         <script src="${staticServePath}/js/admin/preference.js"></script>
+        <!--script src="${staticServePath}/js/admin/setting.js"></script-->
         <script src="${staticServePath}/js/admin/pluginList.js"></script>
         <script src="${staticServePath}/js/admin/userList.js"></script>
         <script src="${staticServePath}/js/admin/categoryList.js"></script>

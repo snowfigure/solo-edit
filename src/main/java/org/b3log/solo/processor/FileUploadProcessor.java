@@ -464,8 +464,9 @@ public class FileUploadProcessor {
 
 
                     /*上传到七牛云*/
-                    uploadManager.put(file.getFileInputStream(), fileName, uploadToken, null, contentType);
+                    uploadManager.put(file.getFileInputStream(), "upload/" + fileName, uploadToken, null, contentType);
 
+                    System.out.println("upload/" + fileName);
                     boolean need_add_image_view = false;
                     /*获取图片文件的分辨率，确定是否加水印*/
                     if(Images.isImageFileName(fileName))
@@ -496,9 +497,9 @@ public class FileUploadProcessor {
                     }else{
                         /*常规模式*/
                         if(qiniu.optString(Option.ID_C_QINIU_DOMAIN).endsWith("/")){
-                            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "file/" + fileName;
+                            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "upload/" + fileName;
                         }else{
-                            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/file/" + fileName;
+                            qiniu_file_name = qiniu.optString(Option.ID_C_QINIU_DOMAIN) + "/upload/" + fileName;
                         }
                         if(need_add_image_view){
                             qiniu_file_name = qiniu_file_name + "?" + image_view;

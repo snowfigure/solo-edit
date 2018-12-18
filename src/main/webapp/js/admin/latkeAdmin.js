@@ -1581,6 +1581,36 @@ admin.article = {
         }
         return false;
     },
+
+    moveToUnpublish: function(oid){
+      var that = this;
+      that._addDisabled();
+      $.ajax({
+          url: latkeConfig.servePath + "/console/article/unpublish/" + oid,
+          type: "PUT",
+          cache: false,
+          success: function(result, textStatus){
+              $("#tipMsg").text(result.msg);
+              if (!result.sc) {
+                  return;
+              }
+
+              admin.selectTab("article/draft-list");
+              admin.article.status.id = undefined;
+              admin.article.isConfirm = false;
+              admin.selectTab("article/article-list");
+          },
+          complete: function (jqXHR, textStatus) {
+              that._removeDisabled();
+              $("#loadMsg").text("");
+              if (jqXHR.status === 403) {
+                  $.get("/admin-index.do");
+                  that.unPublish();
+              }
+          }
+      });
+    },
+
     /**
      * @description 取消发布 
      * @param {Boolean} isAuto 是否为自动保存
@@ -1944,11 +1974,13 @@ admin.articleList = {
                     articleData[i].author = articles[i].authorName;
                             
                     var topClass = articles[i].articlePutTop ? Label.cancelPutTopLabel : Label.putTopLabel;
-                    articleData[i].expendRow = "<a target='_blank' href='" + latkeConfig.servePath + articles[i].articlePermalink + "'>" + Label.viewLabel + "</a>  \
-                                <a href='javascript:void(0)' onclick=\"admin.article.get('" + articles[i].oId + "', true)\">" + Label.updateLabel + "</a>  \
-                                <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'article', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a>  \
-                                <a href='javascript:void(0)' onclick=\"admin.articleList.popTop(this, '" + articles[i].oId + "')\">" + topClass + "</a>  \
-                                <a href='javascript:void(0)' onclick=\"admin.comment.open('" + articles[i].oId + "', 'article')\">" + Label.commentLabel + "</a>";
+                    articleData[i].expendRow =
+                        " <a target='_blank' href='" + latkeConfig.servePath + articles[i].articlePermalink + "'>" + Label.viewLabel + "</a> " +
+                        " <a href='javascript:void(0)' onclick=\"admin.article.get('" + articles[i].oId + "', true)\">" + Label.updateLabel + "</a> " +
+                        " <a href='javascript:void(0)' onclick=\"admin.article.moveToUnpublish('" + articles[i].oId + "')\">" + Label.unPublishLabel + "</a> " +
+                        //" <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'article', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a> " +
+                        " <a href='javascript:void(0)' onclick=\"admin.articleList.popTop(this, '" + articles[i].oId + "')\">" + topClass + "</a> " +
+                        " <a href='javascript:void(0)' onclick=\"admin.comment.open('" + articles[i].oId + "', 'article')\">" + Label.commentLabel + "</a> ";
                 }
                     
                 that.tablePagination.updateTablePagination(articleData, pageNum, result.pagination);
@@ -2097,9 +2129,11 @@ admin.draftList = {
                     articleData[i].title = "<a class='no-underline' href='" + latkeConfig.servePath +
                     articles[i].articlePermalink + "' target='_blank'>" + 
                     articles[i].articleTitle + "</a><span class='table-tag'>" + articles[i].articleTags + "</span>";
-                    articleData[i].expendRow = "<a href='javascript:void(0)' onclick=\"admin.article.get('" + articles[i].oId + "', false);\">" + Label.updateLabel + "</a>  \
-                                <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'draft', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a>  \
-                                <a href='javascript:void(0)' onclick=\"admin.comment.open('" + articles[i].oId + "', 'draft')\">" + Label.commentLabel + "</a>";
+                    articleData[i].expendRow =
+                        " <a href='javascript:void(0)' onclick=\"admin.article.get('" + articles[i].oId + "', false);\">" + Label.updateLabel + "</a> "  +
+                        //" <a href='javascript:void(0)' onclick=\"admin.article.update('" + articles[i].oId + "', false);\">" + Label.publishLabel + "</a> "  +
+                        " <a href='javascript:void(0)' onclick=\"admin.article.del('" + articles[i].oId + "', 'draft', '" + encodeURIComponent(articles[i].articleTitle) + "')\">" + Label.removeLabel + "</a> " +
+                        " <a href='javascript:void(0)' onclick=\"admin.comment.open('" + articles[i].oId + "', 'draft')\">" + Label.commentLabel + "</a>";
                 }
                     
                 that.tablePagination.updateTablePagination(articleData, pageNum, result.pagination);
